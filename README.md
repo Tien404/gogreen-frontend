@@ -1,75 +1,32 @@
-# React + TypeScript + Vite
+# gogreen frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web app for the Smart E-Mobility Hub course project. Students can rent vehicles and book parking or charging. Operators can monitor hubs, handle incidents, move shared vehicles, and run What-if scenarios.
 
-Currently, two official plugins are available:
+**Stack:** React, TypeScript, Vite, React Router, Tailwind CSS, and Axios.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Folder structure
 
-## React Compiler
+| Folder                                | Contents                                     |
+| ------------------------------------- | -------------------------------------------- |
+| `src/app/`                            | Routes, workspace layouts, and app providers |
+| `src/features/`                       | Student and operator screens                 |
+| `src/shared/api/`, `src/integration/` | Typed API client and data mapping            |
+| `src/shared/ui/`, `src/index.css`     | Shared controls and styles                   |
+| `src/mocks/`, `src/store/`            | Standalone preview data and logic            |
+| `tests/`                              | Frontend tests                               |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run locally
 
-## Expanding the ESLint configuration
+Use Node.js 22.18+ and npm. Start the companion `Smart-Mobility-Hub-Backend` on port 8000, then run these commands from this repo:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm ci
+npm run dev -- --host 127.0.0.1
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Vite forwards `/api/v1` to the backend. Log in as `anh@demo.example` (student) or `nam@demo.example` (operator), both with the demo password `gogreen-demo`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+For a standalone preview, run `npm run dev -- --mode preview`. See [`.env.example`](.env.example) for API URL and proxy settings. Run `npm test` for tests or `npm run build` for a production build.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+Run `npm run lint` for ESLint or `npm run format` for Prettier.
+`npm ci` installs the Husky pre-commit hook, which formats staged files and lints staged TypeScript.

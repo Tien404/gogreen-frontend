@@ -1,0 +1,88 @@
+// Generated TypeScript contract for the backend OpenAPI 0.2.0.
+export const apiContractVersion = "0.2.0";
+
+export interface Schemas {
+  "ActivityOut": { "operation_id": string; "at": string; "actor_id": string; "action": string; "resource_type": string; "resource_id": string; "outcome": string; "reason"?: string | null; };
+  "ChargerFault": { "hub_id": string; "horizon_minutes": number; "scenario_type": "CHARGER_FAULT"; "charging_point_id": string; };
+  "ChargingPointOut": { "resource_id": string; "status": string; };
+  "ChargingSessionCreate": { "vehicle_id": string; "parking_reservation_id": string; "target_battery_pct"?: number | null; "need_by"?: string | null; };
+  "ChargingSessionModify": { "target_battery_pct"?: number | null; "need_by"?: string | null; };
+  "ChargingSessionOut": { "session_id": string; "vehicle_id": string; "parking_reservation_id": string; "hub_id": string; "status": string; "charging_point_id": string | null; "scheduled_start_at": string | null; "scheduled_end_at": string | null; "target_battery_pct": number; "reason": string | null; };
+  "DispatchOut": { "task_id": string; "vehicle_id": string; "from_hub_id": string; "to_hub_id": string; "status": string; "started_at": string | null; "completed_at": string | null; "reason": string | null; };
+  "ErrorDetail": { "code": string; "message": string; "retryable": boolean; "details"?: { [key: string]: unknown; } | null; };
+  "ErrorEnvelope": { "error": Schemas["ErrorDetail"]; };
+  "HoldCreate": { "vehicle_id": string; "intended_hub_id"?: string | null; };
+  "HubOut": { "hub_id": string; "name": string; "parking_capacity": number; "physical_free_now": number; "bookable_now": number; "charging_points": Array<Schemas["ChargingPointOut"]>; "as_of": string; "hub_type"?: string | null; "latitude"?: string | null; "longitude"?: string | null; "status"?: string | null; };
+  "IncidentCreate": { "hub_id": string; "vehicle_id"?: string | null; "resource_id"?: string | null; "incident_type": string; "severity": string; "description"?: string | null; };
+  "IncidentOut": { "incident_id": string; "hub_id": string; "vehicle_id": string | null; "resource_id": string | null; "incident_type": string; "severity": string; "status": string; "description"?: string | null; "opened_at": string; "resolved_at": string | null; "resolution_notes": string | null; };
+  "IncidentResolve": { "resolution_notes": string; };
+  "Login": { "login_alias": string; "password": string; };
+  "OperationsAlert": { "hub_id": string; "code": string; };
+  "OperationsOut": { "as_of": string; "hubs": Array<Schemas["HubOut"]>; "vehicles": Array<Schemas["VehicleOut"]>; "incidents": Array<Schemas["IncidentOut"]>; "dispatches": Array<Schemas["DispatchOut"]>; "charging": Array<Schemas["ChargingSessionOut"]>; "alerts": Array<Schemas["OperationsAlert"]>; };
+  "OwnedVehicleOut": { "vehicle_id": string; "current_hub_id"?: string | null; "vehicle_type"?: string | null; "ownership_type"?: string | null; "battery_pct"?: number | null; "battery_observed_at"?: string | null; "status"?: string | null; "license_plate": string; };
+  "ParkingReservationCreate": { "vehicle_id": string; "hub_id": string; "starts_at": string; "ends_at": string; };
+  "ParkingReservationOut": { "reservation_id": string; "session_id"?: string | null; "vehicle_id": string; "hub_id": string; "parking_space_id": string; "starts_at": string; "ends_at": string; "status": string; };
+  "PrivateVehicleCreate": { "license_plate": string; "current_hub_id"?: string | null; "vehicle_type"?: string | null; "battery_pct"?: number | null; "rfid_tag_code"?: string | null; };
+  "RedistributionTaskCreate": { "vehicle_id": string; "from_hub_id": string; "to_hub_id": string; };
+  "RentalDemandSurge": { "hub_id": string; "horizon_minutes": number; "scenario_type": "RENTAL_DEMAND_SURGE"; "demand_count": number; };
+  "RentalOut": { "rental_id": string; "reservation_id": string; "vehicle_id": string; "origin_hub_id": string; "return_hub_id": string | null; "picked_up_at": string; "returned_at": string | null; "status": string; };
+  "RentalReturn": { "return_hub_id": string; "return_condition"?: string | null; };
+  "SessionView": { "account_id": string; "display_name": string; "role": "student" | "operator"; "expires_at": string; };
+  "SimulationAdvice": { "type": "REDISTRIBUTE_VEHICLE" | "MONITOR_DEMAND" | "RESTORE_CHARGER"; "reason": string; "vehicle_id"?: string | null; "from_hub_id"?: string | null; "to_hub_id"?: string | null; };
+  "SimulationMetric": { "name": string; "unit": string; "baseline": number; "scenario": number; };
+  "SimulationRunOut": { "run_id": string; "status": "COMPLETED"; "scenario_type": "RENTAL_DEMAND_SURGE" | "CHARGER_FAULT"; "hub_id": string; "horizon_minutes": number; "snapshot_revision": string; "snapshot_at": string; "model_version": string; "metrics": Array<Schemas["SimulationMetric"]>; "recommendations": Array<Schemas["SimulationAdvice"]>; "error_code"?: string | null; };
+  "TelemetryCreate": { "vehicle_id"?: string | null; "resource_id"?: string | null; "metric_name": string; "metric_value"?: number | null; "is_simulated"?: boolean; };
+  "VehicleOut": { "vehicle_id": string; "current_hub_id"?: string | null; "vehicle_type"?: string | null; "ownership_type"?: string | null; "battery_pct"?: number | null; "battery_observed_at"?: string | null; "status"?: string | null; };
+  "VehicleReservationOut": { "reservation_id": string; "vehicle_id": string; "origin_hub_id": string | null; "intended_hub_id": string | null; "reserved_at": string; "expires_at": string; "status": string; };
+  "VehicleStatusUpdate": { "status": string; "current_hub_id"?: string | null; "battery_pct"?: number | null; };
+}
+
+export interface Operations {
+  "GET /activity": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["ActivityOut"]>; };
+  "POST /sessions": { body: Schemas["Login"]; response: Schemas["SessionView"]; };
+  "GET /sessions/me": { response: Schemas["SessionView"]; };
+  "POST /sessions/logout": { response: void; };
+  "GET /mobility/hubs": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["HubOut"]>; };
+  "GET /mobility/hubs/{hub_id}": { params: { "hub_id": string; }; response: Schemas["HubOut"]; };
+  "GET /mobility/vehicles": { query?: { "hub_id"?: string | null; "vehicle_type"?: string | null; "destination_hub_id"?: string | null; "offset"?: number; "limit"?: number; }; response: Array<Schemas["VehicleOut"]>; };
+  "GET /rentals/reservations": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["VehicleReservationOut"]>; };
+  "POST /rentals/reservations": { body: Schemas["HoldCreate"]; response: Schemas["VehicleReservationOut"]; };
+  "GET /rentals/reservations/{reservation_id}": { params: { "reservation_id": string; }; response: Schemas["VehicleReservationOut"]; };
+  "GET /rentals/rentals": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["RentalOut"]>; };
+  "GET /rentals/rentals/{rental_id}": { params: { "rental_id": string; }; response: Schemas["RentalOut"]; };
+  "POST /rentals/reservations/{reservation_id}/cancel": { params: { "reservation_id": string; }; response: Schemas["VehicleReservationOut"]; };
+  "POST /rentals/reservations/{reservation_id}/pickup": { params: { "reservation_id": string; }; response: Schemas["RentalOut"]; };
+  "POST /rentals/rentals/{rental_id}/return": { params: { "rental_id": string; }; body: Schemas["RentalReturn"]; response: Schemas["RentalOut"]; };
+  "GET /parking/reservations": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["ParkingReservationOut"]>; };
+  "POST /parking/reservations": { body: Schemas["ParkingReservationCreate"]; response: Schemas["ParkingReservationOut"]; };
+  "GET /parking/reservations/{reservation_id}": { params: { "reservation_id": string; }; response: Schemas["ParkingReservationOut"]; };
+  "POST /parking/reservations/{reservation_id}/cancel": { params: { "reservation_id": string; }; response: Schemas["ParkingReservationOut"]; };
+  "POST /parking/reservations/{reservation_id}/check-in": { params: { "reservation_id": string; }; response: Schemas["ParkingReservationOut"]; };
+  "POST /parking/sessions/{session_id}/check-out": { params: { "session_id": string; }; response: Schemas["ParkingReservationOut"]; };
+  "GET /charging/sessions": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["ChargingSessionOut"]>; };
+  "POST /charging/sessions": { body: Schemas["ChargingSessionCreate"]; response: Schemas["ChargingSessionOut"]; };
+  "GET /charging/sessions/{session_id}": { params: { "session_id": string; }; response: Schemas["ChargingSessionOut"]; };
+  "PATCH /charging/sessions/{session_id}": { params: { "session_id": string; }; body: Schemas["ChargingSessionModify"]; response: Schemas["ChargingSessionOut"]; };
+  "POST /charging/sessions/{session_id}/cancel": { params: { "session_id": string; }; response: Schemas["ChargingSessionOut"]; };
+  "POST /charging/sessions/{session_id}/start": { params: { "session_id": string; }; response: Schemas["ChargingSessionOut"]; };
+  "POST /charging/sessions/{session_id}/stop": { params: { "session_id": string; }; response: Schemas["ChargingSessionOut"]; };
+  "POST /charging/sessions/{session_id}/complete": { params: { "session_id": string; }; response: Schemas["ChargingSessionOut"]; };
+  "POST /charging/priorities/recalculate": { response: Array<Schemas["ChargingSessionOut"]>; };
+  "POST /fleet/vehicles/private": { body: Schemas["PrivateVehicleCreate"]; response: Schemas["OwnedVehicleOut"]; };
+  "GET /fleet/vehicles/private": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["OwnedVehicleOut"]>; };
+  "PATCH /fleet/vehicles/{vehicle_id}/status": { params: { "vehicle_id": string; }; body: Schemas["VehicleStatusUpdate"]; response: unknown; };
+  "POST /fleet/telemetry": { body: Schemas["TelemetryCreate"]; response: unknown; };
+  "GET /operations": { response: Schemas["OperationsOut"]; };
+  "GET /incidents": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["IncidentOut"]>; };
+  "POST /incidents": { body: Schemas["IncidentCreate"]; response: Schemas["IncidentOut"]; };
+  "GET /incidents/{incident_id}": { params: { "incident_id": string; }; response: Schemas["IncidentOut"]; };
+  "POST /incidents/{incident_id}/resolve": { params: { "incident_id": string; }; body: Schemas["IncidentResolve"]; response: Schemas["IncidentOut"]; };
+  "GET /redistribution-tasks": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["DispatchOut"]>; };
+  "POST /redistribution-tasks": { body: Schemas["RedistributionTaskCreate"]; response: Schemas["DispatchOut"]; };
+  "GET /redistribution-tasks/{task_id}": { params: { "task_id": string; }; response: Schemas["DispatchOut"]; };
+  "POST /redistribution-tasks/{task_id}/start": { params: { "task_id": string; }; response: Schemas["DispatchOut"]; };
+  "POST /redistribution-tasks/{task_id}/complete": { params: { "task_id": string; }; response: Schemas["DispatchOut"]; };
+  "GET /simulations": { query?: { "offset"?: number; "limit"?: number; }; response: Array<Schemas["SimulationRunOut"]>; };
+  "POST /simulations": { body: Schemas["RentalDemandSurge"] | Schemas["ChargerFault"]; response: Schemas["SimulationRunOut"]; };
+  "GET /simulations/{run_id}": { params: { "run_id": string; }; response: Schemas["SimulationRunOut"]; };
+}

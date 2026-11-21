@@ -22,7 +22,6 @@ function ParkingNewView() {
   const {
     s,
     error,
-    setError,
     service,
     hub,
     setHub,
@@ -137,19 +136,11 @@ function ParkingNewView() {
                 ? "Checked when you confirm"
                 : "Review your selected interval"}
             </dd>
-            <dt className="text-content-muted">Charging target</dt>
-            <dd className="wrap-anywhere m-0">
-              {service === "Parking + charging"
-                ? "80% · supported preset"
-                : "Not requested"}
-            </dd>
           </dl>
-          {
-            <Alert>
-              The server allocates an available space for your selected interval
-              when you confirm.
-            </Alert>
-          }
+          <Alert>
+            The server allocates an available space for your selected interval
+            when you confirm.
+          </Alert>
         </section>
       </div>
       <Modal
@@ -173,18 +164,6 @@ function ParkingNewView() {
           <dd className="wrap-anywhere m-0">{service}</dd>
         </dl>
         {error && <Alert tone="error">{error}</Alert>}
-        {error && service === "Parking + charging" && (
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setService("Parking only");
-              setReview(false);
-              setError("");
-            }}
-          >
-            Choose parking only
-          </Button>
-        )}
         <div className="flex gap-3 justify-end mt-5 flex-wrap max-[600px]:*:data-[slot~=button]:flex-1">
           <Button disabled={busy} onClick={submit}>
             {busy ? "Confirming…" : "Confirm booking"}

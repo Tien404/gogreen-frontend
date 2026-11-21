@@ -82,7 +82,7 @@ test("API deep link waits for session, shows a retry if unavailable and only the
   assert.doesNotMatch(authorized, /Demo account switcher|Explore as student/);
 });
 
-test("workspace role guard rejects a valid session in the wrong workspace and keeps fixture pages out of API mode", () => {
+test("workspace role guard rejects the wrong role and removed demo routes", () => {
   const denied = render("/operator/hubs/metro", {
     status: "ready",
     user: student,

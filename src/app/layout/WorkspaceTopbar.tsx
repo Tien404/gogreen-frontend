@@ -46,7 +46,7 @@ export function WorkspaceTopbar({
             .find((item) => item.path.split("/")[0] === route)?.label ??
             (route === "parking"
               ? "Parking"
-              : route === "demo"
+              : route === "profile"
                 ? "Demo"
                 : "Details")}
         </strong>
@@ -74,7 +74,7 @@ export function WorkspaceTopbar({
         )}
         <button
           data-slot="avatar"
-          className="w-9 h-9 bg-demo-surface rounded-lg text-demo grid place-items-center text-xs font-semibold shrink-0 hover:text-demo-hover hover:bg-demo-surface-hover focus-visible:outline-demo **:data-[slot~=workspace-avatar]:bg-demo-surface-hover **:data-[slot~=workspace-avatar]:text-demo **:data-[slot~=icon-box]:bg-demo-surface-hover **:data-[slot~=icon-box]:text-demo [&_small]:text-demo max-[600px]:w-8 max-[600px]:h-8"
+          className="w-9 h-9 bg-profile-surface rounded-lg text-profile grid place-items-center text-xs font-semibold shrink-0 hover:text-profile-hover hover:bg-profile-surface-hover focus-visible:outline-profile **:data-[slot~=workspace-avatar]:bg-profile-surface-hover **:data-[slot~=workspace-avatar]:text-profile **:data-[slot~=icon-box]:bg-profile-surface-hover **:data-[slot~=icon-box]:text-profile [&_small]:text-profile max-[600px]:w-8 max-[600px]:h-8"
           onClick={() => setProfile(true)}
           aria-label={"Open account profile"}
         >

@@ -40,13 +40,13 @@ export function useWhatIf(id?: string, newScenario = false) {
     async (signal: AbortSignal) =>
       id
         ? [
-            await api!.request("GET /simulations/{run_id}", {
+            await api.request("GET /simulations/{run_id}", {
               signal,
               params: { run_id: id },
             }),
           ]
         : readPages((offset, limit) =>
-            api!.request("GET /simulations", {
+            api.request("GET /simulations", {
               signal,
               query: { offset, limit },
             }),

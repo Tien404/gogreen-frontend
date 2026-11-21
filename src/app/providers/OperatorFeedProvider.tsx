@@ -8,7 +8,7 @@ export function OperatorFeedProvider({ children }: { children: ReactNode }) {
   const load = useCallback(
     async (signal: AbortSignal) => {
       let revision: string | null = null;
-      const data = await api!.request("GET /operations", {
+      const data = await api.request("GET /operations", {
         signal,
         onHeaders: (headers) => {
           revision = headers.get("X-Operational-Revision");

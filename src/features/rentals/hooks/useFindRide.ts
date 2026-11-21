@@ -37,7 +37,7 @@ export function useFindRide() {
     async (signal: AbortSignal) => {
       if (!origin) return [];
       const rows = await readPages((offset, limit) =>
-        api!.request("GET /mobility/vehicles", {
+        api.request("GET /mobility/vehicles", {
           signal,
           query: {
             hub_id: origin,

@@ -19,7 +19,7 @@ export function useLiveHub(id: string) {
   const load = useCallback(
     async (signal: AbortSignal) => {
       const hub = mapHub(
-        await api!.request("GET /mobility/hubs/{hub_id}", {
+        await api.request("GET /mobility/hubs/{hub_id}", {
           params: { hub_id: id },
           signal,
         }),
@@ -27,7 +27,7 @@ export function useLiveHub(id: string) {
       const vehicles = operator
         ? []
         : await readPages((offset, limit) =>
-            api!.request("GET /mobility/vehicles", {
+            api.request("GET /mobility/vehicles", {
               signal,
               query: { hub_id: id, offset, limit },
             }),

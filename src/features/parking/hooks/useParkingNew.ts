@@ -54,7 +54,6 @@ export function useParkingNew() {
     s,
 
     error: command.error ? apiErrorMessage(command.error) : error,
-    setError,
     service,
     hub,
     setHub,

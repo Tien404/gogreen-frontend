@@ -10,7 +10,6 @@ export function usePrivateVehicles() {
   const refresh = useRefreshStudentData();
   const command = useApiAction();
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState("");
   const registerVehicle = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
@@ -36,10 +35,9 @@ export function usePrivateVehicles() {
     busy: command.busy,
     setOpen: (next: boolean) => {
       setOpen(next);
-      setError("");
       command.setError(null);
     },
-    error: command.error ? apiErrorMessage(command.error) : error,
+    error: command.error ? apiErrorMessage(command.error) : "",
     registerVehicle,
   };
 }

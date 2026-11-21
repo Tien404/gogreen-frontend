@@ -27,7 +27,7 @@ export function PageTitle({
             {eyebrow}
           </div>
         )}
-        <h1 className="leading-[1.15] demo:text-demo max-[1200px]:text-lg max-[600px]:text-lg max-[600px]:tracking-[-1px]">
+        <h1 className="leading-[1.15]  max-[1200px]:text-lg max-[600px]:text-lg max-[600px]:tracking-[-1px]">
           {title}
         </h1>
         <p className="leading-[1.65] mt-3 max-[600px]:text-sm max-[600px]:mt-2">

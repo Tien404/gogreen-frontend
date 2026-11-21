@@ -18,14 +18,14 @@ export function useHubs() {
   const load = useCallback(
     async (signal: AbortSignal) => {
       const hubs = await readPages((offset, limit) =>
-        api!.request("GET /mobility/hubs", {
+        api.request("GET /mobility/hubs", {
           signal,
           query: { offset, limit },
         }),
       );
       if (hubs.length === 0) return { hubs: [], clock: null };
       const vehicles = await readPages((offset, limit) =>
-        api!.request("GET /mobility/vehicles", {
+        api.request("GET /mobility/vehicles", {
           signal,
           query: { offset, limit },
         }),

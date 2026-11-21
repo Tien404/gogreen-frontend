@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@custom-variant demo (&:where([data-demo-scope], [data-demo-scope] *));
 @theme {
   /* Shared semantic palette. Decorative component colors stay with their owner. */
   --color-brand: #12b894;
@@ -29,12 +28,11 @@
   --color-success: var(--color-accent);
   --color-success-surface: var(--color-soft);
 
-  /* Preview tools and overlays. */
-  --color-demo: #6d28d9;
-  --color-demo-hover: #5b21b6;
-  --color-demo-surface: #f5f0ff;
-  --color-demo-surface-hover: #ede5ff;
-  --color-demo-border: #c4a7f0;
+  /* Profile accent and overlays. */
+  --color-profile: #6d28d9;
+  --color-profile-hover: #5b21b6;
+  --color-profile-surface: #f5f0ff;
+  --color-profile-surface-hover: #ede5ff;
   --color-overlay: #14291f;
 
   /* Shared effects, typography, spacing, shape and motion. */
@@ -132,9 +130,6 @@
   :focus-visible {
     outline: 3px solid var(--color-accent);
     outline-offset: 4px;
-  }
-  :where([data-demo-scope]) :focus-visible {
-    outline-color: var(--color-demo);
   }
   input:focus-visible,
   select:focus-visible,

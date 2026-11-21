@@ -34,28 +34,28 @@ export function OperatorScreenData({
     async (signal: AbortSignal) => {
       if (dispatchId)
         return {
-          dispatch: await api!.request("GET /redistribution-tasks/{task_id}", {
+          dispatch: await api.request("GET /redistribution-tasks/{task_id}", {
             signal,
             params: { task_id: dispatchId },
           }),
         };
       if (incidentId)
         return {
-          incident: await api!.request("GET /incidents/{incident_id}", {
+          incident: await api.request("GET /incidents/{incident_id}", {
             signal,
             params: { incident_id: incidentId },
           }),
         };
       if (chargeId)
         return {
-          charge: await api!.request("GET /charging/sessions/{session_id}", {
+          charge: await api.request("GET /charging/sessions/{session_id}", {
             signal,
             params: { session_id: chargeId },
           }),
         };
       return {
         activity: await readPages((offset, limit) =>
-          api!.request("GET /activity", { signal, query: { offset, limit } }),
+          api.request("GET /activity", { signal, query: { offset, limit } }),
         ),
       };
     },

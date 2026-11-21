@@ -1,6 +1,6 @@
+import { OperatorScreenData } from "@/integration/OperatorScreenData";
 import { PageTitle } from "@/shared/ui";
 import { VehicleTable } from "../components/VehicleTable";
-
 export function Fleet() {
   return (
     <>
@@ -12,7 +12,9 @@ export function Fleet() {
         data-slot="panel"
         className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
       >
-        <VehicleTable />
+        <OperatorScreenData>
+          <VehicleTable />
+        </OperatorScreenData>
       </section>
     </>
   );

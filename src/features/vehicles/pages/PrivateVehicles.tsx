@@ -1,19 +1,27 @@
+import { StudentData } from "@/integration/StudentScreenData";
 import { config } from "@/config/app";
 import { Icon } from "@/shared/components/Icon";
 import {
   Alert,
   Battery,
   Button,
+  Empty,
   Field,
   Link,
   Modal,
   PageTitle,
 } from "@/shared/ui";
 import { usePrivateVehicles } from "../hooks/usePrivateVehicles";
-
 export function PrivateVehicles() {
-  const { s, open, setOpen, error, registerVehicle } = usePrivateVehicles();
-
+  return (
+    <StudentData screen="privateVehicles">
+      <PrivateVehiclesView />
+    </StudentData>
+  );
+}
+function PrivateVehiclesView() {
+  const { s, open, setOpen, error, registerVehicle, busy } =
+    usePrivateVehicles();
   return (
     <>
       <PageTitle
@@ -30,6 +38,12 @@ export function PrivateVehicles() {
         Private vehicles belong to your account. They are separate from shared
         rentals and operator dispatch.
       </Alert>
+      {!s.privateVehicles.length && (
+        <Empty
+          title="No private vehicles"
+          text="Add a vehicle to book parking."
+        />
+      )}
       <div className="grid grid-cols-3 gap-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1">
         {s.privateVehicles
           .filter((v) => v.owner === s.persona)
@@ -46,7 +60,7 @@ export function PrivateVehicles() {
                 </span>
               </div>
               <div className="flex items-center justify-between gap-2">
-                <h3>{v.identifier}</h3>
+                <h3 className="min-w-0 wrap-anywhere">{v.identifier}</h3>
                 <Battery value={v.battery} />
               </div>
               <p className="leading-[1.65] mt-1 mb-3 mx-0">
@@ -64,7 +78,9 @@ export function PrivateVehicles() {
       </div>
       <Modal
         title="Add a private vehicle"
-        description="Use a fictional identifier. All information stays in this browser session."
+        description={
+          "Register a vehicle identifier for campus parking and charging."
+        }
         open={open}
         onOpenChange={setOpen}
       >
@@ -100,7 +116,9 @@ export function PrivateVehicles() {
             />
           </Field>
           {error && <Alert tone="error">{error}</Alert>}
-          <Button type="submit">Add private vehicle</Button>
+          <Button type="submit" disabled={busy}>
+            Add private vehicle
+          </Button>
         </form>
       </Modal>
     </>

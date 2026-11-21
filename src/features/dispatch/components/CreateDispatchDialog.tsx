@@ -1,7 +1,6 @@
-import { available, freeSpaces } from "@/domain/selectors";
+import { freeSpaces } from "@/domain/selectors";
 import { Alert, Button, Field, Modal } from "@/shared/ui";
 import type { DispatchesModel } from "../hooks/useDispatches";
-
 type CreateDispatchDialogProps = Pick<
   DispatchesModel,
   | "open"
@@ -17,8 +16,11 @@ type CreateDispatchDialogProps = Pick<
   | "vehicles"
   | "review"
   | "error"
+  | "busy"
+  | "valid"
+  | "candidates"
+  | "hubs"
 >;
-
 export function CreateDispatchDialog({
   open,
   setOpen,
@@ -33,6 +35,10 @@ export function CreateDispatchDialog({
   vehicles,
   review,
   error,
+  busy,
+  valid,
+  candidates,
+  hubs,
 }: CreateDispatchDialogProps) {
   return (
     <Modal
@@ -52,7 +58,7 @@ export function CreateDispatchDialog({
             }}
             className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
           >
-            {s.hubs.map((h) => (
+            {hubs.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
               </option>
@@ -68,7 +74,7 @@ export function CreateDispatchDialog({
             }}
             className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
           >
-            {s.hubs.map((h) => (
+            {hubs.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
               </option>
@@ -80,33 +86,41 @@ export function CreateDispatchDialog({
             Eligible shared vehicles
           </legend>
           <div className="grid gap-3 max-h-55 overflow-auto">
-            {available(s, source).map((v) => (
+            {candidates.map((v) => (
               <label
                 key={v.id}
                 className="flex gap-3 text-sm items-center min-h-8"
               >
                 <input
-                  type="checkbox"
+                  type={"radio"}
+                  name={"dispatch-vehicle"}
                   checked={vehicles.includes(v.id)}
                   onChange={(e) => {
                     setVehicles(
                       e.target.checked
-                        ? [...vehicles, v.id]
+                        ? [v.id]
                         : vehicles.filter((x) => x !== v.id),
                     );
                     setReview(false);
                   }}
                   className="placeholder:text-content-muted hover:bg-soft w-4.5 h-4.5 accent-accent"
                 />
-                {v.id} · {v.type} · {v.battery}%
+                {v.id} · {v.type} ·{" "}
+                {v.battery === null ? "Battery unavailable" : `${v.battery}%`}
               </label>
             ))}
           </div>
         </fieldset>
         <Alert>
-          {freeSpaces(s, destination)} physical spaces free · {vehicles.length}{" "}
+          {freeSpaces(s, destination)} {"bookable spaces"} · {vehicles.length}{" "}
           selected. Existing dispatch commitments are rechecked on confirmation.
         </Alert>
+        {vehicles.length > 0 && !valid && (
+          <Alert tone="error">
+            The selected vehicle or route is unavailable. Review the current
+            choices.
+          </Alert>
+        )}
         {review && (
           <Alert>
             Review: {vehicles.join(", ")} will move from {source} to{" "}
@@ -114,10 +128,7 @@ export function CreateDispatchDialog({
           </Alert>
         )}
         {error && <Alert tone="error">{error}</Alert>}
-        <Button
-          disabled={!vehicles.length || source === destination}
-          type="submit"
-        >
+        <Button disabled={!valid || busy} type="submit">
           {review ? "Confirm planned dispatch" : "Review dispatch"}
         </Button>
       </form>

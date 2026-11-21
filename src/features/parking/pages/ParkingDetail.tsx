@@ -1,8 +1,12 @@
+import { useRefreshStudentData } from "@/integration/studentRefresh";
+import { studentDate } from "@/integration/studentData";
+import { recordUrl } from "@/integration/studentRecords";
+import { apiErrorMessage } from "@/shared/api/errors";
+import { useApiAction } from "@/shared/api/useApiAction";
+import { StudentData } from "@/integration/StudentScreenData";
 import { Missing } from "@/app/pages/Missing";
 import { useApp } from "@/app/providers/AppContext";
-import { config } from "@/config/app";
 import { Icon } from "@/shared/components/Icon";
-import { time } from "@/shared/lib/time";
 import {
   Alert,
   Badge,
@@ -13,24 +17,45 @@ import {
   SectionHead,
 } from "@/shared/ui";
 import { useState } from "react";
-
-type ParkingDetailProps = { id: string };
-
-export function ParkingDetail({ id }: ParkingDetailProps) {
-  const { s, act } = useApp();
-
+type ParkingDetailProps = {
+  id: string;
+};
+export function ParkingDetail(props: ParkingDetailProps) {
+  return (
+    <StudentData screen="parking" id={props.id}>
+      <ParkingDetailView {...props} />
+    </StudentData>
+  );
+}
+function ParkingDetailView({ id }: ParkingDetailProps) {
+  const { s, api } = useApp();
+  const refresh = useRefreshStudentData();
+  const command = useApiAction();
   const b = s.bookings.find((b) => b.id === id && b.owner === s.persona)!;
-
-  const [error, setError] = useState("");
-
-  const action = (type: string) => {
-    const r = act({ type, id: b?.id });
-
-    setError(r.error ? r.message : "");
+  const [error] = useState("");
+  const action = async (type: string) => {
+    if (b) {
+      const params = { reservation_id: b.id };
+      await command.run(() => {
+        if (type === "check-in")
+          return api.request(
+            "POST /parking/reservations/{reservation_id}/check-in",
+            { params },
+          );
+        if (type === "cancel-booking")
+          return api.request(
+            "POST /parking/reservations/{reservation_id}/cancel",
+            { params },
+          );
+        return api.request("POST /parking/sessions/{session_id}/check-out", {
+          params: { session_id: b.sessionId! },
+        });
+      });
+      refresh?.();
+      return;
+    }
   };
-
   if (!b) return <Missing />;
-
   return (
     <>
       <Link
@@ -58,20 +83,27 @@ export function ParkingDetail({ id }: ParkingDetailProps) {
           <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
             <dt className="text-content-muted">Vehicle</dt>
             <dd className="wrap-anywhere m-0">
-              {s.privateVehicles.find((v) => v.id === b.vehicle)?.identifier}
+              {s.privateVehicles.find((v) => v.id === b.vehicle)?.identifier ??
+                b.vehicle}
             </dd>
             <dt className="text-content-muted">Hub</dt>
             <dd className="wrap-anywhere m-0">
               {s.hubs.find((h) => h.id === b.hub)?.name}
             </dd>
             <dt className="text-content-muted">Starts</dt>
-            <dd className="wrap-anywhere m-0">20 October · {time(b.start)}</dd>
+            <dd className="wrap-anywhere m-0">{studentDate(b.start)}</dd>
             <dt className="text-content-muted">Ends</dt>
-            <dd className="wrap-anywhere m-0">20 October · {time(b.end)}</dd>
+            <dd className="wrap-anywhere m-0">{studentDate(b.end)}</dd>
             <dt className="text-content-muted">Timezone</dt>
             <dd className="wrap-anywhere m-0">Asia/Ho_Chi_Minh</dd>
             <dt className="text-content-muted">Service</dt>
             <dd className="wrap-anywhere m-0">{b.service}</dd>
+            {b.space && (
+              <>
+                <dt className="text-content-muted">Parking space</dt>
+                <dd className="wrap-anywhere m-0">{b.space}</dd>
+              </>
+            )}
             <dt className="text-content-muted">Physical occupancy</dt>
             <dd className="wrap-anywhere m-0">
               {["checked-in", "overstaying"].includes(b.status)
@@ -85,9 +117,9 @@ export function ParkingDetail({ id }: ParkingDetailProps) {
               <Link
                 className="flex items-center justify-between gap-3 border-t border-solid border-t-divider text-sm [&_small]:block py-4 px-0"
                 key={c.id}
-                to={`/student/charging/${c.id}`}
+                to={recordUrl("charging", c.id)}
               >
-                <span>{c.id} · Charging</span>
+                <span className="min-w-0 wrap-anywhere">{c.id} · Charging</span>
                 <Badge>{c.status}</Badge>
               </Link>
             ))}
@@ -97,22 +129,39 @@ export function ParkingDetail({ id }: ParkingDetailProps) {
           className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
         >
           <SectionHead title="Manage your booking" />
+          {command.error != null && (
+            <Alert tone="error">{apiErrorMessage(command.error)}</Alert>
+          )}
           {error && <Alert tone="error">{error}</Alert>}
+          {["confirmed", "checked-in"].includes(b.status) && (
+            <Link
+              to={`/student/charging/new?${new URLSearchParams({ parking: b.id })}`}
+            >
+              Request charging
+            </Link>
+          )}
           {b.status === "confirmed" && (
             <>
               <Alert>
-                Check in from {time(b.start)} until{" "}
-                {time(b.start + config.checkInGrace)}. Check-in opens at the
-                booking start time.
+                {`Check-in opens at ${studentDate(b.start)}. The server checks whether your booking is still eligible.`}
               </Alert>
-              <Button onClick={() => action("check-in")}>
+              <Button
+                disabled={command.busy}
+                onClick={() => action("check-in")}
+              >
                 Check in vehicle <Icon name="check" />
               </Button>
               <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
                 <Confirm
                   title={`Cancel ${b.id}?`}
-                  description="The parking booking and its pending or scheduled combined charging request will be cancelled."
-                  trigger={<Button variant="ghost">Cancel booking</Button>}
+                  description={
+                    "Cancel this parking booking and any charging request linked to it."
+                  }
+                  trigger={
+                    <Button variant="ghost" disabled={command.busy}>
+                      Cancel booking
+                    </Button>
+                  }
                   onConfirm={() => action("cancel-booking")}
                 />
               </div>
@@ -127,17 +176,13 @@ export function ParkingDetail({ id }: ParkingDetailProps) {
               </Alert>
               <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
                 <Confirm
-                  title="Extend by 30 minutes?"
-                  description={`This changes the end time from ${time(b.end)} to ${time(b.end + 30)} if the fixture interval is available.`}
-                  trigger={
-                    <Button variant="secondary">Extend 30 minutes</Button>
-                  }
-                  onConfirm={() => action("extend")}
-                />
-                <Confirm
                   title="Check out this vehicle?"
                   description="One parking space will be released and active charging stopped. Confirm only when ready to leave."
-                  trigger={<Button>Check out</Button>}
+                  trigger={
+                    <Button disabled={command.busy || !b.sessionId}>
+                      Check out
+                    </Button>
+                  }
                   onConfirm={() => action("checkout")}
                 />
               </div>

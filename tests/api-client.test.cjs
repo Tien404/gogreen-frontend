@@ -10,25 +10,19 @@ const {
   mapStatus,
   mapVehicle,
 } = require("../src/integration/apiMappers.ts");
-const {
-  resolveApiBaseUrl,
-  resolveDataMode,
-} = require("../src/config/dataMode.ts");
+const { resolveApiBaseUrl } = require("../src/config/api.ts");
 
-test("mode selection and API URL stay explicit", () => {
-  assert.equal(resolveDataMode(undefined, "development"), "api");
-  assert.equal(resolveDataMode(undefined, "preview"), "preview");
-  assert.equal(resolveDataMode("preview", "production"), "preview");
-  assert.throws(() => resolveDataMode("oops", "preview"));
+test("API URL configuration is explicit", () => {
   assert.equal(resolveApiBaseUrl(), "/api/v1");
   assert.equal(
-    resolveApiBaseUrl("http://localhost:8000/api/v1/"),
-    "http://localhost:8000/api/v1",
+    resolveApiBaseUrl("https://campus.example/api/v1/"),
+    "https://campus.example/api/v1",
   );
   for (const invalid of [
-    "//backend/api/v1",
-    "javascript:bad/api/v1",
-    "https://backend?x=/api/v1",
+    "//campus.example/api/v1",
+    "/wrong",
+    "javascript:alert(1)",
+    "/api/v1?x=1",
   ]) {
     assert.throws(() => resolveApiBaseUrl(invalid));
   }

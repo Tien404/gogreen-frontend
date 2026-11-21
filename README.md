@@ -12,7 +12,6 @@ Web app for the Smart E-Mobility Hub course project. Students can rent vehicles 
 | `src/features/`                       | Student and operator screens                 |
 | `src/shared/api/`, `src/integration/` | Typed API client and data mapping            |
 | `src/shared/ui/`, `src/index.css`     | Shared controls and styles                   |
-| `src/mocks/`, `src/store/`            | Standalone preview data and logic            |
 | `tests/`                              | Frontend tests                               |
 
 ## Run locally
@@ -26,7 +25,7 @@ npm run dev -- --host 127.0.0.1
 
 Open [http://127.0.0.1:5173](http://127.0.0.1:5173). Vite forwards `/api/v1` to the backend. Log in as `anh@demo.example` (student) or `nam@demo.example` (operator), both with the demo password `gogreen-demo`.
 
-For a standalone preview, run `npm run dev -- --mode preview`. See [`.env.example`](.env.example) for API URL and proxy settings. Run `npm test` for tests or `npm run build` for a production build.
+See [`.env.example`](.env.example) for API URL and proxy settings. Run `npm test` for tests or `npm run build` for a production build.
 
 Run `npm run lint` for ESLint or `npm run format` for Prettier.
 `npm ci` installs the Husky pre-commit hook, which formats staged files and lints staged TypeScript.

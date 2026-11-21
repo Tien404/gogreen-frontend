@@ -1,19 +1,18 @@
 import { useApp } from "@/app/providers/AppContext";
-import { available, freeSpaces, pointFree } from "@/domain/selectors";
+import { freeSpaces, pointFree } from "@/domain/selectors";
 import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
 import { Badge, Link } from "@/shared/ui";
-
-type HubCardsProps = { limit?: number };
-
+type HubCardsProps = {
+  limit?: number;
+};
 export function HubCards({ limit = 4 }: HubCardsProps) {
   const { s } = useApp();
-
   return (
     <div className="grid grid-cols-4 gap-4 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1">
       {s.hubs.slice(0, limit).map((h, i) => (
         <Link
-          to={`/${s.role}/hubs/${h.id}`}
+          to={`/${s.role}/hubs/${encodeURIComponent(h.id)}`}
           className="rounded-xs bg-panel block min-w-0 motion-safe:hover:-translate-y-1 hover:shadow-control hover:text-content p-5 max-[600px]:p-5"
           key={h.id}
         >
@@ -33,7 +32,7 @@ export function HubCards({ limit = 4 }: HubCardsProps) {
           <div className="flex justify-between gap-2 pt-4 [&_svg]:inline [&_svg]:mr-2 [&_svg]:w-[16px] [&_svg]:h-[16px] [&_svg]:text-content-muted [&_svg]:align-middle my-5 mx-0 max-[600px]:my-4 max-[600px]:mx-0">
             <span className="text-sm font-semibold">
               <Icon name="bike" />
-              {available(s, h.id).length}
+              {h.live?.availableVehicles ?? 0}
               <small className="leading-[1.6] block font-normal text-xs mt-1">
                 vehicles
               </small>

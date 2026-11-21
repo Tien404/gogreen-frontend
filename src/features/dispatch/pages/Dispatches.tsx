@@ -1,15 +1,27 @@
+import { OperatorScreenData } from "@/integration/OperatorScreenData";
 import { Missing } from "@/app/pages/Missing";
 import { Icon } from "@/shared/components/Icon";
 import { Alert, Badge, Button, Empty, Link, PageTitle } from "@/shared/ui";
 import { CreateDispatchDialog } from "../components/CreateDispatchDialog";
 import { DispatchDetails } from "../components/DispatchDetails";
 import { useDispatches } from "../hooks/useDispatches";
-
-type DispatchesProps = { id?: string };
-
-export function Dispatches({ id }: DispatchesProps) {
+type DispatchesProps = {
+  id?: string;
+};
+export function Dispatches(props: DispatchesProps) {
+  return (
+    <OperatorScreenData dispatchId={props.id}>
+      <DispatchesView {...props} />
+    </OperatorScreenData>
+  );
+}
+function DispatchesView({ id }: DispatchesProps) {
   const {
     s,
+    busy,
+    valid,
+    candidates,
+    hubs,
     open,
     setOpen,
     source,
@@ -21,15 +33,11 @@ export function Dispatches({ id }: DispatchesProps) {
     error,
     review,
     setReview,
-    recover,
-    setRecover,
     d,
     action,
     submitDispatch,
   } = useDispatches({ id });
-
   if (id && !d) return <Missing />;
-
   if (d)
     return (
       <>
@@ -40,7 +48,7 @@ export function Dispatches({ id }: DispatchesProps) {
           <Icon name="arrow-left" size={16} /> All dispatches
         </Link>
         <PageTitle
-          title={`Dispatch ${d.id}`}
+          title={`Dispatch ${encodeURIComponent(d.id)}`}
           description={`${s.hubs.find((h) => h.id === d.source)?.name} → ${s.hubs.find((h) => h.id === d.destination)?.name}`}
           action={<Badge>{d.status}</Badge>}
         />
@@ -49,12 +57,10 @@ export function Dispatches({ id }: DispatchesProps) {
           s={s}
           error={error}
           action={action}
-          recover={recover}
-          setRecover={setRecover}
+          busy={busy}
         />
       </>
     );
-
   return (
     <>
       <PageTitle
@@ -119,7 +125,7 @@ export function Dispatches({ id }: DispatchesProps) {
                     <Link
                       data-slot="text-link"
                       className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
-                      to={`/operator/dispatch/${d.id}`}
+                      to={`/operator/dispatch/${encodeURIComponent(d.id)}`}
                     >
                       View dispatch <Icon name="arrow" size={16} />
                     </Link>
@@ -142,6 +148,7 @@ export function Dispatches({ id }: DispatchesProps) {
         )}
       </div>
       <CreateDispatchDialog
+        s={s}
         open={open}
         setOpen={setOpen}
         submitDispatch={submitDispatch}
@@ -149,12 +156,15 @@ export function Dispatches({ id }: DispatchesProps) {
         setSource={setSource}
         setVehicles={setVehicles}
         setReview={setReview}
-        s={s}
         destination={destination}
         setDestination={setDestination}
         vehicles={vehicles}
         review={review}
         error={error}
+        busy={busy}
+        valid={valid}
+        candidates={candidates}
+        hubs={hubs}
       />
     </>
   );

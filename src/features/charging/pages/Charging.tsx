@@ -1,27 +1,40 @@
+import { OperatorScreenData } from "@/integration/OperatorScreenData";
+import { StudentData } from "@/integration/StudentScreenData";
 import { Missing } from "@/app/pages/Missing";
 import { Icon } from "@/shared/components/Icon";
-import {
-  Alert,
-  Badge,
-  Button,
-  Empty,
-  Link,
-  Modal,
-  PageTitle,
-} from "@/shared/ui";
+import { Alert, Badge, Button, Empty, Link, PageTitle } from "@/shared/ui";
 import { ChargeForm } from "../components/ChargeForm";
 import { ChargingSessionDetails } from "../components/ChargingSessionDetails";
 import { useCharging } from "../hooks/useCharging";
-
 type ChargingProps = {
   id?: string;
   newRequest?: boolean;
 };
-
-export function Charging({ id, newRequest = false }: ChargingProps) {
-  const { s, act, go, tab, setTab, operator, charges, c, canAct } =
-    useCharging(id);
-
+export function Charging(props: ChargingProps) {
+  return (
+    <StudentData
+      screen={
+        props.newRequest ? "newCharging" : props.id ? "charge" : "charging"
+      }
+      id={props.id}
+    >
+      <OperatorScreenData chargeId={props.id}>
+        <ChargingView {...props} />
+      </OperatorScreenData>
+    </StudentData>
+  );
+}
+function ChargingView({ id, newRequest = false }: ChargingProps) {
+  const { s, go, tab, setTab, operator, charges, c, canAct } = useCharging(id);
+  const visible = charges.filter(
+    (session) =>
+      tab === "all" ||
+      (tab === "queue"
+        ? session.status === "pending"
+        : tab === "schedule"
+          ? ["scheduled", "active"].includes(session.status)
+          : !["pending", "scheduled", "active"].includes(session.status)),
+  );
   if (newRequest)
     return (
       <>
@@ -37,10 +50,8 @@ export function Charging({ id, newRequest = false }: ChargingProps) {
         </section>
       </>
     );
-
   if (id) {
     if (!c) return <Missing />;
-
     return (
       <>
         <Link
@@ -54,35 +65,21 @@ export function Charging({ id, newRequest = false }: ChargingProps) {
           description={`${c.vehicle} · ${s.hubs.find((h) => h.id === c.hub)?.name}`}
           action={<Badge>{c.status}</Badge>}
         />
-        <ChargingSessionDetails c={c} canAct={canAct} act={act} s={s} />
+        <ChargingSessionDetails s={s} c={c} canAct={canAct} />
       </>
     );
   }
-
   return (
     <>
       <PageTitle
         title="Charging"
         description={
           operator
-            ? "Review the charging queue, allocations and shared-fleet requests."
+            ? "Review the charging queue, allocations and campus requests."
             : "Your requests and sessions. Keep track of your next charge."
         }
         action={
-          operator ? (
-            <Modal
-              title="Request shared-vehicle charging"
-              description="Only eligible shared fleet vehicles can be selected."
-              trigger={
-                <Button>
-                  <Icon name="plus" />
-                  New request
-                </Button>
-              }
-            >
-              <ChargeForm onDone={(id) => go(`/operator/charging/${id}`)} />
-            </Modal>
-          ) : (
+          operator ? undefined : (
             <Button onClick={() => go("/student/charging/new")}>
               <Icon name="plus" />
               New request
@@ -105,7 +102,9 @@ export function Charging({ id, newRequest = false }: ChargingProps) {
         </div>
       </div>
       <Alert>
-        Fixture priority: lower battery, need-by time, then request order.
+        {
+          "Charging priority uses need-by time, lower battery, then request order."
+        }{" "}
         Active sessions are not interrupted for a new request.
       </Alert>
       <div
@@ -137,60 +136,51 @@ export function Charging({ id, newRequest = false }: ChargingProps) {
               </tr>
             </thead>
             <tbody className="[&_tr:hover]:bg-surface-muted">
-              {charges
-                .filter(
-                  (c) =>
-                    tab === "all" ||
-                    (tab === "queue"
-                      ? c.status === "pending"
-                      : tab === "schedule"
-                        ? ["scheduled", "active"].includes(c.status)
-                        : !["pending", "scheduled", "active"].includes(
-                            c.status,
-                          )),
-                )
-                .map((c) => (
-                  <tr key={c.id}>
-                    <th
-                      scope="row"
-                      className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 font-medium whitespace-nowrap py-4 px-3"
+              {visible.map((c) => (
+                <tr key={c.id}>
+                  <th
+                    scope="row"
+                    className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 font-medium whitespace-nowrap py-4 px-3"
+                  >
+                    {c.id}
+                    <small className="leading-[1.6] block font-normal max-w-75">
+                      {c.vehicle} ·{" "}
+                      {c.owner === "operator" ? "Shared" : "Private"}
+                    </small>
+                  </th>
+                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                    {s.hubs.find((h) => h.id === c.hub)?.name}
+                  </td>
+                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                    {c.battery === null ? "—" : `${c.battery}%`} / {c.target}%
+                  </td>
+                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                    <Badge>{c.status}</Badge>
+                  </td>
+                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 py-4 px-3">
+                    {c.point ?? "Awaiting point"}
+                    <small className="leading-[1.6] block font-normal max-w-75">
+                      {c.schedule && (
+                        <span className="block">{c.schedule}</span>
+                      )}
+                      <span className="wrap-anywhere">{c.reason}</span>
+                    </small>
+                  </td>
+                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                    <Link
+                      data-slot="text-link"
+                      className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+                      to={`/${s.role}/charging/${encodeURIComponent(c.id)}`}
                     >
-                      {c.id}
-                      <small className="leading-[1.6] block font-normal max-w-75">
-                        {c.vehicle} ·{" "}
-                        {c.owner === "operator" ? "Shared" : "Private"}
-                      </small>
-                    </th>
-                    <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                      {s.hubs.find((h) => h.id === c.hub)?.name}
-                    </td>
-                    <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                      {c.battery}% / {c.target}%
-                    </td>
-                    <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                      <Badge>{c.status}</Badge>
-                    </td>
-                    <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 py-4 px-3">
-                      {c.point ?? "Awaiting point"}
-                      <small className="leading-[1.6] block font-normal max-w-75">
-                        {c.reason}
-                      </small>
-                    </td>
-                    <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                      <Link
-                        data-slot="text-link"
-                        className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
-                        to={`/${s.role}/charging/${c.id}`}
-                      >
-                        View session <Icon name="arrow" size={16} />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                      View session <Icon name="arrow" size={16} />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-        {!charges.length && (
+        {!visible.length && (
           <Empty
             title="No charging requests"
             text="New requests will appear here."

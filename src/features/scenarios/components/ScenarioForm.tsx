@@ -1,12 +1,9 @@
-import { scenarioFixtures, scenarioTypes } from "@/mocks/scenarios";
 import { Icon } from "@/shared/components/Icon";
 import { Alert, Button, Field } from "@/shared/ui";
 import type { WhatIfModel } from "../hooks/useWhatIf";
-
 type ScenarioFormProps = Pick<
   WhatIfModel,
   | "runScenario"
-  | "s"
   | "type"
   | "setType"
   | "hub"
@@ -17,10 +14,15 @@ type ScenarioFormProps = Pick<
   | "setDemand"
   | "error"
   | "busy"
+  | "types"
+  | "liveHubs"
+  | "points"
+  | "point"
+  | "setPoint"
+  | "valid"
+  | "fault"
 >;
-
 export function ScenarioForm({
-  s,
   runScenario,
   type,
   setType,
@@ -32,6 +34,13 @@ export function ScenarioForm({
   setDemand,
   error,
   busy,
+  types,
+  liveHubs,
+  points,
+  point,
+  setPoint,
+  valid,
+  fault,
 }: ScenarioFormProps) {
   return (
     <div
@@ -46,13 +55,10 @@ export function ScenarioForm({
           <Field label="Scenario category">
             <select
               value={type}
-              onChange={(e) => {
-                setType(e.target.value);
-                setHub(scenarioFixtures[e.target.value].hub);
-              }}
+              onChange={(e) => setType(e.target.value)}
               className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
             >
-              {scenarioTypes.map((t) => (
+              {types.map((t) => (
                 <option key={t}>{t}</option>
               ))}
             </select>
@@ -63,39 +69,72 @@ export function ScenarioForm({
               onChange={(e) => setHub(e.target.value)}
               className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
             >
-              <option value={scenarioFixtures[type].hub}>
-                {
-                  s.hubs.find((hub) => hub.id === scenarioFixtures[type].hub)
-                    ?.name
-                }{" "}
-                · supported fixture
-              </option>
+              {
+                <>
+                  <option value="">Choose a hub</option>
+                  {liveHubs.map((item) => (
+                    <option key={item.hub_id} value={item.hub_id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </>
+              }
             </select>
           </Field>
           <Field label="Horizon">
-            <select
-              value={horizon}
-              onChange={(e) => setHorizon(e.target.value)}
-              className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
-            >
-              <option value="60">60 minutes · supported fixture</option>
-            </select>
+            {
+              <input
+                type="number"
+                required
+                min="1"
+                max="240"
+                value={horizon}
+                onChange={(e) => setHorizon(e.target.value)}
+                className="min-h-11 rounded-xs border border-control-border bg-panel px-3"
+              />
+            }
           </Field>
-          <Field label="Demand / fault preset">
-            <select
-              value={demand}
-              onChange={(e) => setDemand(e.target.value)}
-              className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
-            >
-              <option value="standard">Standard supported preset</option>
-              <option value="custom">
-                Custom configuration · no result fixture
-              </option>
-            </select>
-          </Field>
+          {fault ? (
+            <Field label="Charging point">
+              <select
+                required
+                value={point}
+                onChange={(e) => setPoint(e.target.value)}
+                className="min-h-11 rounded-xs border border-control-border bg-panel px-3"
+              >
+                <option value="">Choose a working point</option>
+                {point &&
+                  !points.some((item) => item.resource_id === point) && (
+                    <option value={point} disabled>
+                      {point} · unavailable
+                    </option>
+                  )}
+                {points.map((item) => (
+                  <option key={item.resource_id} value={item.resource_id}>
+                    {item.resource_id}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : (
+            <Field label="Additional rental requests">
+              <input
+                type="number"
+                min="1"
+                max="1000"
+                required
+                value={demand}
+                onChange={(e) => setDemand(e.target.value)}
+                className="min-h-11 rounded-xs border border-control-border bg-panel px-3"
+              />
+            </Field>
+          )}
+          {!liveHubs.length && (
+            <Alert>No eligible hub is available for this scenario.</Alert>
+          )}
           {error && <Alert tone="error">{error}</Alert>}
-          <Button disabled={busy} type="submit">
-            {busy ? "Loading mock result…" : "Run mock scenario"}
+          <Button disabled={busy || !valid} type="submit">
+            {busy ? "Running…" : "Run simulation"}
             <Icon name="flask" />
           </Button>
           {busy && (
@@ -103,7 +142,7 @@ export function ScenarioForm({
               className="bg-linear-to-r from-surface-muted via-soft to-surface-muted rounded-xs mt-5 text-xs text-content-muted animate-pulse p-5"
               role="status"
             >
-              Loading bundled scenario fixture…
+              {"Running from an operational snapshot…"}
             </div>
           )}
         </form>

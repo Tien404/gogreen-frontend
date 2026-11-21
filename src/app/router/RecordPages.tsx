@@ -7,62 +7,47 @@ import { HoldDetail } from "@/features/rentals/pages/HoldDetail";
 import { RideDetail } from "@/features/rentals/pages/RideDetail";
 import { WhatIf } from "@/features/scenarios/pages/WhatIf";
 import { Empty, Link, PageTitle } from "@/shared/ui";
-import { useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 import { useApp } from "../providers/AppContext";
-
 export function HubPage() {
   const { hubId } = useParams();
-
   return hubId ? <HubDetail id={hubId} /> : <Missing />;
 }
-
 export function HoldPage() {
   const { holdId } = useParams();
-
   return holdId ? <HoldDetail id={holdId} /> : <Missing />;
 }
-
 export function RidePage() {
   const { rideId } = useParams();
-
   return rideId ? <RideDetail id={rideId} /> : <Missing />;
 }
-
 export function ParkingPage() {
   const { bookingId } = useParams();
-
   return bookingId ? <ParkingDetail id={bookingId} /> : <Missing />;
 }
-
 export function ChargingPage() {
   const { sessionId } = useParams();
-
   return sessionId ? <Charging id={sessionId} /> : <Missing />;
 }
-
 export function NewChargingPage() {
+  const { s } = useApp();
+  if (s.role === "operator")
+    return <Navigate replace to="/operator/charging" />;
   return <Charging newRequest />;
 }
-
 export function DispatchPage() {
   const { dispatchId } = useParams();
-
   return dispatchId ? <Dispatches id={dispatchId} /> : <Missing />;
 }
-
 export function NewScenarioPage() {
   return <WhatIf newScenario />;
 }
-
 export function ScenarioRunPage() {
   const { runId } = useParams();
-
   return runId ? <WhatIf id={runId} /> : <Missing />;
 }
-
 export function UnknownRoutePage() {
   const { s } = useApp();
-
   return (
     <>
       <PageTitle
@@ -85,7 +70,6 @@ export function UnknownRoutePage() {
     </>
   );
 }
-
 export function NotFoundPage() {
   return (
     <main

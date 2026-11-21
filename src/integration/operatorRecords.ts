@@ -35,12 +35,22 @@ export function simulationUrl(id: string) {
   return `/operator/what-if/runs/${encodeURIComponent(id)}`;
 }
 
-export function simulationLabel(kind: Schemas["SimulationRunOut"]["scenario_type"]) {
-  return kind === "CHARGER_FAULT" ? "Charging-point fault" : "Metro rental demand surge";
+export function simulationLabel(
+  kind: Schemas["SimulationRunOut"]["scenario_type"],
+) {
+  return kind === "CHARGER_FAULT"
+    ? "Charging-point fault"
+    : "Metro rental demand surge";
 }
 
 export function dispatchAdviceUrl(advice: Schemas["SimulationAdvice"]) {
   const { type, vehicle_id, from_hub_id, to_hub_id } = advice;
-  if (type !== "REDISTRIBUTE_VEHICLE" || !vehicle_id || !from_hub_id || !to_hub_id) return null;
+  if (
+    type !== "REDISTRIBUTE_VEHICLE" ||
+    !vehicle_id ||
+    !from_hub_id ||
+    !to_hub_id
+  )
+    return null;
   return `/operator/dispatch?${new URLSearchParams({ vehicle_id, from_hub_id, to_hub_id })}#plan-dispatch`;
 }

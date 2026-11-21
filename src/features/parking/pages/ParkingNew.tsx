@@ -1,6 +1,7 @@
-import { freeSpaces } from "@/domain/selectors";
+import { studentDate } from "@/integration/studentData";
+import { StudentData } from "@/integration/StudentScreenData";
 import { Icon } from "@/shared/components/Icon";
-import { parseTime, time } from "@/shared/lib/time";
+import { parseTime } from "@/shared/lib/time";
 import {
   Alert,
   Button,
@@ -10,14 +11,19 @@ import {
   SectionHead,
 } from "@/shared/ui";
 import { useParkingNew } from "../hooks/useParkingNew";
-
 export function ParkingNew() {
+  return (
+    <StudentData screen="newParking">
+      <ParkingNewView />
+    </StudentData>
+  );
+}
+function ParkingNewView() {
   const {
     s,
     error,
     setError,
     service,
-    setService,
     hub,
     setHub,
     start,
@@ -32,12 +38,11 @@ export function ParkingNew() {
     submit,
     submitParking,
   } = useParkingNew();
-
   return (
     <>
       <PageTitle
         title="A space for your day."
-        description="Book parking for your private vehicle, with charging if you need it."
+        description={"Book parking for your private vehicle."}
       />
       <div
         data-slot="two-col"
@@ -107,18 +112,9 @@ export function ParkingNew() {
                 />
               </Field>
             </div>
-            <Field label="Service">
-              <select
-                value={service}
-                onChange={(e) => setService(e.target.value)}
-                className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
-              >
-                <option>Parking only</option>
-                <option>Parking + charging</option>
-              </select>
-            </Field>
+
             {error && <Alert tone="error">{error}</Alert>}
-            <Button type="submit">
+            <Button type="submit" disabled={!vehicle || !hub}>
               Review interval availability <Icon name="arrow" />
             </Button>
           </form>
@@ -138,9 +134,7 @@ export function ParkingNew() {
             <dt className="text-content-muted">Availability</dt>
             <dd className="wrap-anywhere m-0">
               {review
-                ? freeSpaces(s, hub) > 0
-                  ? "Parking available for this supported interval"
-                  : "Unavailable"
+                ? "Checked when you confirm"
                 : "Review your selected interval"}
             </dd>
             <dt className="text-content-muted">Charging target</dt>
@@ -150,13 +144,12 @@ export function ParkingNew() {
                 : "Not requested"}
             </dd>
           </dl>
-          <Alert>
-            Combined parking and charging succeeds together. If unavailable, no
-            booking is created. You can explicitly select Parking only.
-          </Alert>
-          <p className="leading-[1.65] text-content-muted mt-3 mb-5 mx-0">
-            Date: 20 October 2026. Interval outcomes use fixtures.
-          </p>
+          {
+            <Alert>
+              The server allocates an available space for your selected interval
+              when you confirm.
+            </Alert>
+          }
         </section>
       </div>
       <Modal
@@ -174,7 +167,7 @@ export function ParkingNew() {
           </dd>
           <dt className="text-content-muted">Interval</dt>
           <dd className="wrap-anywhere m-0">
-            {time(parseTime(start))}–{time(parseTime(end))} · 20 October
+            {`${studentDate(parseTime(start))} – ${studentDate(parseTime(end))}`}
           </dd>
           <dt className="text-content-muted">Service</dt>
           <dd className="wrap-anywhere m-0">{service}</dd>

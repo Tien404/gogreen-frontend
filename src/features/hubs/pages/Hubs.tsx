@@ -1,19 +1,15 @@
 import { config } from "@/config/app";
-import {
-  available,
-  freeSpaces,
-  occupancy,
-  pointFree,
-} from "@/domain/selectors";
+import { ApiLoadError } from "@/shared/api/ApiFeedback";
 import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
-import { Empty, Link, PageTitle } from "@/shared/ui";
+import { Button, Empty, Link, PageTitle } from "@/shared/ui";
 import { CampusMap } from "../components/CampusMap";
 import { useHubs } from "../hooks/useHubs";
-
 export function Hubs() {
   const {
-    s,
+    role,
+    source,
+    retry,
     search,
     setSearch,
     view,
@@ -24,7 +20,6 @@ export function Hubs() {
     setSelected,
     hubs,
   } = useHubs();
-
   return (
     <>
       <PageTitle
@@ -70,88 +65,109 @@ export function Hubs() {
           ))}
         </div>
       </div>
-      {view === "map" && (
-        <CampusMap
-          selected={selected}
-          onSelect={setSelected}
-          visibleIds={hubs.map((h) => h.id)}
-        />
+      {source.status === "loading" && <p role="status">Loading hubs…</p>}
+      {source.status === "error" && (
+        <ApiLoadError message={source.message} retry={retry} />
       )}
-      <div
-        data-slot="panel"
-        className="mt-5 bg-panel rounded-sm min-w-0 max-[600px]:mt-5 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
-        <div className="overflow-x-auto max-w-full max-[600px]:my-0 max-[600px]:-mx-1">
-          <table className="w-full border-collapse text-left text-sm max-[600px]:min-w-140">
-            <caption className="text-left pt-0 pb-5 text-content-muted text-xs px-0">
-              Hub resources · Updated {time(s.clock)}
-            </caption>
-            <thead>
-              <tr>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                  Hub
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                  Shared vehicles
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                  Physical occupancy
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                  Parking available
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                  Charging points available
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                  Details
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&_tr:hover]:bg-surface-muted">
-              {hubs.map((h) => (
-                <tr
-                  key={h.id}
-                  data-selected={selected === h.id}
-                  className="data-[selected=true]:bg-soft!"
-                >
-                  <th
-                    scope="row"
-                    className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 font-medium whitespace-nowrap py-4 px-3"
-                  >
-                    <Link to={`/${s.role}/hubs/${h.id}`}>{h.name}</Link>
-                    <small className="leading-[1.6] block font-normal max-w-75">
-                      {h.area}
-                    </small>
-                  </th>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                    {available(s, h.id).length} available
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                    {occupancy(s, h.id)} / {h.capacity}
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                    {freeSpaces(s, h.id)} now
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                    {pointFree(s, h.id)} / {h.points}
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
-                    <Link
-                      data-slot="text-link"
-                      className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
-                      to={`/${s.role}/hubs/${h.id}`}
+      {source.status === "ready" && (
+        <>
+          {view === "map" && (
+            <CampusMap selected={selected} onSelect={setSelected} hubs={hubs} />
+          )}
+          <div
+            data-slot="panel"
+            className="mt-5 bg-panel rounded-sm min-w-0 max-[600px]:mt-5 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
+          >
+            <div className="overflow-x-auto max-w-full max-[600px]:my-0 max-[600px]:-mx-1">
+              <table className="w-full border-collapse text-left text-sm max-[600px]:min-w-140">
+                <caption className="text-left pt-0 pb-5 text-content-muted text-xs px-0">
+                  Hub resources
+                  {source.data.clock !== null &&
+                    ` · Updated ${time(source.data.clock)}`}
+                </caption>
+                <thead>
+                  <tr>
+                    <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                      Hub
+                    </th>
+                    <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                      Shared vehicles
+                    </th>
+                    <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                      Physical occupancy
+                    </th>
+                    <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                      Parking available
+                    </th>
+                    <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                      Charging points available
+                    </th>
+                    <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                      Details
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="[&_tr:hover]:bg-surface-muted">
+                  {hubs.map((h) => (
+                    <tr
+                      key={h.id}
+                      data-selected={selected === h.id}
+                      className="data-[selected=true]:bg-soft!"
                     >
-                      View hub <Icon name="arrow" size={16} />
-                    </Link>
-                  </td>
-                </tr>
+                      <th
+                        scope="row"
+                        className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 font-medium whitespace-nowrap py-4 px-3"
+                      >
+                        <Link to={`/${role}/hubs/${encodeURIComponent(h.id)}`}>
+                          {h.name}
+                        </Link>
+                        <small className="leading-[1.6] block font-normal max-w-75">
+                          {h.area}
+                        </small>
+                      </th>
+                      <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                        {h.availableVehicles} available
+                      </td>
+                      <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                        {h.occupied} / {h.capacity}
+                      </td>
+                      <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                        {h.parkingAvailable} now
+                      </td>
+                      <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                        {h.availablePoints} / {h.points.length}
+                      </td>
+                      <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                        <Link
+                          data-slot="text-link"
+                          className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+                          to={`/${role}/hubs/${encodeURIComponent(h.id)}`}
+                        >
+                          View hub <Icon name="arrow" size={16} />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {!hubs.length &&
+              (source.data.hubs.length ? (
+                <Empty />
+              ) : (
+                <Empty
+                  title="No campus hubs yet"
+                  text="There are no hubs to display."
+                  action={
+                    <Button variant="secondary" onClick={retry}>
+                      Refresh
+                    </Button>
+                  }
+                />
               ))}
-            </tbody>
-          </table>
-        </div>
-        {!hubs.length && <Empty />}
-      </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

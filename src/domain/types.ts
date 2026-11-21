@@ -1,16 +1,12 @@
 import type { config } from "@/config/app";
-
 export type Role = "student" | "operator";
-
-export type VehicleType = (typeof config.vehicleTypes)[number];
-
 export interface AccountProfile {
   name: string;
   email: string;
   role: Role;
   persona: string;
 }
-
+export type VehicleType = (typeof config.vehicleTypes)[number];
 export type Status =
   | "available"
   | "held"
@@ -18,8 +14,8 @@ export type Status =
   | "charging"
   | "maintenance"
   | "in-transit"
-  | "committed";
-
+  | "committed"
+  | "unknown";
 export interface Hub {
   id: string;
   name: string;
@@ -28,25 +24,31 @@ export interface Hub {
   points: number;
   x: number;
   y: number;
+  live?: {
+    occupied: number;
+    bookable: number;
+    availablePoints: number;
+    availableVehicles: number;
+    active: boolean;
+    pointIds: string[];
+  };
 }
-
 export interface Vehicle {
   id: string;
-  type: VehicleType;
+  type: string;
   battery: number | null;
   status: Status;
   hub: string | null;
   stale?: boolean;
+  observedClock?: number | null;
 }
-
 export interface PrivateVehicle {
   id: string;
   owner: string;
   identifier: string;
-  type: VehicleType;
-  battery: number;
+  type: string;
+  battery: number | null;
 }
-
 export interface Hold {
   id: string;
   owner: string;
@@ -56,7 +58,6 @@ export interface Hold {
   expires: number;
   status: "held" | "cancelled" | "expired" | "picked-up";
 }
-
 export interface Ride {
   id: string;
   owner: string;
@@ -65,9 +66,8 @@ export interface Ride {
   destination: string;
   start: number;
   end?: number;
-  status: "active" | "completed";
+  status: "active" | "completed" | "disputed";
 }
-
 export interface Booking {
   id: string;
   owner: string;
@@ -76,6 +76,8 @@ export interface Booking {
   start: number;
   end: number;
   service: string;
+  sessionId?: string;
+  space?: string;
   status:
     | "confirmed"
     | "cancelled"
@@ -84,7 +86,6 @@ export interface Booking {
     | "expired"
     | "overstaying";
 }
-
 export interface Charge {
   id: string;
   owner: string;
@@ -99,12 +100,12 @@ export interface Charge {
     | "cancelled"
     | "stopped"
     | "interrupted";
-  battery: number;
+  battery: number | null;
+  schedule?: string;
   target: number;
   reason: string;
   point?: string;
 }
-
 export interface Incident {
   id: string;
   resource: string;
@@ -115,7 +116,6 @@ export interface Incident {
   resolution?: string;
   time: number;
 }
-
 export interface Dispatch {
   id: string;
   source: string;
@@ -123,8 +123,9 @@ export interface Dispatch {
   vehicles: string[];
   status: "planned" | "in-transit" | "completed" | "cancelled" | "failed";
   reason?: string;
+  started?: number;
+  completed?: number;
 }
-
 export interface Activity {
   persona?: string;
   id: string;
@@ -136,30 +137,11 @@ export interface Activity {
   reason: string;
   link: string;
 }
-
-export interface Run {
-  id: string;
-  type: string;
-  hub: string;
-  horizon: string;
-  demand: string;
-  snapshot: number;
-  captured: number;
-  status: "completed" | "failed";
-  applied: boolean;
-  vehicle: string;
-  baseline: number[];
-  scenario: number[];
-}
-
 export interface State {
   clock: number;
-  preset: string;
   role: Role | null;
   persona: string;
   profile?: AccountProfile;
-  serial: number;
-  revision: number;
   hubs: Hub[];
   vehicles: Vehicle[];
   privateVehicles: PrivateVehicle[];
@@ -170,6 +152,4 @@ export interface State {
   incidents: Incident[];
   dispatches: Dispatch[];
   activity: Activity[];
-  runs: Run[];
-  loadFailed: boolean;
 }

@@ -1,20 +1,19 @@
-import { freeSpaces } from "@/domain/selectors";
-import { Alert, Button, Confirm, Field, SectionHead } from "@/shared/ui";
+import { studentDate } from "@/integration/studentData";
+import { Alert, Button, Confirm, SectionHead } from "@/shared/ui";
 import type { DispatchesModel } from "../hooks/useDispatches";
-
 type DispatchDetailsProps = Pick<
   DispatchesModel,
-  "d" | "s" | "error" | "action" | "recover" | "setRecover"
+  "d" | "s" | "error" | "action" | "busy"
 >;
-
 export function DispatchDetails({
   d,
   s,
   error,
   action,
-  recover,
-  setRecover,
+  busy,
 }: DispatchDetailsProps) {
+  const failedBeforeDeparture =
+    d.status === "failed" && d.started === undefined;
   return (
     <div
       data-slot="two-col"
@@ -38,13 +37,14 @@ export function DispatchDetails({
           </dd>
           <dt className="text-content-muted">Destination commitment</dt>
           <dd className="wrap-anywhere m-0">
-            {["completed", "cancelled"].includes(d.status)
+            {["completed", "cancelled"].includes(d.status) ||
+            failedBeforeDeparture
               ? "Released"
               : `${d.vehicles.length} spaces · separate from occupancy`}
           </dd>
           <dt className="text-content-muted">Physical location</dt>
           <dd className="wrap-anywhere m-0">
-            {d.status === "planned"
+            {d.status === "planned" || failedBeforeDeparture
               ? "Still at source"
               : d.status === "completed"
                 ? "At destination"
@@ -55,7 +55,7 @@ export function DispatchDetails({
         </dl>
         {d.reason && (
           <Alert tone={d.status === "failed" ? "error" : "info"}>
-            {d.reason}
+            <span className="wrap-anywhere">{d.reason}</span>
           </Alert>
         )}
       </section>
@@ -71,13 +71,15 @@ export function DispatchDetails({
               Destination space commitment displayed
             </small>
           </li>
-          {d.status !== "planned" && (
+          {d.status !== "planned" && !failedBeforeDeparture && (
             <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 border-l border-solid border-l-divider text-sm">
               {d.status === "cancelled"
                 ? "Cancelled before departure"
                 : "Departed source"}
               <small className="leading-[1.6] block mt-1">
-                Source occupancy updated at departure only
+                {d.started === undefined
+                  ? "Source occupancy updated at departure only"
+                  : studentDate(d.started)}
               </small>
             </li>
           )}
@@ -85,7 +87,9 @@ export function DispatchDetails({
             <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 border-l border-solid border-l-divider text-sm">
               Arrived at destination{" "}
               <small className="leading-[1.6] block mt-1">
-                Vehicles placed once
+                {d.completed === undefined
+                  ? "Vehicles placed once"
+                  : studentDate(d.completed)}
               </small>
             </li>
           )}
@@ -97,55 +101,21 @@ export function DispatchDetails({
               <Confirm
                 title={`Start ${d.id}?`}
                 description={`${d.vehicles.length} vehicle(s) leave the source and become in transit.`}
-                trigger={<Button>Start dispatch</Button>}
+                trigger={<Button disabled={busy}>Start dispatch</Button>}
                 onConfirm={() => action("start-dispatch")}
-              />
-              <Confirm
-                title={`Cancel ${d.id}?`}
-                description="Vehicles remain at the source. The destination commitment is released."
-                trigger={<Button variant="secondary">Cancel dispatch</Button>}
-                onConfirm={() => action("cancel-dispatch")}
               />
             </>
           )}
-          {d.status === "in-transit" && (
+          {(d.status === "in-transit" ||
+            (d.status === "failed" && !failedBeforeDeparture)) && (
             <Confirm
               title="Confirm arrival?"
               description="Destination capacity is checked before these vehicles are placed."
-              trigger={<Button>Complete dispatch</Button>}
+              trigger={<Button disabled={busy}>Complete dispatch</Button>}
               onConfirm={() => action("complete-dispatch")}
             />
           )}
         </div>
-        {["failed", "in-transit"].includes(d.status) && (
-          <div className="mt-5 max-[600px]:mt-5">
-            <Field label="Recovery destination">
-              <select
-                value={recover}
-                onChange={(e) => setRecover(e.target.value)}
-                className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
-              >
-                {s.hubs
-                  .filter((h) => h.id !== d.destination)
-                  .map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {h.name} · {freeSpaces(s, h.id)} free
-                    </option>
-                  ))}
-              </select>
-            </Field>
-            <Confirm
-              title="Change dispatch destination?"
-              description="The selected recovery hub replaces the previous destination. Vehicles stay in transit."
-              trigger={
-                <Button variant="secondary">
-                  Confirm recovery destination
-                </Button>
-              }
-              onConfirm={() => action("recover")}
-            />
-          </div>
-        )}
       </section>
     </div>
   );

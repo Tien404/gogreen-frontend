@@ -1,66 +1,61 @@
+import { campusInputToIso, recordUrl } from "@/integration/studentRecords";
+import { apiErrorMessage } from "@/shared/api/errors";
+import { useApiAction } from "@/shared/api/useApiAction";
 import { useApp } from "@/app/providers/AppContext";
 import { inputTime, parseTime } from "@/shared/lib/time";
 import type { FormEvent } from "react";
 import { useState } from "react";
-
 export function useParkingNew() {
-  const { s, act, go } = useApp();
+  const { s, go, api } = useApp();
+  const command = useApiAction();
+  const initialStart = Math.ceil(s.clock);
   const [error, setError] = useState("");
-  const [service, setService] = useState("Parking only");
-  const [hub, setHub] = useState("north");
-  const [start, setStart] = useState(inputTime(s.clock));
-  const [end, setEnd] = useState(inputTime(s.clock + 60));
+  const service = "Parking only";
+  const [hub, setHub] = useState(
+    s.hubs.find((h) => h.id === "north")?.id ?? s.hubs[0]?.id ?? "",
+  );
+  const [start, setStart] = useState(inputTime(initialStart));
+  const [end, setEnd] = useState(inputTime(initialStart + 60));
   const [review, setReview] = useState(false);
   const [vehicle, setVehicle] = useState(
     s.privateVehicles.find((v) => v.owner === s.persona)?.id ?? "",
   );
-  const [busy, setBusy] = useState(false);
-
   const valid =
     Number.isFinite(parseTime(start)) &&
     parseTime(start) >= s.clock &&
     parseTime(end) > parseTime(start);
-
-  const submit = () => {
-    setBusy(true);
-    setTimeout(() => {
-      const r = act({
-        type: "book",
-        vehicle,
-        hub,
-        start: parseTime(start),
-        end: parseTime(end),
-        service,
-      });
-
-      setBusy(false);
-      setError(r.error ? r.message : "");
-
-      if (r.id) go(`/student/parking/${r.id}`);
-    }, 200);
+  const submit = async () => {
+    const result = await command.run(() =>
+      api.request("POST /parking/reservations", {
+        body: {
+          hub_id: hub,
+          vehicle_id: vehicle,
+          starts_at: campusInputToIso(start),
+          ends_at: campusInputToIso(end),
+        },
+      }),
+    );
+    if (result.ok) go(recordUrl("parking", result.data.reservation_id));
+    return;
   };
-
   const submitParking = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!valid) {
       setError(
         "End must follow start; start must not precede the current time.",
       );
-
       return;
     }
-
     setError("");
+    command.setError(null);
     setReview(true);
   };
-
   return {
     s,
-    error,
+
+    error: command.error ? apiErrorMessage(command.error) : error,
     setError,
     service,
-    setService,
     hub,
     setHub,
     start,
@@ -71,7 +66,7 @@ export function useParkingNew() {
     setReview,
     vehicle,
     setVehicle,
-    busy,
+    busy: command.busy,
     submit,
     submitParking,
   };

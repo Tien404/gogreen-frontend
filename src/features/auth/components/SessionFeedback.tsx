@@ -11,10 +11,14 @@ export function SessionFeedback({ auth }: { auth: AuthSession }) {
     >
       <Brand />
       {auth.status === "loading" ? (
-        <p role="status" className="text-content-muted">Checking your session…</p>
+        <p role="status" className="text-content-muted">
+          Checking your session…
+        </p>
       ) : (
         <div className="max-w-100">
-          <Alert tone="error">{auth.error ?? "Could not check your session."}</Alert>
+          <Alert tone="error">
+            {auth.error ?? "Could not check your session."}
+          </Alert>
           <Button onClick={auth.retry}>Retry connection</Button>
         </div>
       )}

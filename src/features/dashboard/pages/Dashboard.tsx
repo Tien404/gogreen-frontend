@@ -1,31 +1,40 @@
+import { OperatorScreenData } from "@/integration/OperatorScreenData";
+import { StudentData } from "@/integration/StudentScreenData";
 import { useApp } from "@/app/providers/AppContext";
 import { config } from "@/config/app";
-import { available, occupancy } from "@/domain/selectors";
+import { occupancy } from "@/domain/selectors";
 import { CampusMap } from "@/features/hubs/components/CampusMap";
 import { HubCards } from "@/features/hubs/components/HubCards";
 import { Icon } from "@/shared/components/Icon";
-import { Alert, Link, PageTitle, SectionHead } from "@/shared/ui";
+import { Alert, Empty, Link, PageTitle, SectionHead } from "@/shared/ui";
+import { useOptionalOperatorFeed } from "@/integration/operatorFeed";
+import { alertLabel } from "@/integration/operatorRecords";
 import { useEffect, useState } from "react";
 import { DashboardActivity } from "../components/DashboardActivity";
 import { DashboardWelcomeBanner } from "../components/DashboardWelcomeBanner";
-
 export function Dashboard() {
+  return (
+    <StudentData screen="dashboard">
+      <OperatorScreenData activity>
+        <DashboardView />
+      </OperatorScreenData>
+    </StudentData>
+  );
+}
+function DashboardView() {
   const { s, go } = useApp();
-
+  const feed = useOptionalOperatorFeed();
+  const alerts =
+    feed?.result.status === "ready" ? feed.result.data.data.alerts : [];
   const student = s.role === "student";
-
   const activeRide = s.rides.find(
     (r) => r.owner === s.persona && r.status === "active",
   );
-
   const hold = s.holds.find(
     (h) => h.owner === s.persona && h.status === "held",
   );
-
   const total = s.hubs.reduce((n, h) => n + h.capacity, 0);
-
   const occupied = s.hubs.reduce((n, h) => n + occupancy(s, h.id), 0);
-
   return (
     <>
       <PageTitle
@@ -85,14 +94,14 @@ export function Dashboard() {
               </strong>
               <p className="leading-[1.65]">
                 {hold
-                  ? `${hold.vehicle} · ${Math.max(0, hold.expires - s.clock)} minutes remaining`
-                  : `${activeRide!.vehicle} · ${s.clock - activeRide!.start} minutes elapsed`}
+                  ? `${hold.vehicle} · ${Math.max(0, Math.ceil(hold.expires - s.clock))} minutes remaining`
+                  : `${activeRide!.vehicle} · ${Math.max(0, Math.floor(s.clock - activeRide!.start))} minutes elapsed`}
               </p>
               <Link
                 to={
                   hold
-                    ? `/student/holds/${hold.id}`
-                    : `/student/rides/${activeRide!.id}`
+                    ? `/student/holds/${encodeURIComponent(hold.id)}`
+                    : `/student/rides/${encodeURIComponent(activeRide!.id)}`
                 }
               >
                 View {hold ? "hold" : "ride"} <Icon name="arrow" size={16} />
@@ -111,9 +120,12 @@ export function Dashboard() {
             ],
             [
               "bike",
-              String(available(s).length),
+              String(
+                s.vehicles.filter((vehicle) => vehicle.status === "available")
+                  .length,
+              ),
               "Available shared vehicles",
-              "Known battery · rental ready",
+              "Reported available by fleet status",
             ],
             [
               "bolt",
@@ -155,7 +167,7 @@ export function Dashboard() {
       <div className="mt-5 max-[600px]:mt-5">
         <SectionHead
           title={student ? "Explore your campus" : "Network overview"}
-          subtitle="Four hubs. More ways to get where you’re going."
+          subtitle={"Check live availability across campus."}
           action={
             <Link
               to={`/${s.role}/hubs`}
@@ -174,46 +186,59 @@ export function Dashboard() {
           subtitle={
             student
               ? "Check vehicles, parking and charging before you head out."
-              : "Current fixture availability. Dispatch commitments are shown in hub details."
+              : "Dispatch commitments are shown in hub details."
           }
         />
-        <HubCards />
+        {!s.hubs.length ? (
+          <Empty
+            title="No campus hubs yet"
+            text="Campus hubs will appear here when available."
+          />
+        ) : (
+          <HubCards />
+        )}
       </div>
+      {alerts.length > 0 && (
+        <Alert>
+          <ul>
+            {alerts.map((alert) => (
+              <li key={`${alert.hub_id}-${alert.code}`}>
+                <Link to={`/operator/hubs/${encodeURIComponent(alert.hub_id)}`}>
+                  {s.hubs.find((hub) => hub.id === alert.hub_id)?.name ??
+                    alert.hub_id}
+                </Link>
+                {" · "}
+                {alertLabel(alert.code)}
+              </li>
+            ))}
+          </ul>
+        </Alert>
+      )}
       <DashboardActivity s={s} student={student} go={go} />
     </>
   );
 }
-
 function CurrentDateTime() {
   const [now, setNow] = useState(() => new Date());
-
   useEffect(() => {
-    const untilNextMinute = () => 60_000 - (Date.now() % 60_000);
-
+    const untilNextMinute = () => 60000 - (Date.now() % 60000);
     let timer: number;
-
     const tick = () => {
       setNow(new Date());
       timer = window.setTimeout(tick, untilNextMinute());
     };
-
     timer = window.setTimeout(tick, untilNextMinute());
-
     const refreshWhenVisible = () => {
       if (document.hidden) return;
-
       window.clearTimeout(timer);
       tick();
     };
-
     document.addEventListener("visibilitychange", refreshWhenVisible);
-
     return () => {
       window.clearTimeout(timer);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
   }, []);
-
   const date = now.toLocaleDateString("en-GB", {
     timeZone: config.timezone,
     weekday: "long",
@@ -221,14 +246,12 @@ function CurrentDateTime() {
     month: "long",
     year: "numeric",
   });
-
   const currentTime = now.toLocaleTimeString("en-GB", {
     timeZone: config.timezone,
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
   });
-
   return (
     <div className="flex items-center gap-3 text-xs text-content-muted shrink-0 [&_>_svg]:text-[#8b9791] [&_small]:block [&_small]:text-xs [&_small]:text-content-muted max-[1200px]:hidden">
       <Icon name="sun" />

@@ -1,3 +1,5 @@
+import { ApiLoadError } from "@/shared/api/ApiFeedback";
+import { StudentData } from "@/integration/StudentScreenData";
 import { config } from "@/config/app";
 import { Icon } from "@/shared/components/Icon";
 import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
@@ -14,21 +16,25 @@ import {
   SectionHead,
 } from "@/shared/ui";
 import { useFindRide } from "../hooks/useFindRide";
-
 export function FindRide() {
+  return (
+    <StudentData screen="findRide">
+      <FindRideView />
+    </StudentData>
+  );
+}
+function FindRideView() {
   const {
     s,
+    query,
     origin,
     setOrigin,
     destination,
     setDestination,
     type,
     setType,
-    need,
-    setNeed,
     error,
     busy,
-    selected,
     setSelected,
     vehicles,
     v,
@@ -36,7 +42,6 @@ export function FindRide() {
     ride,
     reserveVehicle,
   } = useFindRide();
-
   return (
     <>
       <PageTitle
@@ -45,7 +50,7 @@ export function FindRide() {
       />
       <div
         data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 grid grid-cols-4 gap-5 mb-5 max-[1200px]:grid-cols-2 max-[600px]:rounded-xs max-[600px]:grid-cols-1 max-[600px]:gap-4 p-5 **:data-[slot~=field]:m-0 max-[600px]:p-5 max-[600px]:**:data-[slot~=field]:m-0"
+        className="bg-panel rounded-sm min-w-0 grid grid-cols-3 gap-5 mb-5 max-[1200px]:grid-cols-2 max-[600px]:rounded-xs max-[600px]:grid-cols-1 max-[600px]:gap-4 p-5 **:data-[slot~=field]:m-0 max-[600px]:p-5 max-[600px]:**:data-[slot~=field]:m-0"
       >
         <Field label="Starting hub">
           <select
@@ -88,16 +93,6 @@ export function FindRide() {
             ))}
           </select>
         </Field>
-        <Field label="Journey preset">
-          <select
-            value={need}
-            onChange={(e) => setNeed(e.target.value)}
-            className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
-          >
-            <option value="short">Across campus</option>
-            <option value="long">Extended campus journey</option>
-          </select>
-        </Field>
       </div>
       {origin === destination && (
         <Alert>
@@ -118,9 +113,24 @@ export function FindRide() {
         </Alert>
       )}
       {error && <Alert tone="error">{error}</Alert>}
+      {query.result.status === "loading" && (
+        <p role="status">Loading vehicles…</p>
+      )}
+      {(query.refreshError ??
+        (query.result.status === "error" ? query.result : null)) && (
+        <ApiLoadError
+          message={
+            query.refreshError?.message ??
+            (query.result.status === "error" ? query.result.message : "")
+          }
+          retry={query.retry}
+        />
+      )}
       <SectionHead
         title={`${vehicles.length} suitable vehicles`}
-        subtitle="Suitability uses a supported journey fixture, not a real range estimate."
+        subtitle={
+          "Availability and battery eligibility are checked by the server."
+        }
       />
       <div className="grid grid-cols-3 gap-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1">
         {vehicles.map((v) => (
@@ -145,22 +155,18 @@ export function FindRide() {
             <Badge>Available</Badge>
             <div className="text-xs text-content-muted flex gap-2 mt-4">
               <Icon name="check" size={16} />
-              Suitable for{" "}
-              {need === "short" ? "across campus" : "extended journey"} preset
+              {"Eligible for an immediate hold"}
             </div>
-            <Button
-              disabled={!!hold || !!ride}
-              onClick={() => setSelected(v.id)}
-            >
+            <Button disabled={!!hold || !!ride} onClick={() => setSelected(v)}>
               Reserve now <Icon name="arrow" size={16} />
             </Button>
           </section>
         ))}
       </div>
-      {!vehicles.length && (
+      {!vehicles.length && query.result.status === "ready" && (
         <Empty
           title="No suitable vehicles"
-          text="Try another origin, vehicle type or journey preset."
+          text={"Try another origin or vehicle type."}
         />
       )}
       <div className="flex items-center gap-2 text-xs text-content-muted mt-5">
@@ -169,10 +175,10 @@ export function FindRide() {
         readings.
       </div>
       <Modal
-        title={`Hold ${selected}?`}
-        description="An immediate 10-minute hold. No future rental reservation or return space is created."
+        title={`Hold ${v?.id ?? "vehicle"}?`}
+        description={`An immediate ${15}-minute hold. No future rental reservation or return space is created.`}
         open={!!v}
-        onOpenChange={(open) => !open && setSelected("")}
+        onOpenChange={(open) => !open && setSelected(null)}
       >
         {v && (
           <>

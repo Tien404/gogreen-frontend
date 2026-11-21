@@ -1,3 +1,8 @@
+import { useRefreshStudentData } from "@/integration/studentRefresh";
+import { recordUrl } from "@/integration/studentRecords";
+import { apiErrorMessage } from "@/shared/api/errors";
+import { useApiAction } from "@/shared/api/useApiAction";
+import { StudentData } from "@/integration/StudentScreenData";
 import { Missing } from "@/app/pages/Missing";
 import { useApp } from "@/app/providers/AppContext";
 import { Icon } from "@/shared/components/Icon";
@@ -11,25 +16,49 @@ import {
   PageTitle,
   SectionHead,
 } from "@/shared/ui";
-
-type HoldDetailProps = { id: string };
-
-export function HoldDetail({ id }: HoldDetailProps) {
-  const { s, act, go } = useApp();
-
+type HoldDetailProps = {
+  id: string;
+};
+export function HoldDetail(props: HoldDetailProps) {
+  return (
+    <StudentData screen="hold" id={props.id}>
+      <HoldDetailView {...props} />
+    </StudentData>
+  );
+}
+function HoldDetailView({ id }: HoldDetailProps) {
+  const { s, go, api } = useApp();
+  const refresh = useRefreshStudentData();
+  const command = useApiAction();
   const h = s.holds.find((h) => h.id === id && h.owner === s.persona)!;
-
-  const v = s.vehicles.find((v) => v.id === h?.vehicle)!;
-
+  const v = s.vehicles.find((v) => v.id === h?.vehicle);
   const active = h?.status === "held";
-
   if (!h) return <Missing />;
-
+  const remaining = active ? Math.max(0, Math.ceil(h.expires - s.clock)) : 0;
+  const hubName = (id: string) =>
+    s.hubs.find((hub) => hub.id === id)?.name ?? (id || "Not specified");
+  async function pickup() {
+    const result = await command.run(() =>
+      api.request("POST /rentals/reservations/{reservation_id}/pickup", {
+        params: { reservation_id: h.id },
+      }),
+    );
+    if (result.ok) go(recordUrl("rental", result.data.rental_id));
+    else refresh?.();
+  }
+  async function cancel() {
+    await command.run(() =>
+      api.request("POST /rentals/reservations/{reservation_id}/cancel", {
+        params: { reservation_id: h.id },
+      }),
+    );
+    refresh?.();
+  }
   return (
     <>
       <PageTitle
         title={active ? "Your ride is waiting." : `Hold ${h.status}`}
-        description={`${h.id} · Pick up at ${s.hubs.find((x) => x.id === h.origin)?.name}`}
+        description={`${h.id} · Pick up at ${hubName(h.origin)}`}
         action={<Badge>{h.status}</Badge>}
       />
       <div
@@ -44,18 +73,14 @@ export function HoldDetail({ id }: HoldDetailProps) {
             <Icon name="bike" size={96} />
           </div>
           <SectionHead
-            title={`${v.id} · ${v.type}`}
-            action={<Battery value={v.battery} />}
+            title={v ? `${h.vehicle} · ${v.type}` : h.vehicle}
+            action={<Battery value={v?.battery ?? null} />}
           />
           <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
             <dt className="text-content-muted">Pickup location</dt>
-            <dd className="wrap-anywhere m-0">
-              {s.hubs.find((x) => x.id === h.origin)?.name}
-            </dd>
+            <dd className="wrap-anywhere m-0">{hubName(h.origin)}</dd>
             <dt className="text-content-muted">Intended destination</dt>
-            <dd className="wrap-anywhere m-0">
-              {s.hubs.find((x) => x.id === h.destination)?.name}
-            </dd>
+            <dd className="wrap-anywhere m-0">{hubName(h.destination)}</dd>
             <dt className="text-content-muted">Hold expires</dt>
             <dd className="wrap-anywhere m-0">
               {time(h.expires)} · Asia/Ho_Chi_Minh
@@ -77,36 +102,39 @@ export function HoldDetail({ id }: HoldDetailProps) {
           </span>
           <div
             className="text-lg leading-[1.3] tracking-[-3px] text-accent max-[600px]:text-lg my-5 mx-0"
-            aria-label={`${Math.max(0, h.expires - s.clock)} minutes remaining`}
+            aria-label={`${remaining} minutes remaining`}
           >
-            {String(Math.max(0, h.expires - s.clock)).padStart(2, "0")}
+            {String(remaining).padStart(2, "0")}
             <span className="text-[#52705c]">:00</span>
           </div>
           <p className="leading-[1.65] mt-3 mb-5 mx-0">
             Pick up your vehicle before the hold expires.
           </p>
+          {command.error != null && (
+            <Alert tone="error">{apiErrorMessage(command.error)}</Alert>
+          )}
           {active ? (
             <>
               <Confirm
                 title="Confirm vehicle pickup?"
-                description={`${v.id} will leave ${s.hubs.find((x) => x.id === h.origin)?.name}. Your ride starts immediately.`}
+                description={`${h.vehicle} will leave ${hubName(h.origin)}. Your ride starts immediately.`}
                 trigger={
-                  <Button>
+                  <Button disabled={command.busy}>
                     Confirm pickup <Icon name="arrow" />
                   </Button>
                 }
-                onConfirm={() => {
-                  const r = act({ type: "pickup", id: h.id });
-
-                  if (r.id) go(`/student/rides/${r.id}`);
-                }}
+                onConfirm={pickup}
               />
               <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
                 <Confirm
                   title="Cancel this hold?"
-                  description={`${v.id} becomes available again at its current hub.`}
-                  trigger={<Button variant="ghost">Cancel hold</Button>}
-                  onConfirm={() => act({ type: "cancel-hold", id: h.id })}
+                  description={`${h.vehicle} becomes available again at its current hub.`}
+                  trigger={
+                    <Button variant="ghost" disabled={command.busy}>
+                      Cancel hold
+                    </Button>
+                  }
+                  onConfirm={cancel}
                 />
               </div>
             </>

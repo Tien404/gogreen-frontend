@@ -1,12 +1,16 @@
 import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
 import { Badge, Battery, Button, Empty, Link, Modal } from "@/shared/ui";
-import { useVehicleTable } from "../hooks/useVehicleTable";
+import {
+  useVehicleTable,
+  type LiveVehicleTable,
+} from "../hooks/useVehicleTable";
 import { FleetTable } from "./FleetTable";
-
-type VehicleTableProps = { hub?: string };
-
-export function VehicleTable({ hub }: VehicleTableProps) {
+type VehicleTableProps = {
+  hub?: string;
+  live?: LiveVehicleTable;
+};
+export function VehicleTable({ hub, live }: VehicleTableProps) {
   const {
     s,
     go,
@@ -22,8 +26,7 @@ export function VehicleTable({ hub }: VehicleTableProps) {
     pages,
     current,
     v,
-  } = useVehicleTable({ hub });
-
+  } = useVehicleTable({ hub, live });
   return (
     <>
       <div className="flex items-center gap-3 flex-wrap mb-5 max-[600px]:items-stretch max-[600px]:gap-2">
@@ -80,6 +83,7 @@ export function VehicleTable({ hub }: VehicleTableProps) {
         current={current}
         s={s}
         go={go}
+        liveHubName={live?.hubName}
         setSelected={setSelected}
       />
       {!list.length && <Empty />}
@@ -127,13 +131,15 @@ export function VehicleTable({ hub }: VehicleTableProps) {
               </dd>
               <dt className="text-content-muted">Location</dt>
               <dd className="wrap-anywhere m-0">
-                {s.hubs.find((h) => h.id === v.hub)?.name ?? "Off hub"}
+                {live?.hubName ??
+                  s.hubs.find((h) => h.id === v.hub)?.name ??
+                  "Off hub"}
               </dd>
               <dt className="text-content-muted">Freshness</dt>
               <dd className="wrap-anywhere m-0">
-                {v.stale
-                  ? "Stale · check before use"
-                  : `Updated ${time(s.clock)}`}
+                {v.observedClock == null
+                  ? "Reading time unavailable"
+                  : `Observed ${time(v.observedClock)}`}
               </dd>
             </dl>
             <Link

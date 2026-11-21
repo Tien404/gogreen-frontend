@@ -2,12 +2,11 @@ import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
 import { Badge, Empty, Link } from "@/shared/ui";
 import { useActivity } from "../hooks/useActivity";
-
-type ActivityFeedProps = { compact?: boolean };
-
+type ActivityFeedProps = {
+  compact?: boolean;
+};
 export function ActivityFeed({ compact = false }: ActivityFeedProps) {
   const { s, filter, setFilter, outcome, setOutcome, items } = useActivity();
-
   return (
     <>
       {!compact && (
@@ -64,10 +63,10 @@ export function ActivityFeed({ compact = false }: ActivityFeedProps) {
               <strong className="text-sm capitalize">
                 {a.action.replaceAll("-", " ")}
               </strong>
-              <p className="leading-[1.65] text-xs max-[600px]:max-w-full max-[600px]:wrap-anywhere">
+              <p className="leading-[1.65] text-xs max-[600px]:max-w-full wrap-anywhere">
                 {a.reason}
               </p>
-              <small className="leading-[1.6] block">
+              <small className="leading-[1.6] block wrap-anywhere">
                 {a.actor} ·{" "}
                 {a.link ? (
                   <Link

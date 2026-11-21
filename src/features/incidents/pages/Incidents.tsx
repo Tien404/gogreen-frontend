@@ -1,3 +1,5 @@
+import { OperatorScreenData } from "@/integration/OperatorScreenData";
+import { useSearchParams } from "react-router";
 import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
 import {
@@ -11,10 +13,21 @@ import {
 } from "@/shared/ui";
 import { ReportIncidentDialog } from "../components/ReportIncidentDialog";
 import { useIncidents } from "../hooks/useIncidents";
-
 export function Incidents() {
+  const [params] = useSearchParams();
+  return (
+    <OperatorScreenData incidentId={params.get("incident") || undefined}>
+      <IncidentsView />
+    </OperatorScreenData>
+  );
+}
+function IncidentsView() {
   const {
     s,
+    busy,
+    resource,
+    setResource,
+    targets,
     open,
     setOpen,
     filter,
@@ -28,7 +41,6 @@ export function Incidents() {
     reportIncident,
     resolveIncident,
   } = useIncidents();
-
   return (
     <>
       <PageTitle
@@ -80,7 +92,7 @@ export function Incidents() {
               >
                 <Icon name="alert" />
               </span>
-              <div className="flex-1">
+              <div className={"flex-1 min-w-32 wrap-anywhere"}>
                 <h3>{i.resource}</h3>
                 <small className="leading-[1.6] block">
                   {i.id} · {i.type} · Reported {time(i.time)}
@@ -89,7 +101,7 @@ export function Incidents() {
               <Badge>{i.severity}</Badge>
               <Badge>{i.status}</Badge>
             </div>
-            <p className="leading-[1.65] mt-5">{i.description}</p>
+            <p className="leading-[1.65] mt-5 wrap-anywhere">{i.description}</p>
             <ol
               data-compact="true"
               className="list-none [&_li:before]:content-[''] [&_li:before]:absolute [&_li:before]:-left-1.25 [&_li:before]:top-1.75 [&_li:before]:w-2.25 [&_li:before]:h-2.25 [&_li:before]:bg-accent [&_li:before]:rounded-full [&_li:last-child]:border-l-transparent [&_small]:block [&_small]:mt-1 data-[compact=true]:mt-5 [&[data-compact=true]_li]:pb-3 m-0 p-0"
@@ -99,7 +111,9 @@ export function Incidents() {
               </li>
               {i.resolution && (
                 <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 border-l border-solid border-l-divider text-sm">
-                  Resolved: {i.resolution}
+                  <span className="wrap-anywhere">
+                    Resolved: {i.resolution}
+                  </span>
                 </li>
               )}
             </ol>
@@ -123,6 +137,10 @@ export function Incidents() {
         setOpen={setOpen}
         reportIncident={reportIncident}
         error={error}
+        busy={busy}
+        resource={resource}
+        setResource={setResource}
+        targets={targets}
       />
       <Modal
         title={`Resolve ${resolve}`}
@@ -141,7 +159,9 @@ export function Incidents() {
             />
           </Field>
           {error && <Alert tone="error">{error}</Alert>}
-          <Button type="submit">Confirm resolution</Button>
+          <Button type="submit" disabled={busy}>
+            Confirm resolution
+          </Button>
         </form>
       </Modal>
     </>

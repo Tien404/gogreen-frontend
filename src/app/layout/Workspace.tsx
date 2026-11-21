@@ -10,23 +10,19 @@ import { useWorkspace } from "./useWorkspace";
 import { WorkspaceContent } from "./WorkspaceContent";
 import { WorkspaceDialogs } from "./WorkspaceDialogs";
 import { WorkspaceSidebar } from "./WorkspaceSidebar";
-
-type WorkspaceGuardProps = { role: Role };
-
+type WorkspaceGuardProps = {
+  role: Role;
+};
 function WorkspaceGuard({ role }: WorkspaceGuardProps) {
-  const { auth, go, mode } = useApp();
+  const { auth, go } = useApp();
   const location = useLocation();
-
   if (auth.status !== "ready") return <SessionFeedback auth={auth} />;
-
   if (!auth.user) {
     const returnTo = location.pathname + location.search + location.hash;
-
     return (
       <Navigate replace to={`/login?${new URLSearchParams({ returnTo })}`} />
     );
   }
-
   if (auth.user.role !== role)
     return (
       <main
@@ -48,29 +44,27 @@ function WorkspaceGuard({ role }: WorkspaceGuardProps) {
         <Link to="/">Return to entry</Link>
       </main>
     );
-
   // Reset transient menus and dialogs on every navigation, including Back/Forward.
-  // Operational fixtures live above the router outlets and are preserved.
-  const layout = <WorkspaceLayout key={location.key} role={role} />;
-  return mode === "api" && role === "operator"
-    ? <OperatorFeedProvider>{layout}</OperatorFeedProvider>
-    : layout;
-}
 
+  const layout = <WorkspaceLayout key={location.key} role={role} />;
+  return role === "operator" ? (
+    <OperatorFeedProvider>{layout}</OperatorFeedProvider>
+  ) : (
+    layout
+  );
+}
 export function StudentWorkspace() {
   return <WorkspaceGuard role="student" />;
 }
-
 export function OperatorWorkspace() {
   return <WorkspaceGuard role="operator" />;
 }
-
-type WorkspaceLayoutProps = { role: Role };
-
+type WorkspaceLayoutProps = {
+  role: Role;
+};
 function WorkspaceLayout({ role }: WorkspaceLayoutProps) {
   const {
     s,
-    act,
     go,
     location,
     route,
@@ -81,16 +75,12 @@ function WorkspaceLayout({ role }: WorkspaceLayoutProps) {
     setNotifications,
     profile,
     setProfile,
-    controls,
-    setControls,
     auth,
     handleNavigationKeyDown,
     navRef,
     menuRef,
     closeMenu,
-    enter,
   } = useWorkspace(role);
-
   return (
     <div className="flex min-h-dvh">
       <a
@@ -104,11 +94,9 @@ function WorkspaceLayout({ role }: WorkspaceLayoutProps) {
         navRef={navRef}
         menu={menu}
         closeMenu={closeMenu}
-        enter={enter}
         s={s}
         role={role}
         parkingMatch={parkingMatch}
-        setControls={setControls}
         go={go}
       />
       {menu && (
@@ -124,23 +112,16 @@ function WorkspaceLayout({ role }: WorkspaceLayoutProps) {
         setMenu={setMenu}
         s={s}
         route={route}
-        setControls={setControls}
         setNotifications={setNotifications}
         setProfile={setProfile}
-        act={act}
         location={location}
       />
       <WorkspaceDialogs
-        controls={controls}
-        setControls={setControls}
         notifications={notifications}
         setNotifications={setNotifications}
         profile={profile}
         setProfile={setProfile}
-        s={s}
         auth={auth}
-        enter={enter}
-        go={go}
       />
     </div>
   );

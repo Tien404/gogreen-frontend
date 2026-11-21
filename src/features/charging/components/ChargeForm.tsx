@@ -2,12 +2,15 @@ import { Icon } from "@/shared/components/Icon";
 import { MobilityArtwork } from "@/shared/components/MobilityArtwork";
 import { Alert, Button, Field } from "@/shared/ui";
 import { useChargeForm } from "../hooks/useChargeForm";
-
-type ChargeFormProps = { onDone?: (id: string) => void };
-
+type ChargeFormProps = {
+  onDone?: (id: string) => void;
+};
 export function ChargeForm({ onDone }: ChargeFormProps) {
   const {
     student,
+    needBy,
+    setNeedBy,
+    validChoice,
     eligible,
     choice,
     setChoice,
@@ -17,7 +20,6 @@ export function ChargeForm({ onDone }: ChargeFormProps) {
     busy,
     requestCharge,
   } = useChargeForm({ onDone });
-
   return (
     <form onSubmit={requestCharge}>
       <div className="flex items-center gap-5 rounded-xs bg-soft p-4 mb-5">
@@ -46,6 +48,11 @@ export function ChargeForm({ onDone }: ChargeFormProps) {
           className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
         >
           <option value="">Select a vehicle</option>
+          {choice && !validChoice && (
+            <option value={choice} disabled>
+              {choice} · unavailable
+            </option>
+          )}
           {eligible.map((e) => (
             <option key={e.label}>{e.label}</option>
           ))}
@@ -58,7 +65,7 @@ export function ChargeForm({ onDone }: ChargeFormProps) {
         <input
           required
           type="number"
-          min="0"
+          min={1}
           max="100"
           value={target}
           onChange={(e) => setTarget(Number(e.target.value))}
@@ -66,12 +73,17 @@ export function ChargeForm({ onDone }: ChargeFormProps) {
         />
       </Field>
       <Field label="Need by · Asia/Ho_Chi_Minh">
-        <select className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3">
-          <option>20 October, 12:00 · supported preset</option>
-        </select>
+        {
+          <input
+            type="datetime-local"
+            value={needBy}
+            onChange={(e) => setNeedBy(e.target.value)}
+            className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft py-2 px-3"
+          />
+        }
       </Field>
       {error && <Alert tone="error">{error}</Alert>}
-      <Button type="submit" disabled={busy || !eligible.length}>
+      <Button type="submit" disabled={busy || !validChoice}>
         {busy ? "Adding request…" : "Request charging"}
         <Icon name="bolt" size={18} />
       </Button>

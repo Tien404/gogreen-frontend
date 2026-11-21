@@ -4,20 +4,35 @@ import { ApiError, apiErrorMessage } from "@/shared/api/errors";
 import { mapSession } from "@/integration/apiMappers";
 import { useEffect, useState } from "react";
 import type { AuthSession } from "../model/types";
-
 type SessionState =
-  | { status: "loading"; user: null }
-  | { status: "ready"; user: AccountProfile | null }
-  | { status: "error"; user: null; error: string };
-
-export function useServerSession(baseUrl: string): { client: ReturnType<typeof createApiClient>; auth: AuthSession } {
-  const [state, setState] = useState<SessionState>({ status: "loading", user: null });
+  | {
+      status: "loading";
+      user: null;
+    }
+  | {
+      status: "ready";
+      user: AccountProfile | null;
+    }
+  | {
+      status: "error";
+      user: null;
+      error: string;
+    };
+export function useServerSession(baseUrl: string): {
+  client: ReturnType<typeof createApiClient>;
+  auth: AuthSession;
+} {
+  const [state, setState] = useState<SessionState>({
+    status: "loading",
+    user: null,
+  });
   const [attempt, setAttempt] = useState(0);
-  const [client] = useState(() => createApiClient({
-    baseUrl,
-    onUnauthorized: () => setState({ status: "ready", user: null }),
-  }));
-
+  const [client] = useState(() =>
+    createApiClient({
+      baseUrl,
+      onUnauthorized: () => setState({ status: "ready", user: null }),
+    }),
+  );
   useEffect(() => {
     const controller = new AbortController();
     const load = async () => {
@@ -26,19 +41,20 @@ export function useServerSession(baseUrl: string): { client: ReturnType<typeof c
           signal: controller.signal,
           onUnauthorized: "ignore",
         });
-        if (!controller.signal.aborted) setState({ status: "ready", user: mapSession(response) });
+        if (!controller.signal.aborted)
+          setState({ status: "ready", user: mapSession(response) });
       } catch (error) {
         if (controller.signal.aborted) return;
-        setState(error instanceof ApiError && error.status === 401
-          ? { status: "ready", user: null }
-          : { status: "error", user: null, error: apiErrorMessage(error) });
+        setState(
+          error instanceof ApiError && error.status === 401
+            ? { status: "ready", user: null }
+            : { status: "error", user: null, error: apiErrorMessage(error) },
+        );
       }
     };
-
     void load();
     return () => controller.abort();
   }, [attempt, client]);
-
   return {
     client,
     auth: {
@@ -63,18 +79,15 @@ export function useServerSession(baseUrl: string): { client: ReturnType<typeof c
       },
       async signOut() {
         try {
-          await client.request("POST /sessions/logout", { onUnauthorized: "ignore" });
+          await client.request("POST /sessions/logout", {
+            onUnauthorized: "ignore",
+          });
         } catch (error) {
-          if (!(error instanceof ApiError && error.status === 401)) return { error: apiErrorMessage(error) };
+          if (!(error instanceof ApiError && error.status === 401))
+            return { error: apiErrorMessage(error) };
         }
         setState({ status: "ready", user: null });
         return {};
-      },
-      async signUp() {
-        return { error: "Use an account provided for this workspace." };
-      },
-      preview() {
-        return null;
       },
     },
   };

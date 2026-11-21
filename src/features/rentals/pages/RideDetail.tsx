@@ -1,3 +1,4 @@
+import { StudentData } from "@/integration/StudentScreenData";
 import { Missing } from "@/app/pages/Missing";
 import { freeSpaces } from "@/domain/selectors";
 import { Icon } from "@/shared/components/Icon";
@@ -15,28 +16,41 @@ import {
   SectionHead,
 } from "@/shared/ui";
 import { useRideDetail } from "../hooks/useRideDetail";
-
-type RideDetailProps = { id: string };
-
-export function RideDetail({ id }: RideDetailProps) {
+type RideDetailProps = {
+  id: string;
+};
+export function RideDetail(props: RideDetailProps) {
+  return (
+    <StudentData screen="ride" id={props.id}>
+      <RideDetailView {...props} />
+    </StudentData>
+  );
+}
+function RideDetailView({ id }: RideDetailProps) {
   const {
     s,
     r,
     destination,
     setDestination,
     error,
-    setError,
+    suggestions,
+    busy,
+    clearError,
     v,
     handleConfirm1,
   } = useRideDetail({ id });
-
   if (!r) return <Missing />;
-
   return (
     <>
       <PageTitle
-        title={r.status === "active" ? "Enjoy the journey." : "You’ve arrived."}
-        description={`${r.id} · ${r.status === "active" ? "Your ride is active" : "Ride completed"}`}
+        title={
+          r.status === "active"
+            ? "Enjoy the journey."
+            : r.status === "completed"
+              ? "You’ve arrived."
+              : "Ride disputed"
+        }
+        description={`${r.id} · ${r.status === "active" ? "Your ride is active" : r.status === "completed" ? "Ride completed" : "Ride disputed"}`}
         action={<Badge>{r.status}</Badge>}
       />
       <div
@@ -48,18 +62,18 @@ export function RideDetail({ id }: RideDetailProps) {
           className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
         >
           <div className="h-50 rounded-xs bg-soft grid place-items-center text-accent mb-5 max-[600px]:h-42.5">
-            <VehicleArtwork type={v.type} />
+            <VehicleArtwork type={v?.type ?? ""} />
           </div>
           <SectionHead
-            title={`${r.vehicle} · ${v.type}`}
-            action={<Battery value={v.battery} />}
+            title={v ? `${r.vehicle} · ${v.type}` : r.vehicle}
+            action={<Battery value={v?.battery ?? null} />}
           />
           <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
             <dt className="text-content-muted">Started</dt>
             <dd className="wrap-anywhere m-0">{time(r.start)}</dd>
             <dt className="text-content-muted">Elapsed time</dt>
             <dd className="wrap-anywhere m-0">
-              {(r.end ?? s.clock) - r.start} minutes
+              {Math.max(0, Math.floor((r.end ?? s.clock) - r.start))} minutes
             </dd>
             <dt className="text-content-muted">Origin</dt>
             <dd className="wrap-anywhere m-0">
@@ -67,7 +81,8 @@ export function RideDetail({ id }: RideDetailProps) {
             </dd>
             <dt className="text-content-muted">Destination</dt>
             <dd className="wrap-anywhere m-0">
-              {s.hubs.find((h) => h.id === r.destination)?.name}
+              {s.hubs.find((h) => h.id === r.destination)?.name ??
+                (r.destination || "Not specified")}
             </dd>
           </dl>
         </section>
@@ -77,7 +92,11 @@ export function RideDetail({ id }: RideDetailProps) {
         >
           <SectionHead
             title={
-              r.status === "active" ? "Ready to return?" : "Return confirmed"
+              r.status === "active"
+                ? "Ready to return?"
+                : r.status === "completed"
+                  ? "Return confirmed"
+                  : "Ride status"
             }
           />
           {r.status === "active" ? (
@@ -100,28 +119,30 @@ export function RideDetail({ id }: RideDetailProps) {
                 reserve it.
               </Alert>
               {error && (
+                <Alert tone="error">
+                  {error}
+                  {suggestions !== null && " Your ride is still active."}
+                </Alert>
+              )}
+              {suggestions !== null && (
                 <>
-                  <Alert tone="error">{error}</Alert>
                   <h3>Alternative hubs</h3>
-                  <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
-                    {s.hubs
-                      .filter(
-                        (h) => h.id !== destination && freeSpaces(s, h.id) > 0,
-                      )
-                      .map((h) => (
-                        <Button
-                          variant="secondary"
-                          key={h.id}
-                          onClick={() => {
-                            setDestination(h.id);
-                            setError("");
-                          }}
-                        >
-                          {h.name}
-                        </Button>
-                      ))}
+                  <div className="flex items-center flex-wrap gap-3 mt-5">
+                    {suggestions.map((hub) => (
+                      <Button
+                        variant="secondary"
+                        key={hub.id}
+                        onClick={() => {
+                          setDestination(hub.id);
+                          clearError();
+                        }}
+                      >
+                        {s.hubs.find((h) => h.id === hub.id)?.name ?? hub.id}
+                        {` · ${hub.spaces} available`}
+                      </Button>
+                    ))}
                   </div>
-                  {s.hubs.every((h) => freeSpaces(s, h.id) === 0) && (
+                  {!suggestions.length && (
                     <p className="leading-[1.65] mt-3 mb-5 mx-0">
                       No alternative hub is available. Your ride remains active;
                       review hubs again later.
@@ -133,7 +154,7 @@ export function RideDetail({ id }: RideDetailProps) {
                 title={`Return at ${s.hubs.find((h) => h.id === destination)?.name}?`}
                 description="If capacity is available, the ride completes and this vehicle occupies one space."
                 trigger={
-                  <Button>
+                  <Button disabled={busy || !destination}>
                     Confirm return <Icon name="check" />
                   </Button>
                 }
@@ -142,11 +163,16 @@ export function RideDetail({ id }: RideDetailProps) {
             </>
           ) : (
             <>
-              <Alert>
-                Vehicle returned to{" "}
-                {s.hubs.find((h) => h.id === r.destination)?.name}. Occupancy
-                was updated once.
-              </Alert>
+              {r.status === "completed" ? (
+                <Alert>
+                  Vehicle returned to{" "}
+                  {s.hubs.find((h) => h.id === r.destination)?.name ??
+                    (r.destination || "Not specified")}
+                  . Occupancy was updated once.
+                </Alert>
+              ) : (
+                <Alert>This ride is disputed.</Alert>
+              )}
               <Link
                 data-slot="button"
                 className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-xs text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-accent [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"

@@ -2,7 +2,6 @@ import { Activity } from "@/features/activity/pages/Activity";
 import { Login, SignUp } from "@/features/auth/pages/AuthPages";
 import { Charging } from "@/features/charging/pages/Charging";
 import { Dashboard } from "@/features/dashboard/pages/Dashboard";
-import { DemoControls } from "@/features/demo/pages/DemoControls";
 import { Dispatches } from "@/features/dispatch/pages/Dispatches";
 import { Fleet } from "@/features/fleet/pages/Fleet";
 import { Hubs } from "@/features/hubs/pages/Hubs";
@@ -27,7 +26,6 @@ import {
   ScenarioRunPage,
   UnknownRoutePage,
 } from "./RecordPages";
-
 // Declarative, browser-only routes. These are UI pages, never API endpoints.
 export const appRoutes: RouteObject[] = [
   { id: "entry", path: "/", Component: Entry },
@@ -63,7 +61,6 @@ export const appRoutes: RouteObject[] = [
         Component: ChargingPage,
       },
       { id: "student-activity", path: "activity", Component: Activity },
-      { id: "student-demo", path: "demo", Component: DemoControls },
       { id: "student-not-found", path: "*", Component: UnknownRoutePage },
     ],
   },
@@ -106,7 +103,6 @@ export const appRoutes: RouteObject[] = [
         Component: ScenarioRunPage,
       },
       { id: "operator-activity", path: "activity", Component: Activity },
-      { id: "operator-demo", path: "demo", Component: DemoControls },
       { id: "operator-not-found", path: "*", Component: UnknownRoutePage },
     ],
   },

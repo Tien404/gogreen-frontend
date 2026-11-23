@@ -1,7 +1,22 @@
+import {
+  Panel,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  Alert,
+  Badge,
+  Button,
+  Empty,
+  Link,
+  PageTitle,
+} from "@/shared/ui";
 import { OperatorScreenData } from "@/integration/OperatorScreenData";
 import { Missing } from "@/app/pages/Missing";
 import { Icon } from "@/shared/components/Icon";
-import { Alert, Badge, Button, Empty, Link, PageTitle } from "@/shared/ui";
+
 import { CreateDispatchDialog } from "../components/CreateDispatchDialog";
 import { DispatchDetails } from "../components/DispatchDetails";
 import { useDispatches } from "../hooks/useDispatches";
@@ -42,14 +57,14 @@ function DispatchesView({ id }: DispatchesProps) {
     return (
       <>
         <Link
-          className="inline-flex items-center gap-2 text-xs text-content-muted mb-5"
+          className="inline-flex items-center gap-2 text-sm text-content-muted mb-5"
           to="/operator/dispatch"
         >
           <Icon name="arrow-left" size={16} /> All dispatches
         </Link>
         <PageTitle
-          title={`Dispatch ${encodeURIComponent(d.id)}`}
-          description={`${s.hubs.find((h) => h.id === d.source)?.name} → ${s.hubs.find((h) => h.id === d.destination)?.name}`}
+          title="Vehicle dispatch"
+          description={`${d.id} · ${s.hubs.find((h) => h.id === d.source)?.name} → ${s.hubs.find((h) => h.id === d.destination)?.name}`}
           action={<Badge>{d.status}</Badge>}
         />
         <DispatchDetails
@@ -77,63 +92,63 @@ function DispatchesView({ id }: DispatchesProps) {
         Only shared vehicles can be dispatched. Planned vehicles remain at the
         source until departure.
       </Alert>
-      <div
-        data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
-        <div className="overflow-x-auto max-w-full max-[600px]:my-0 max-[600px]:-mx-1">
-          <table className="w-full border-collapse text-left text-sm max-[600px]:min-w-140">
-            <thead>
-              <tr>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+      <Panel data-slot="panel" className="min-w-0">
+        <div className="min-w-0 max-w-full">
+          <Table
+            aria-label="Vehicle dispatches"
+            className="w-full border-collapse text-left text-sm max-[600px]:min-w-190"
+          >
+            <TableHeader>
+              <TableRow>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Dispatch
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Source → destination
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Vehicles
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Status
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Details
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&_tr:hover]:bg-surface-muted">
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="[&_tr:hover]:bg-surface-muted">
               {s.dispatches.map((d) => (
-                <tr key={d.id}>
-                  <th
+                <TableRow key={d.id}>
+                  <TableHead
                     scope="row"
-                    className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 font-medium whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3"
+                    className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75"
                   >
                     {d.id}
-                  </th>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                  </TableHead>
+                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     {s.hubs.find((h) => h.id === d.source)?.name} →{" "}
                     {s.hubs.find((h) => h.id === d.destination)?.name}
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                  </TableCell>
+                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     {d.vehicles.join(", ")}
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                  </TableCell>
+                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     <Badge>{d.status}</Badge>
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                  </TableCell>
+                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     <Link
                       data-slot="text-link"
-                      className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+                      className="leading-[16px] text-primary inline-flex items-center gap-2 text-sm font-semibold hover:underline"
                       to={`/operator/dispatch/${encodeURIComponent(d.id)}`}
                     >
                       View dispatch <Icon name="arrow" size={16} />
                     </Link>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         {!s.dispatches.length && (
           <Empty
@@ -146,7 +161,7 @@ function DispatchesView({ id }: DispatchesProps) {
             }
           />
         )}
-      </div>
+      </Panel>
       <CreateDispatchDialog
         s={s}
         open={open}

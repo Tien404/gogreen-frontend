@@ -2,6 +2,7 @@ import { Context, useApp } from "@/app/providers/AppContext";
 import { Missing } from "@/app/pages/Missing";
 import { readPages } from "@/features/hubs/hubResources";
 import { ApiLoadError } from "@/shared/api/ApiFeedback";
+import { LoadingState } from "@/shared/ui";
 import { useApiQuery } from "@/shared/api/useApiQuery";
 import { useCallback, type ReactNode } from "react";
 import {
@@ -69,11 +70,11 @@ export function OperatorScreenData({
   if (s.role !== "operator") return children;
   const network = feed?.result;
   if (!network || network.status === "loading")
-    return <p role="status">Loading operations…</p>;
+    return <LoadingState label={"Loading operations…"} />;
   if (network.status === "error")
     return <ApiLoadError message={network.message} retry={feed!.retry} />;
   if (needsRecord && records.result.status === "loading")
-    return <p role="status">Loading…</p>;
+    return <LoadingState label={"Loading…"} />;
   if (needsRecord && records.result.status === "error") {
     if (records.result.code === 404) return <Missing />;
     return (

@@ -60,7 +60,7 @@ export function UnknownRoutePage() {
         action={
           <Link
             data-slot="button"
-            className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-xs text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-accent [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
+            className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-primary [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
             to={s.role ? `/${s.role}` : "/"}
           >
             Back to overview
@@ -75,7 +75,7 @@ export function NotFoundPage() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="pt-5 pb-0 max-w-400 outline-none focus-visible:outline-3 focus-visible:outline-accent focus-visible:-outline-offset-4 min-[1600px]:pt-6 min-[1600px]:pb-0 max-[1200px]:pt-5 max-[1200px]:pb-0 max-[600px]:pt-5 max-[600px]:pb-0 px-6 m-auto min-[1600px]:px-6 max-[1200px]:px-5 max-[600px]:px-4"
+      className="pt-5 pb-0 max-w-400 outline-none focus-visible:outline-3 focus-visible:outline-primary focus-visible:-outline-offset-4 min-[1600px]:pt-6 min-[1600px]:pb-0 max-[1200px]:pt-5 max-[1200px]:pb-0 max-[600px]:pt-5 max-[600px]:pb-0 px-6 m-auto min-[1600px]:px-6 max-[1200px]:px-5 max-[600px]:px-4"
     >
       <UnknownRoutePage />
     </main>

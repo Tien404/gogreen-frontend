@@ -7,19 +7,13 @@ type DashboardWelcomeBannerProps = Pick<AppContext, "go">;
 
 export function DashboardWelcomeBanner({ go }: DashboardWelcomeBannerProps) {
   return (
-    <div className="rounded-sm bg-soft flex items-center justify-between gap-5 overflow-hidden relative p-5 max-[600px]:flex-col max-[600px]:items-stretch max-[600px]:gap-4">
+    <div className="rounded-xl bg-green-muted flex items-center justify-between gap-5 overflow-hidden relative p-5 max-[600px]:flex-col max-[600px]:items-stretch max-[600px]:gap-4">
       <div className="relative z-1 min-w-0">
-        <span
-          data-slot="eyebrow"
-          className="text-xs font-semibold tracking-[1.5px] text-accent mb-3 max-[600px]:text-xs"
-        >
-          LET’S GET YOU MOVING
-        </span>
-        <h2 className="text-lg leading-[1.1] tracking-[-1.5px] mb-4 text-brand-strong max-[600px]:text-lg">
+        <h2 className="text-2xl leading-[1.2] tracking-tight mb-2 text-brand-strong max-[600px]:text-2xl">
           Your campus.
           <br />A little closer.
         </h2>
-        <p className="leading-[1.65] text-content-muted mb-5 max-[600px]:text-xs max-[600px]:max-w-42.5">
+        <p className="leading-[1.65] text-green-ink mb-5 max-[600px]:text-sm">
           Shared rides and easy parking.
           <br />
           All in one place.
@@ -29,12 +23,12 @@ export function DashboardWelcomeBanner({ go }: DashboardWelcomeBannerProps) {
         </Button>
       </div>
       <div
-        className="relative isolate flex w-[52%] shrink-0 items-center justify-center max-[600px]:w-full"
+        className="relative isolate flex w-[32%] max-w-64 shrink-0 items-center justify-center max-[600px]:hidden"
         aria-hidden="true"
       >
         <MobilityArtwork
           name="campus-hub-reduced"
-          className="w-full max-w-115"
+          className="w-full max-h-48 object-contain"
         />
       </div>
     </div>

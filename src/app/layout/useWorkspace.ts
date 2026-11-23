@@ -4,13 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useMatch } from "react-router";
 import { useApp } from "../providers/AppContext";
 export function useWorkspace(role: Role) {
-  const { s, go, auth } = useApp();
+  const { s, go } = useApp();
   const location = useLocation();
   const route = location.pathname.split("/")[2] ?? "";
   const parkingMatch = useMatch("/student/parking/*");
   const [menu, setMenu] = useState(false);
   const [notifications, setNotifications] = useState(false);
-  const [profile, setProfile] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLButtonElement>(null);
   const closeMenu = () => {
@@ -50,7 +49,6 @@ export function useWorkspace(role: Role) {
   }, [menu]);
   return {
     handleNavigationKeyDown,
-    auth,
     s,
     go,
     location,
@@ -60,8 +58,6 @@ export function useWorkspace(role: Role) {
     setMenu,
     notifications,
     setNotifications,
-    profile,
-    setProfile,
     navRef,
     menuRef,
     closeMenu,

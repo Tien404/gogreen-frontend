@@ -1,9 +1,10 @@
+import { Panel, Alert, Button, Confirm, Link, SectionHead } from "@/shared/ui";
 import { useApp } from "@/app/providers/AppContext";
 import { useRefreshStudentData } from "@/integration/studentRefresh";
 import { recordUrl } from "@/integration/studentRecords";
 import { apiErrorMessage } from "@/shared/api/errors";
 import { useApiAction } from "@/shared/api/useApiAction";
-import { Alert, Button, Confirm, Link, SectionHead } from "@/shared/ui";
+
 import type { ChargingModel } from "../hooks/useCharging";
 type ChargingSessionDetailsProps = Pick<ChargingModel, "c" | "canAct" | "s">;
 export function ChargingSessionDetails({
@@ -29,30 +30,32 @@ export function ChargingSessionDetails({
             params,
           });
     });
-    if (result.ok && action === "start") notify("Charging started.");
+    if (result.ok) {
+      if (action === "start") notify("Charging session started.", "success");
+      else if (action === "stop") notify("Charging session stopped.", "info");
+      else if (action === "cancel")
+        notify("Charging session cancelled.", "info");
+    }
     refresh?.();
     refreshOperations?.();
   }
   return (
     <div
       data-slot="two-col"
-      className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 [&_>_[data-slot~=panel]_>_p]:mt-3 [&_>_[data-slot~=panel]_>_p]:mb-5 max-[900px]:gap-4 max-[600px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1 [&_>_[data-slot~=panel]_>_p]:mx-0"
+      className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 [&_>_[data-slot~=panel]_>_p]:mt-3 [&_>_[data-slot~=panel]_>_p]:mb-5 max-[900px]:gap-4 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1 [&_>_[data-slot~=panel]_>_p]:mx-0"
     >
-      <section
-        data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
+      <Panel data-slot="panel" className="min-w-0">
         <SectionHead title="Battery progress" />
-        <div className="text-lg leading-[1.3] tracking-[-3px] text-accent max-[600px]:text-lg my-5 mx-0">
+        <div className="text-4xl leading-[1.3] tracking-tight text-primary max-[600px]:text-4xl my-5 mx-0">
           {c.battery ?? "—"}
-          {c.battery !== null && <span className="text-lg">%</span>}
+          {c.battery !== null && <span className="text-4xl">%</span>}
         </div>
         {c.battery !== null && (
           <progress
             aria-label="Battery percentage"
             max="100"
             value={c.battery}
-            className="h-3 w-full border-0 border-solid rounded-lg overflow-hidden bg-surface-inset [&::-webkit-progress-bar]:bg-surface-inset [&::-webkit-progress-value]:bg-brand [&::-webkit-progress-value]:rounded-lg [&::-moz-progress-bar]:bg-brand"
+            className="h-3 w-full border-0 border-solid rounded-full overflow-hidden bg-surface-inset [&::-webkit-progress-bar]:bg-surface-inset [&::-webkit-progress-value]:bg-brand [&::-webkit-progress-value]:rounded-full [&::-moz-progress-bar]:bg-brand"
           />
         )}
         <div className="flex justify-between items-center gap-3 border-b border-solid border-b-divider text-sm last:border-b-0 last:border-solid [&_>_span:first-child_>_svg]:inline [&_>_span:first-child_>_svg]:align-middle [&_>_span:first-child_>_svg]:mr-2 [&_small]:block max-[600px]:items-start max-[600px]:*:data-[slot~=badge]:whitespace-normal max-[600px]:*:data-[slot~=badge]:text-right max-[600px]:*:data-[slot~=badge]:justify-end py-4 px-0">
@@ -72,7 +75,7 @@ export function ChargingSessionDetails({
             {c.reason || "No allocation note."}
           </span>
         </Alert>
-        <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
+        <dl className="record-details">
           <dt className="text-content-muted">Charging point</dt>
           <dd className="wrap-anywhere m-0">{c.point ?? "Not assigned"}</dd>
           <dt className="text-content-muted">Queue</dt>
@@ -141,29 +144,26 @@ export function ChargingSessionDetails({
             )}
           </div>
         )}
-      </section>
-      <section
-        data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
+      </Panel>
+      <Panel data-slot="panel" className="min-w-0">
         <SectionHead title="Session timeline" />
-        <ol className="list-none [&_li:before]:content-[''] [&_li:before]:absolute [&_li:before]:-left-1.25 [&_li:before]:top-1.75 [&_li:before]:w-2.25 [&_li:before]:h-2.25 [&_li:before]:bg-accent [&_li:before]:rounded-full [&_li:last-child]:border-l-transparent data-[compact=true]:mt-5 [&[data-compact=true]_li]:pb-3 m-0 p-0">
-          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 border-l border-solid border-l-divider text-sm">
+        <ol className="list-none [&_li:before]:content-[''] [&_li:before]:absolute [&_li:before]:-left-1.25 [&_li:before]:top-1.75 [&_li:before]:w-2.25 [&_li:before]:h-2.25 [&_li:before]:bg-primary [&_li:before]:rounded-full data-[compact=true]:mt-5 [&[data-compact=true]_li]:pb-3 m-0 p-0">
+          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
             Request received{" "}
             <small className="leading-[1.6] block mt-1">{c.vehicle}</small>
           </li>
-          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 border-l border-solid border-l-divider text-sm">
+          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
             Allocation {c.point ? "confirmed" : "pending"}
             <small className="leading-[1.6] block mt-1">
               {c.schedule ?? c.point ?? "No confirmed time slot"}
             </small>
           </li>
-          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 border-l border-solid border-l-divider text-sm">
+          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
             Current state: {c.status}
             <small className="leading-[1.6] block mt-1"></small>
           </li>
         </ol>
-      </section>
+      </Panel>
     </div>
   );
 }

@@ -100,7 +100,7 @@ export function useIncidents() {
       setFilter("open");
       setSearch("");
       refreshOperations?.();
-      notify("Incident reported.");
+      notify("Incident reported successfully.", "warning");
     }
     return;
   };
@@ -116,7 +116,7 @@ export function useIncidents() {
     if (result.ok) {
       setResolve("");
       refreshOperations?.();
-      notify("Incident resolved.");
+      notify("Incident resolved successfully.", "success");
     }
     return;
   };

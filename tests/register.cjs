@@ -4,6 +4,9 @@ const fs = require("node:fs");
 const path = require("node:path");
 const sourceRoot = path.resolve(__dirname, "../src");
 
+// Vite loads styles in the browser; server-rendered tests only need the markup.
+require.extensions[".css"] = () => {};
+
 for (const extension of [".ts", ".tsx"]) {
   require.extensions[extension] = (module, filename) => {
     const code = ts

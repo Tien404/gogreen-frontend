@@ -1,5 +1,6 @@
+import { NativeSelect, Input, Alert, Button, Field, Modal } from "@/shared/ui";
 import { freeSpaces } from "@/domain/selectors";
-import { Alert, Button, Field, Modal } from "@/shared/ui";
+
 import type { DispatchesModel } from "../hooks/useDispatches";
 type CreateDispatchDialogProps = Pick<
   DispatchesModel,
@@ -49,39 +50,39 @@ export function CreateDispatchDialog({
     >
       <form onSubmit={submitDispatch}>
         <Field label="Source hub">
-          <select
+          <NativeSelect
             value={source}
             onChange={(e) => {
               setSource(e.target.value);
               setVehicles([]);
               setReview(false);
             }}
-            className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+            wrapperClassName="max-w-full cursor-pointer"
           >
             {hubs.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
         <Field label="Destination hub">
-          <select
+          <NativeSelect
             value={destination}
             onChange={(e) => {
               setDestination(e.target.value);
               setReview(false);
             }}
-            className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+            wrapperClassName="max-w-full cursor-pointer"
           >
             {hubs.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
-        <fieldset className="border border-solid border-divider rounded-xs mt-0 mb-5 p-4 mx-0">
+        <fieldset className="border border-solid border-divider rounded-lg mt-0 mb-5 p-4 mx-0">
           <legend className="text-sm py-0 px-2">
             Eligible shared vehicles
           </legend>
@@ -89,9 +90,9 @@ export function CreateDispatchDialog({
             {candidates.map((v) => (
               <label
                 key={v.id}
-                className="flex gap-3 text-sm items-center min-h-8"
+                className="flex gap-3 text-sm items-center min-h-11"
               >
-                <input
+                <Input
                   type={"radio"}
                   name={"dispatch-vehicle"}
                   checked={vehicles.includes(v.id)}
@@ -103,7 +104,7 @@ export function CreateDispatchDialog({
                     );
                     setReview(false);
                   }}
-                  className="placeholder:text-content-muted hover:bg-soft w-4.5 h-4.5 accent-accent"
+                  className="size-4.5 shrink-0 accent-primary p-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 focus-visible:ring-0"
                 />
                 {v.id} · {v.type} ·{" "}
                 {v.battery === null ? "Battery unavailable" : `${v.battery}%`}

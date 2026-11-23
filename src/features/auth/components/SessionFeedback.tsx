@@ -16,6 +16,7 @@ export function SessionFeedback({ auth }: { auth: AuthSession }) {
         </p>
       ) : (
         <div className="max-w-100">
+          <h1 className="text-[28px] leading-tight">Connection unavailable</h1>
           <Alert tone="error">
             {auth.error ?? "Could not check your session."}
           </Alert>

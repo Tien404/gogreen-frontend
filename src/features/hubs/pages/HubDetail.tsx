@@ -1,9 +1,6 @@
-import { useApp } from "@/app/providers/AppContext";
-import { ApiLoadError } from "@/shared/api/ApiFeedback";
-import { VehicleTable } from "@/features/fleet/components/VehicleTable";
-import { Icon } from "@/shared/components/Icon";
-import { time } from "@/shared/lib/time";
 import {
+  LoadingState,
+  Panel,
   Alert,
   Badge,
   Button,
@@ -12,6 +9,12 @@ import {
   PageTitle,
   SectionHead,
 } from "@/shared/ui";
+import { useApp } from "@/app/providers/AppContext";
+import { ApiLoadError } from "@/shared/api/ApiFeedback";
+import { VehicleTable } from "@/features/fleet/components/VehicleTable";
+import { Icon } from "@/shared/components/Icon";
+import { time } from "@/shared/lib/time";
+
 import { useLiveHub } from "../hooks/useLiveHub";
 type HubDetailProps = {
   id: string;
@@ -22,7 +25,7 @@ export function HubDetail({ id }: HubDetailProps) {
   const student = s.role === "student";
   const back = (
     <Link
-      className="inline-flex items-center gap-2 text-xs text-content-muted mb-5"
+      className="inline-flex items-center gap-2 text-sm text-content-muted mb-5"
       to={`/${s.role}/hubs`}
     >
       <Icon name="arrow-left" size={16} /> All hubs
@@ -32,7 +35,7 @@ export function HubDetail({ id }: HubDetailProps) {
     return (
       <>
         {back}
-        <p role="status">Loading hub…</p>
+        <LoadingState label={"Loading hub…"} />
       </>
     );
   if (result.status === "error")
@@ -77,70 +80,51 @@ export function HubDetail({ id }: HubDetailProps) {
         }
       />
       <div className="grid grid-cols-4 gap-4 max-[1200px]:grid-cols-2 max-[600px]:gap-2">
-        <div
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-4"
-        >
-          <span className="text-xs text-content-muted">Physical occupancy</span>
-          <strong className="text-lg leading-[1.4] block tracking-[-1px] mt-3 mb-1 max-[600px]:text-lg max-[600px]:tracking-[-0.5px] mx-0">
+        <Panel data-slot="panel" className="min-w-0">
+          <span className="text-sm text-content-muted">Physical occupancy</span>
+          <strong className="metric-value">
             {h.occupied} / {h.capacity}
           </strong>
-          <small className="leading-[1.6] block max-[600px]:text-xs">
+          <small className="leading-[1.6] block max-[600px]:text-sm">
             Includes charging spaces
           </small>
-        </div>
-        <div
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-4"
-        >
-          <span className="text-xs text-content-muted">
+        </Panel>
+        <Panel data-slot="panel" className="min-w-0">
+          <span className="text-sm text-content-muted">
             Available shared vehicles
           </span>
-          <strong className="text-lg leading-[1.4] block tracking-[-1px] mt-3 mb-1 max-[600px]:text-lg max-[600px]:tracking-[-0.5px] mx-0">
-            {h.availableVehicles}
-          </strong>
-          <small className="leading-[1.6] block max-[600px]:text-xs">
+          <strong className="metric-value">{h.availableVehicles}</strong>
+          <small className="leading-[1.6] block max-[600px]:text-sm">
             {!student
               ? "Reported available by fleet status"
               : "Ready for an immediate hold"}
           </small>
-        </div>
-        <div
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-4"
-        >
-          <span className="text-xs text-content-muted">
+        </Panel>
+        <Panel data-slot="panel" className="min-w-0">
+          <span className="text-sm text-content-muted">
             Charging points available
           </span>
-          <strong className="text-lg leading-[1.4] block tracking-[-1px] mt-3 mb-1 max-[600px]:text-lg max-[600px]:tracking-[-0.5px] mx-0">
+          <strong className="metric-value">
             {h.availablePoints} / {h.points.length}
           </strong>
-          <small className="leading-[1.6] block max-[600px]:text-xs">
+          <small className="leading-[1.6] block max-[600px]:text-sm">
             {"Based on current point status"}
           </small>
-        </div>
-        <div
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-4"
-        >
-          <span className="text-xs text-content-muted">
+        </Panel>
+        <Panel data-slot="panel" className="min-w-0">
+          <span className="text-sm text-content-muted">
             Dispatch commitments
           </span>
-          <strong className="text-lg leading-[1.4] block tracking-[-1px] mt-3 mb-1 max-[600px]:text-lg max-[600px]:tracking-[-0.5px] mx-0">
-            {commitments ?? "—"}
-          </strong>
-          <small className="leading-[1.6] block max-[600px]:text-xs">
+          <strong className="metric-value">{commitments ?? "—"}</strong>
+          <small className="leading-[1.6] block max-[600px]:text-sm">
             {commitments === undefined
               ? "Operator access only"
               : "Separate from physical occupancy"}
           </small>
-        </div>
+        </Panel>
       </div>
 
-      <div
-        data-slot="panel"
-        className="mt-5 bg-panel rounded-sm min-w-0 max-[600px]:mt-5 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
+      <Panel data-slot="panel" className="mt-5 min-w-0 max-[600px]:mt-5">
         <SectionHead
           title={student ? "Shared vehicles" : "Parking spaces"}
           subtitle={
@@ -155,13 +139,13 @@ export function HubDetail({ id }: HubDetailProps) {
               <div
                 key={i}
                 data-occupied={i < h.occupied}
-                className="rounded-xs text-content-muted text-center bg-surface-muted data-[occupied=true]:bg-soft [&_svg]:mt-0 [&_svg]:mb-2 p-3 [&_svg]:mx-auto"
+                className="rounded-lg text-content-muted text-center bg-surface-muted data-[occupied=true]:bg-soft data-[occupied=true]:text-primary [&_small]:text-inherit [&_svg]:mt-0 [&_svg]:mb-2 p-3 [&_svg]:mx-auto"
               >
                 <Icon name={"bike"} />
                 <strong className="text-sm">
                   {String(i + 1).padStart(2, "0")}
                 </strong>
-                <small className="leading-[1.6] block text-xs">
+                <small className="leading-[1.6] block text-sm">
                   {i < h.occupied ? "Occupied" : "Free"}
                   {""}
                 </small>
@@ -173,15 +157,12 @@ export function HubDetail({ id }: HubDetailProps) {
           hub={id}
           live={data ? { hubName: h.name, vehicles: data.vehicles } : undefined}
         />
-      </div>
+      </Panel>
       <div
         data-slot="two-col"
-        className="mt-5 grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 max-[900px]:gap-4 max-[600px]:mt-5 max-[600px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1"
+        className="mt-5 grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 max-[900px]:gap-4 max-[600px]:mt-5 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1"
       >
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
+        <Panel data-slot="panel" className="min-w-0">
           <SectionHead title="Charging points" />
           {!h.points.length && (
             <Empty
@@ -200,11 +181,8 @@ export function HubDetail({ id }: HubDetailProps) {
               <Badge>{point.status}</Badge>
             </div>
           ))}
-        </section>
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
+        </Panel>
+        <Panel data-slot="panel" className="min-w-0">
           <SectionHead
             title={
               student ? "Parking for your vehicle" : "Relevant parking bookings"
@@ -234,7 +212,7 @@ export function HubDetail({ id }: HubDetailProps) {
               <span className="wrap-anywhere">{incident.description}</span>
             </Alert>
           ))}
-        </section>
+        </Panel>
       </div>
     </>
   );

@@ -173,6 +173,11 @@ test("shared hold and charging screens display server schedule and gate buttons 
     assert.match(expired, /09:15/);
     assert.match(expired, /Your hold expired/);
     assert.doesNotMatch(expired, /Confirm pickup/);
+    assert.doesNotMatch(
+      expired,
+      /minutes remaining|Pick up your vehicle before/,
+    );
+    assert.match(expired, /Hold status/);
     useData({
       charges: [
         studentCharge(

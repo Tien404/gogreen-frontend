@@ -1,3 +1,4 @@
+import { Panel, Alert, Empty, Link, PageTitle, SectionHead } from "@/shared/ui";
 import { OperatorScreenData } from "@/integration/OperatorScreenData";
 import { StudentData } from "@/integration/StudentScreenData";
 import { useApp } from "@/app/providers/AppContext";
@@ -6,12 +7,11 @@ import { occupancy } from "@/domain/selectors";
 import { CampusMap } from "@/features/hubs/components/CampusMap";
 import { HubCards } from "@/features/hubs/components/HubCards";
 import { Icon } from "@/shared/components/Icon";
-import { Alert, Empty, Link, PageTitle, SectionHead } from "@/shared/ui";
+
 import { useOptionalOperatorFeed } from "@/integration/operatorFeed";
 import { alertLabel } from "@/integration/operatorRecords";
 import { useEffect, useState } from "react";
 import { DashboardActivity } from "../components/DashboardActivity";
-import { DashboardWelcomeBanner } from "../components/DashboardWelcomeBanner";
 export function Dashboard() {
   return (
     <StudentData screen="dashboard">
@@ -38,7 +38,6 @@ function DashboardView() {
   return (
     <>
       <PageTitle
-        eyebrow="OVERVIEW"
         title={student ? "A better way around campus." : "Campus at a glance."}
         description={
           student
@@ -49,7 +48,7 @@ function DashboardView() {
       />
       {student ? (
         <>
-          <DashboardWelcomeBanner go={go} />
+          {/* <DashboardWelcomeBanner go={go} /> */}
           <div className="grid grid-cols-3 gap-4 mt-5 max-[600px]:grid-cols-1 max-[600px]:gap-2 max-[600px]:mt-4">
             {[
               ["bike", "Find a ride", "Shared electric vehicles", "find-ride"],
@@ -69,17 +68,17 @@ function DashboardView() {
               <Link
                 key={title}
                 to={`/student/${path}`}
-                className="bg-panel rounded-xs flex items-center gap-4 motion-safe:hover:-translate-y-1 hover:shadow-control hover:text-content [&_>_svg]:ml-auto [&_>_svg]:text-content-muted [&_>_svg]:w-4.5 max-[1200px]:gap-2 max-[1200px]:[&_>_svg]:hidden max-[600px]:gap-4 max-[600px]:[&_>_svg]:block p-5 max-[1200px]:p-4 max-[600px]:p-4"
+                className="bg-panel rounded-lg flex items-center gap-4  hover:text-content [&_>_svg]:ml-auto [&_>_svg]:text-content-muted [&_>_svg]:w-4.5 max-[1200px]:gap-2 max-[1200px]:[&_>_svg]:hidden max-[600px]:gap-4 max-[600px]:[&_>_svg]:block p-5 max-[1200px]:p-4 max-[600px]:p-4"
               >
                 <span
                   data-slot="icon-box"
-                  className="inline-flex items-center justify-center bg-soft text-accent w-11 h-11 rounded-xs shrink-0 max-[1200px]:w-9 max-[1200px]:h-9 max-[600px]:h-11 max-[600px]:w-11"
+                  className="inline-flex items-center justify-center bg-soft text-primary w-11 h-11 rounded-lg shrink-0 max-[1200px]:w-9 max-[1200px]:h-9 max-[600px]:h-11 max-[600px]:w-11"
                 >
                   <Icon name={icon} size={24} />
                 </span>
                 <span>
                   <strong className="block text-sm">{title}</strong>
-                  <small className="block text-xs mt-1 leading-normal max-[600px]:mt-0">
+                  <small className="block text-sm mt-1 leading-normal max-[600px]:mt-0">
                     {description}
                   </small>
                 </span>
@@ -140,27 +139,25 @@ function DashboardView() {
               "Needs operator attention",
             ],
           ].map(([icon, value, label, detail]) => (
-            <div
+            <Panel
               data-slot="panel"
-              className="bg-panel rounded-sm min-w-0 [&_>_span]:text-xs [&_>_span]:text-content-muted [&_>_div_>_span:first-child]:text-xs [&_>_div_>_span:first-child]:text-content-muted max-[600px]:rounded-xs p-5 max-[600px]:p-4"
+              className="min-w-0 [&_>_span]:text-sm [&_>_span]:text-content-muted [&_>_div_>_span:first-child]:text-sm [&_>_div_>_span:first-child]:text-content-muted"
               key={label}
             >
               <div className="flex justify-between items-center gap-2 max-[600px]:items-start">
                 <span>{label}</span>
                 <span
                   data-slot="icon-box"
-                  className="inline-flex items-center justify-center bg-soft text-accent w-8 h-8 rounded-xs shrink-0 max-[600px]:hidden"
+                  className="inline-flex items-center justify-center bg-soft text-primary w-8 h-8 rounded-lg shrink-0 max-[600px]:hidden"
                 >
                   <Icon name={icon} />
                 </span>
               </div>
-              <strong className="text-lg leading-[1.4] block tracking-[-1px] mt-3 mb-1 max-[600px]:text-lg max-[600px]:tracking-[-0.5px] mx-0">
-                {value}
-              </strong>
-              <small className="leading-[1.6] block max-[600px]:text-xs">
+              <strong className="metric-value">{value}</strong>
+              <small className="leading-[1.6] block max-[600px]:text-sm">
                 {detail}
               </small>
-            </div>
+            </Panel>
           ))}
         </div>
       )}
@@ -172,7 +169,7 @@ function DashboardView() {
             <Link
               to={`/${s.role}/hubs`}
               data-slot="text-link"
-              className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+              className="leading-[16px] text-primary inline-flex items-center gap-2 text-sm font-semibold hover:underline"
             >
               View all hubs <Icon name="arrow" size={16} />
             </Link>
@@ -253,7 +250,7 @@ function CurrentDateTime() {
     hourCycle: "h23",
   });
   return (
-    <div className="flex items-center gap-3 text-xs text-content-muted shrink-0 [&_>_svg]:text-[#8b9791] [&_small]:block [&_small]:text-xs [&_small]:text-content-muted max-[1200px]:hidden">
+    <div className="flex items-center gap-3 text-sm text-content-muted shrink-0 [&_>_svg]:text-content-muted [&_small]:block [&_small]:text-sm [&_small]:text-content-muted max-[1200px]:hidden">
       <Icon name="sun" />
       <time dateTime={now.toISOString()}>
         {date}

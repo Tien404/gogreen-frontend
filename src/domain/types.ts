@@ -18,6 +18,7 @@ export type Status =
   | "unknown";
 export interface Hub {
   id: string;
+  coordinates?: readonly [latitude: number, longitude: number] | null;
   name: string;
   area: string;
   capacity: number;

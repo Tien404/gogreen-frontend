@@ -6,7 +6,7 @@ import { useApp } from "@/app/providers/AppContext";
 import type { FormEvent } from "react";
 import { useState } from "react";
 export function useChargeForm({ onDone }: { onDone?: (id: string) => void }) {
-  const { s, go, api } = useApp();
+  const { s, go, api, notify } = useApp();
   const [params] = useSearchParams();
   const command = useApiAction();
   const student = s.role === "student";
@@ -53,6 +53,7 @@ export function useChargeForm({ onDone }: { onDone?: (id: string) => void }) {
       }),
     );
     if (result.ok) {
+      notify("Charging request submitted successfully.", "success");
       if (onDone) onDone(result.data.session_id);
       else go(recordUrl("charging", result.data.session_id));
     }

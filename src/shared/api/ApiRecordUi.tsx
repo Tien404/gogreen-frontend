@@ -1,4 +1,4 @@
-import { Empty, Link } from "../ui";
+import { LoadingState, Empty, Link } from "../ui";
 import { ApiLoadError } from "./ApiFeedback";
 type FeedbackQuery = {
   result:
@@ -25,10 +25,11 @@ export function RecordFeedback({
   back?: string;
 }) {
   if (query.result.status === "loading")
-    return <p role="status">Loading {item}…</p>;
+    return <LoadingState label={`Loading ${item}…`} />;
   if (query.result.status === "error" && query.result.code === 404 && back) {
     return (
       <Empty
+        headingLevel={1}
         title="Record not found"
         text="Check the address or return to the list."
         action={<Link to={back}>Back to list</Link>}

@@ -1,6 +1,7 @@
 import type { AccountProfile, VehicleType } from "@/domain/types";
 import type { Schemas } from "@/shared/api/contract.generated";
 import { ApiError } from "@/shared/api/errors";
+import { coordinates } from "@/shared/lib/coordinates";
 
 function invalidResponse(): never {
   throw new ApiError(
@@ -144,6 +145,7 @@ export function mapHub(dto: Schemas["HubOut"]) {
   return {
     id: apiId(dto.hub_id),
     name: dto.name,
+    coordinates: coordinates(dto.latitude, dto.longitude),
     type: dto.hub_type ?? null,
     status:
       dto.status === "ACTIVE"

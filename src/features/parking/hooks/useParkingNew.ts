@@ -2,14 +2,15 @@ import { campusInputToIso, recordUrl } from "@/integration/studentRecords";
 import { apiErrorMessage } from "@/shared/api/errors";
 import { useApiAction } from "@/shared/api/useApiAction";
 import { useApp } from "@/app/providers/AppContext";
-import { inputTime, parseTime } from "@/shared/lib/time";
+import { inputTime } from "@/shared/lib/time";
+import { moveParkingInterval, parkingIntervalErrors } from "../model/interval";
 import type { FormEvent } from "react";
 import { useState } from "react";
 export function useParkingNew() {
-  const { s, go, api } = useApp();
+  const { s, go, api, notify } = useApp();
   const command = useApiAction();
-  const initialStart = Math.ceil(s.clock);
-  const [error, setError] = useState("");
+  const initialStart = Math.floor(s.clock) + 5;
+  const [attemptedReview, setAttemptedReview] = useState(false);
   const service = "Parking only";
   const [hub, setHub] = useState(
     s.hubs.find((h) => h.id === "north")?.id ?? s.hubs[0]?.id ?? "",
@@ -20,11 +21,14 @@ export function useParkingNew() {
   const [vehicle, setVehicle] = useState(
     s.privateVehicles.find((v) => v.owner === s.persona)?.id ?? "",
   );
-  const valid =
-    Number.isFinite(parseTime(start)) &&
-    parseTime(start) >= s.clock &&
-    parseTime(end) > parseTime(start);
+  const intervalErrors = parkingIntervalErrors(start, end, s.clock);
+  const valid = !intervalErrors.start && !intervalErrors.end;
   const submit = async () => {
+    setAttemptedReview(true);
+    if (!valid) {
+      setReview(false);
+      return;
+    }
     const result = await command.run(() =>
       api.request("POST /parking/reservations", {
         body: {
@@ -35,32 +39,45 @@ export function useParkingNew() {
         },
       }),
     );
-    if (result.ok) go(recordUrl("parking", result.data.reservation_id));
+    if (result.ok) {
+      notify("Parking space reserved successfully.", "success");
+      go(recordUrl("parking", result.data.reservation_id));
+    }
     return;
   };
   const submitParking = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!valid) {
-      setError(
-        "End must follow start; start must not precede the current time.",
-      );
-      return;
-    }
-    setError("");
+    setAttemptedReview(true);
+    if (!valid) return;
     command.setError(null);
     setReview(true);
   };
   return {
     s,
 
-    error: command.error ? apiErrorMessage(command.error) : error,
+    error: command.error ? apiErrorMessage(command.error) : "",
+    startError: attemptedReview ? intervalErrors.start : undefined,
+    endError: attemptedReview ? intervalErrors.end : undefined,
+    moveIntervalForward: () => {
+      const next = moveParkingInterval(start, end, s.clock);
+      setStart(next.start);
+      setEnd(next.end);
+      setReview(false);
+      command.setError(null);
+    },
     service,
     hub,
     setHub,
     start,
-    setStart,
+    setStart: (value: string) => {
+      setStart(value);
+      command.setError(null);
+    },
     end,
-    setEnd,
+    setEnd: (value: string) => {
+      setEnd(value);
+      command.setError(null);
+    },
     review,
     setReview,
     vehicle,

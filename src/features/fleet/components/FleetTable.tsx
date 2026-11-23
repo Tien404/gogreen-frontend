@@ -1,5 +1,16 @@
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  Badge,
+  Battery,
+  Button,
+} from "@/shared/ui";
 import { Icon } from "@/shared/components/Icon";
-import { Badge, Battery, Button } from "@/shared/ui";
+
 import type { VehicleTableModel } from "../hooks/useVehicleTable";
 type FleetTableProps = Pick<
   VehicleTableModel,
@@ -16,58 +27,61 @@ export function FleetTable({
   liveHubName,
 }: FleetTableProps) {
   return (
-    <div className="overflow-x-auto max-w-full max-[600px]:my-0 max-[600px]:-mx-1">
-      <table className="w-full border-collapse text-left text-sm max-[600px]:min-w-140">
-        <thead>
-          <tr>
-            <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+    <div className="min-w-0 max-w-full">
+      <Table
+        aria-label="Shared fleet vehicles"
+        className="w-full border-collapse text-left text-sm max-[600px]:min-w-140"
+      >
+        <TableHeader>
+          <TableRow>
+            <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
               Shared vehicle
-            </th>
-            <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+            </TableHead>
+            <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
               Hub
-            </th>
-            <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+            </TableHead>
+            <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
               Battery
-            </th>
-            <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+            </TableHead>
+            <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
               Status
-            </th>
-            <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+            </TableHead>
+            <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
               Action
-            </th>
-          </tr>
-        </thead>
-        <tbody className="[&_tr:hover]:bg-surface-muted">
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody className="[&_tr:hover]:bg-surface-muted">
           {list.slice((current - 1) * 8, current * 8).map((v) => {
             const canFindRide = v.status === "available";
             return (
-              <tr key={v.id}>
-                <th
+              <TableRow key={v.id}>
+                <TableHead
                   scope="row"
-                  className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 font-medium whitespace-nowrap py-4 px-3"
+                  className="border-b border-solid border-b-divider "
                 >
                   {v.id}
                   <small className="leading-[1.6] block font-normal max-w-75">
                     {v.type}
                   </small>
-                </th>
-                <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   {liveHubName ??
                     s.hubs.find((h) => h.id === v.hub)?.name ??
                     "In transit / off hub"}
-                </td>
-                <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 py-4 px-3">
+                </TableCell>
+                <TableCell className="border-b border-solid border-b-divider ">
                   <Battery value={v.battery} />
                   {v.stale && (
                     <small className="leading-[1.6] block font-normal max-w-75">
                       Stale reading
                     </small>
                   )}
-                </td>
-                <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableCell>
+                <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   <Badge>{v.status}</Badge>
-                </td>
-                <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableCell>
+                <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   {s.role === "student" ? (
                     <Button
                       variant="secondary"
@@ -90,12 +104,12 @@ export function FleetTable({
                       View details <Icon name="arrow" size={16} />
                     </Button>
                   )}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

@@ -2,34 +2,35 @@ import type { State } from "@/domain/types";
 import { resolveApiBaseUrl } from "@/config/api";
 import { useServerSession } from "@/features/auth/hooks/useServerSession";
 import { Alert } from "@/shared/ui";
-import { Toast } from "@/shared/ui/Toast";
-import { useState } from "react";
+import { ToastContainer } from "@/shared/ui/Toast";
+import { toast } from "react-toastify";
 import { useNavigate, useRoutes } from "react-router";
-import { Context, type AppContext } from "./providers/AppContext";
+import {
+  Context,
+  type AppContext,
+  type NotificationType,
+} from "./providers/AppContext";
 import { appRoutes } from "./router/routes";
 import { useRouteExperience } from "./router/useRouteExperience";
-function AppFrame({
-  value,
-  toast,
-  dismissToast,
-}: {
-  value: Omit<AppContext, "path" | "go">;
-  toast: string;
-  dismissToast: () => void;
-}) {
+function AppFrame({ value }: { value: Omit<AppContext, "path" | "go"> }) {
   const path = useRouteExperience();
   const navigate = useNavigate();
   const content = useRoutes(appRoutes);
   return (
     <Context.Provider value={{ ...value, path, go: (url) => navigate(url) }}>
       {content}
-      <Toast message={toast} onDismiss={dismissToast} />
+      <ToastContainer />
     </Context.Provider>
   );
 }
 function ApiApp({ baseUrl }: { baseUrl: string }) {
   const { client, auth } = useServerSession(baseUrl);
-  const [toast, notify] = useState("");
+  const notify = (message: string, type: NotificationType = "success") => {
+    if (type === "error") toast.error(message);
+    else if (type === "warning") toast.warning(message);
+    else if (type === "info") toast.info(message);
+    else toast.success(message);
+  };
   const s: State = {
     role: auth.user?.role ?? null,
     profile: auth.user ?? undefined,
@@ -54,8 +55,6 @@ function ApiApp({ baseUrl }: { baseUrl: string }) {
         auth,
         notify,
       }}
-      toast={toast}
-      dismissToast={() => notify("")}
     />
   );
 }

@@ -1,17 +1,10 @@
-import { currentProfile, initials } from "@/domain/identity";
 import { useOptionalOperatorFeed } from "@/integration/operatorFeed";
 import { Icon } from "@/shared/components/Icon";
 import type { WorkspaceModel } from "./useWorkspace";
 import { operatorNav, studentNav } from "./workspaceNavigation";
 type WorkspaceTopbarProps = Pick<
   WorkspaceModel,
-  | "menuRef"
-  | "menu"
-  | "setMenu"
-  | "s"
-  | "route"
-  | "setNotifications"
-  | "setProfile"
+  "menuRef" | "menu" | "setMenu" | "s" | "route" | "setNotifications"
 >;
 export function WorkspaceTopbar({
   menuRef,
@@ -20,18 +13,17 @@ export function WorkspaceTopbar({
   s,
   route,
   setNotifications,
-  setProfile,
 }: WorkspaceTopbarProps) {
   const feed = useOptionalOperatorFeed();
   const alertCount =
     feed?.result.status === "ready" ? feed.result.data.data.alerts.length : 0;
   return (
-    <header className="h-7 shrink-0 bg-panel flex items-center justify-between gap-4 max-[900px]:h-17.5 max-[600px]:h-16 py-0 px-6 max-[1200px]:py-0 max-[1200px]:px-5 max-[600px]:py-0 max-[600px]:px-4">
-      <div className="flex items-center gap-3 text-xs max-[600px]:gap-1 max-[600px]:[&_>_svg]:hidden">
+    <header className="h-16 shrink-0 bg-panel flex items-center justify-between gap-4 max-[900px]:h-16 max-[600px]:h-16 py-0 px-6 max-[1200px]:py-0 max-[1200px]:px-5 max-[600px]:py-0 max-[600px]:px-4">
+      <div className="flex items-center gap-3 text-sm max-[600px]:gap-1 max-[600px]:[&_>_svg]:hidden">
         <button
           ref={menuRef}
           data-slot="icon-button"
-          className="hidden items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-xs text-content-muted hover:bg-surface-inset hover:text-accent max-[900px]:inline-flex"
+          className="hidden items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-lg text-content-muted hover:bg-surface-inset hover:text-primary max-[900px]:inline-flex"
           aria-expanded={menu}
           onClick={() => setMenu(true)}
           aria-label="Open navigation"
@@ -40,22 +32,18 @@ export function WorkspaceTopbar({
         </button>
         <span className="text-content-muted max-[600px]:hidden">Workspace</span>
         <Icon name="chevron" size={14} />
-        <strong className="font-medium max-[600px]:text-xs">
+        <strong className="font-medium max-[600px]:text-sm">
           {(s.role === "student" ? studentNav : operatorNav)
             .flatMap((group) => group.items)
             .find((item) => item.path.split("/")[0] === route)?.label ??
-            (route === "parking"
-              ? "Parking"
-              : route === "profile"
-                ? "Demo"
-                : "Details")}
+            (route === "parking" ? "Parking" : "Details")}
         </strong>
       </div>
       <div className="flex items-center gap-5 max-[600px]:gap-2">
         {!!feed && (
           <button
             data-slot="icon-button"
-            className="inline-flex items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-xs text-content-muted hover:bg-surface-inset hover:text-accent relative"
+            className="inline-flex items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-lg text-content-muted hover:bg-surface-inset hover:text-primary relative"
             aria-label={
               alertCount
                 ? `Open notifications, ${alertCount} active alerts`
@@ -72,14 +60,6 @@ export function WorkspaceTopbar({
             )}
           </button>
         )}
-        <button
-          data-slot="avatar"
-          className="w-9 h-9 bg-profile-surface rounded-lg text-profile grid place-items-center text-xs font-semibold shrink-0 hover:text-profile-hover hover:bg-profile-surface-hover focus-visible:outline-profile **:data-[slot~=workspace-avatar]:bg-profile-surface-hover **:data-[slot~=workspace-avatar]:text-profile **:data-[slot~=icon-box]:bg-profile-surface-hover **:data-[slot~=icon-box]:text-profile [&_small]:text-profile max-[600px]:w-8 max-[600px]:h-8"
-          onClick={() => setProfile(true)}
-          aria-label={"Open account profile"}
-        >
-          {initials(currentProfile(s).name)}
-        </button>
       </div>
     </header>
   );

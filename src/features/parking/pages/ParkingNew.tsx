@@ -1,8 +1,7 @@
-import { studentDate } from "@/integration/studentData";
-import { StudentData } from "@/integration/StudentScreenData";
-import { Icon } from "@/shared/components/Icon";
-import { parseTime } from "@/shared/lib/time";
 import {
+  Panel,
+  NativeSelect,
+  Input,
   Alert,
   Button,
   Field,
@@ -10,6 +9,11 @@ import {
   PageTitle,
   SectionHead,
 } from "@/shared/ui";
+import { studentDate } from "@/integration/studentData";
+import { StudentData } from "@/integration/StudentScreenData";
+import { Icon } from "@/shared/components/Icon";
+import { parseTime } from "@/shared/lib/time";
+
 import { useParkingNew } from "../hooks/useParkingNew";
 export function ParkingNew() {
   return (
@@ -22,6 +26,9 @@ function ParkingNewView() {
   const {
     s,
     error,
+    startError,
+    endError,
+    moveIntervalForward,
     service,
     hub,
     setHub,
@@ -45,19 +52,16 @@ function ParkingNewView() {
       />
       <div
         data-slot="two-col"
-        className="grid grid-cols-2 gap-5 max-[900px]:gap-4 max-[600px]:grid-cols-1"
+        className="grid grid-cols-2 gap-5 max-[900px]:gap-4 max-[900px]:grid-cols-1"
       >
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
+        <Panel data-slot="panel" className="min-w-0">
           <form onSubmit={submitParking}>
             <Field label="Your private vehicle">
-              <select
+              <NativeSelect
                 required
                 value={vehicle}
                 onChange={(e) => setVehicle(e.target.value)}
-                className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+                wrapperClassName="max-w-full cursor-pointer"
               >
                 <option value="">Select vehicle</option>
                 {s.privateVehicles
@@ -67,27 +71,27 @@ function ParkingNewView() {
                       {v.identifier} · {v.type}
                     </option>
                   ))}
-              </select>
+              </NativeSelect>
             </Field>
             <Field label="Hub">
-              <select
+              <NativeSelect
                 value={hub}
                 onChange={(e) => setHub(e.target.value)}
-                className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+                wrapperClassName="max-w-full cursor-pointer"
               >
                 {s.hubs.map((h) => (
                   <option value={h.id} key={h.id}>
                     {h.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </Field>
             <div
               data-slot="two-col"
-              className="grid grid-cols-2 gap-4 **:data-[slot~=two-col]:gap-4 [&_>_[data-slot~=panel]_>_p]:mt-3 [&_>_[data-slot~=panel]_>_p]:mb-5 max-[900px]:gap-4 max-[600px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1 [&_>_[data-slot~=panel]_>_p]:mx-0"
+              className="grid grid-cols-2 gap-4 **:data-[slot~=two-col]:gap-4 [&_>_[data-slot~=panel]_>_p]:mt-3 [&_>_[data-slot~=panel]_>_p]:mb-5 max-[900px]:gap-4 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1 [&_>_[data-slot~=panel]_>_p]:mx-0"
             >
-              <Field label="Start · Asia/Ho_Chi_Minh">
-                <input
+              <Field label="Start · Asia/Ho_Chi_Minh" error={startError}>
+                <Input
                   type="datetime-local"
                   required
                   value={start}
@@ -95,11 +99,11 @@ function ParkingNewView() {
                     setStart(e.target.value);
                     setReview(false);
                   }}
-                  className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full placeholder:text-content-muted hover:bg-soft py-2 px-3"
+                  className="max-w-full"
                 />
               </Field>
-              <Field label="End · Asia/Ho_Chi_Minh">
-                <input
+              <Field label="End · Asia/Ho_Chi_Minh" error={endError}>
+                <Input
                   type="datetime-local"
                   required
                   value={end}
@@ -107,23 +111,30 @@ function ParkingNewView() {
                     setEnd(e.target.value);
                     setReview(false);
                   }}
-                  className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full placeholder:text-content-muted hover:bg-soft py-2 px-3"
+                  className="max-w-full"
                 />
               </Field>
             </div>
 
+            {startError && (
+              <Button
+                type="button"
+                variant="secondary"
+                className="mb-4"
+                onClick={moveIntervalForward}
+              >
+                Move interval to next minute
+              </Button>
+            )}
             {error && <Alert tone="error">{error}</Alert>}
             <Button type="submit" disabled={!vehicle || !hub}>
               Review interval availability <Icon name="arrow" />
             </Button>
           </form>
-        </section>
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
+        </Panel>
+        <Panel data-slot="panel" className="min-w-0">
           <SectionHead title="Booking summary" />
-          <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
+          <dl className="record-details">
             <dt className="text-content-muted">Hub</dt>
             <dd className="wrap-anywhere m-0">
               {s.hubs.find((h) => h.id === hub)?.name}
@@ -141,7 +152,7 @@ function ParkingNewView() {
             The server allocates an available space for your selected interval
             when you confirm.
           </Alert>
-        </section>
+        </Panel>
       </div>
       <Modal
         title="Confirm parking booking"
@@ -149,7 +160,7 @@ function ParkingNewView() {
         open={review}
         onOpenChange={setReview}
       >
-        <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
+        <dl className="record-details">
           <dt className="text-content-muted">Vehicle</dt>
           <dd className="wrap-anywhere m-0">{vehicle}</dd>
           <dt className="text-content-muted">Hub</dt>

@@ -6,14 +6,11 @@ import { Link, Modal } from "@/shared/ui";
 import type { WorkspaceModel } from "./useWorkspace";
 type WorkspaceDialogsProps = Pick<
   WorkspaceModel,
-  "notifications" | "setNotifications" | "profile" | "setProfile" | "auth"
+  "notifications" | "setNotifications"
 >;
 export function WorkspaceDialogs({
   notifications,
   setNotifications,
-  profile,
-  setProfile,
-  auth,
 }: WorkspaceDialogsProps) {
   const feed = useOptionalOperatorFeed();
   const data = feed?.result.status === "ready" ? feed.result.data.data : null;
@@ -49,21 +46,12 @@ export function WorkspaceDialogs({
               <p>No active alerts.</p>
             ))}
           {data && (
-            <p className="mt-3 text-xs text-content-muted">
+            <p className="mt-3 text-sm text-content-muted">
               Updated {campusTime(data.as_of)}
             </p>
           )}
         </Modal>
       )}
-      <Modal
-        title="Your account"
-        description="Signed-in account for this workspace."
-        open={profile}
-        onOpenChange={setProfile}
-      >
-        <p className="font-medium">{auth.user?.name}</p>
-        <p className="capitalize text-content-muted">{auth.user?.role}</p>
-      </Modal>
     </>
   );
 }

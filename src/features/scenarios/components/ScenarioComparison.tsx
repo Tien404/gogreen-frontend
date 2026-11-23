@@ -1,8 +1,21 @@
+import {
+  Panel,
+  Table,
+  TableCaption,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  Alert,
+  Empty,
+  SectionHead,
+} from "@/shared/ui";
 import type { State } from "@/domain/types";
 import { metricLabel } from "@/integration/operatorRecords";
 import { campusTime } from "@/integration/studentRecords";
 import type { Schemas } from "@/shared/api/contract.generated";
-import { Alert, Empty, SectionHead } from "@/shared/ui";
+
 type LiveProps = {
   run: Schemas["SimulationRunOut"];
   s: State;
@@ -19,56 +32,55 @@ export function ScenarioComparison({ run, s, revision }: LiveProps) {
   return (
     <div
       data-slot="two-col"
-      className="mt-5 grid grid-cols-2 gap-5 max-[900px]:gap-4 max-[600px]:grid-cols-1"
+      className="mt-5 grid grid-cols-2 gap-5 max-[900px]:gap-4 max-[900px]:grid-cols-1"
     >
-      <section
-        data-slot="panel"
-        className="min-w-0 rounded-sm bg-panel p-5 max-[600px]:rounded-xs"
-      >
+      <Panel data-slot="panel" className="min-w-0">
         <SectionHead
           title="KPI comparison"
           subtitle="Baseline vs scenario over the selected horizon"
         />
         {run.metrics.length ? (
-          <div
-            role="region"
-            aria-label="Scrollable KPI comparison"
-            tabIndex={0}
-            className="max-w-full overflow-x-auto"
-          >
-            <table className="w-full min-w-68 border-collapse text-left text-sm">
-              <caption className="sr-only">
+          <div className="min-w-0">
+            <Table
+              aria-label="Baseline and scenario KPI comparison"
+              className="w-full min-w-130 border-collapse text-left text-sm"
+            >
+              <TableCaption className="sr-only">
                 Baseline and scenario KPI values
-              </caption>
-              <thead className="bg-surface-muted">
-                <tr>
-                  <th scope="col" className="p-2">
-                    Metric
-                  </th>
-                  <th scope="col" className="p-2">
-                    Unit
-                  </th>
-                  <th scope="col" className="p-2">
-                    Baseline
-                  </th>
-                  <th scope="col" className="p-2">
-                    Scenario
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+              </TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead scope="col">Metric</TableHead>
+                  <TableHead scope="col">Unit</TableHead>
+                  <TableHead scope="col">Baseline</TableHead>
+                  <TableHead scope="col">Scenario</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {run.metrics.map((metric) => (
-                  <tr key={metric.name} className="border-b border-divider">
-                    <th scope="row" className="p-2 font-medium">
+                  <TableRow
+                    key={metric.name}
+                    className="border-b border-divider"
+                  >
+                    <TableHead scope="row">
                       {metricLabel(metric.name)}
-                    </th>
-                    <td className="p-2">{metric.unit}</td>
-                    <td className="p-2 tabular-nums">{metric.baseline}</td>
-                    <td className="p-2 tabular-nums">{metric.scenario}</td>
-                  </tr>
+                    </TableHead>
+                    <TableCell className="whitespace-nowrap">
+                      {metric.unit}
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      {metric.baseline}
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      {metric.scenario}
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
+            <p className="mt-2 text-sm sm:hidden">
+              Scroll to compare baseline and scenario.
+            </p>
           </div>
         ) : (
           <Empty
@@ -76,13 +88,10 @@ export function ScenarioComparison({ run, s, revision }: LiveProps) {
             text="This run has no comparison metrics."
           />
         )}
-      </section>
-      <section
-        data-slot="panel"
-        className="min-w-0 rounded-sm bg-panel p-5 max-[600px]:rounded-xs"
-      >
+      </Panel>
+      <Panel data-slot="panel" className="min-w-0">
         <SectionHead title="Snapshot" />
-        <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm my-5">
+        <dl className="record-details">
           {details.map(([label, value]) => (
             <div key={label} className="contents">
               <dt className="text-content-muted">{label}</dt>
@@ -96,7 +105,7 @@ export function ScenarioComparison({ run, s, revision }: LiveProps) {
             current eligibility and capacity.
           </Alert>
         )}
-      </section>
+      </Panel>
     </div>
   );
 }

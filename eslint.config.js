@@ -20,6 +20,15 @@ export default defineConfig([
     },
   },
   {
+    files: ["src/shared/ui/primitives/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": [
+        "error",
+        { allowExportNames: ["buttonVariants", "badgeVariants"] },
+      ],
+    },
+  },
+  {
     files: ["src/shared/**/*.{ts,tsx}"],
     rules: {
       "no-restricted-imports": [

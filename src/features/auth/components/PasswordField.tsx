@@ -1,3 +1,4 @@
+import { Input, Label, Button } from "@/shared/ui";
 import { Eye, EyeOff } from "lucide-react";
 import { useId, useState } from "react";
 
@@ -21,11 +22,11 @@ export function PasswordField({
 
   return (
     <div className="flex flex-col gap-2 mb-5 text-sm">
-      <label htmlFor={id} className="font-medium">
+      <Label htmlFor={id} className="font-medium">
         {label} <span aria-hidden="true">*</span>
-      </label>
+      </Label>
       <div className="relative">
-        <input
+        <Input
           id={id}
           name={name}
           type={visible ? "text" : "password"}
@@ -39,21 +40,23 @@ export function PasswordField({
               .filter(Boolean)
               .join(" ") || undefined
           }
-          className="w-full rounded-xs border border-control-border bg-panel py-2 pl-3 pr-6 min-h-6 hover:bg-soft disabled:opacity-50 aria-invalid:border-danger"
+          className="w-full pr-12"
         />
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           type="button"
           aria-label={`${visible ? "Hide" : "Show"} ${label.toLowerCase()}`}
           aria-pressed={visible}
           onClick={() => setVisible((value) => !value)}
-          className="absolute right-1 top-1/2 -translate-y-1/2 grid size-11 place-items-center rounded-xs text-content-muted hover:bg-soft hover:text-accent disabled:opacity-50"
+          className="absolute right-1 top-1/2 -translate-y-1/2 grid size-11 place-items-center rounded-lg text-content-muted hover:bg-soft hover:text-primary disabled:opacity-50"
         >
           {visible ? (
             <EyeOff size={20} strokeWidth={1.75} aria-hidden="true" />
           ) : (
             <Eye size={20} strokeWidth={1.75} aria-hidden="true" />
           )}
-        </button>
+        </Button>
       </div>
       {hint && (
         <small id={`${id}-hint`} className="text-content-muted">

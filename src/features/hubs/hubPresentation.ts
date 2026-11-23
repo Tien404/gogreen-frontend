@@ -10,11 +10,11 @@ export const hubPresentation: Readonly<
     >
   >
 > = {
-  north: { area: "Student dormitories & residential services", x: 23, y: 28 },
-  library: { area: "Library & student service area", x: 55, y: 42 },
-  science: { area: "University campuses & teaching facilities", x: 75, y: 68 },
+  north: { area: "KTX Khu A · Tạ Quang Bửu", x: 23, y: 28 },
+  library: { area: "VNU-HCM Central Library · Võ Trường Toản", x: 55, y: 42 },
+  science: { area: "University of Science · Linh Trung campus", x: 75, y: 68 },
   metro: {
-    area: "Metro Line 1 connection & onward campus journeys",
+    area: "Đại học Quốc gia Metro station · Line 1",
     x: 30,
     y: 77,
   },

@@ -1,10 +1,6 @@
-import { StudentData } from "@/integration/StudentScreenData";
-import { Missing } from "@/app/pages/Missing";
-import { freeSpaces } from "@/domain/selectors";
-import { Icon } from "@/shared/components/Icon";
-import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
-import { time } from "@/shared/lib/time";
 import {
+  Panel,
+  NativeSelect,
   Alert,
   Badge,
   Battery,
@@ -15,6 +11,13 @@ import {
   PageTitle,
   SectionHead,
 } from "@/shared/ui";
+import { StudentData } from "@/integration/StudentScreenData";
+import { Missing } from "@/app/pages/Missing";
+import { freeSpaces } from "@/domain/selectors";
+import { Icon } from "@/shared/components/Icon";
+import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
+import { time } from "@/shared/lib/time";
+
 import { useRideDetail } from "../hooks/useRideDetail";
 type RideDetailProps = {
   id: string;
@@ -55,20 +58,17 @@ function RideDetailView({ id }: RideDetailProps) {
       />
       <div
         data-slot="two-col"
-        className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 max-[900px]:gap-4 max-[600px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1"
+        className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 max-[900px]:gap-4 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1"
       >
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
-          <div className="h-50 rounded-xs bg-soft grid place-items-center text-accent mb-5 max-[600px]:h-42.5">
+        <Panel data-slot="panel" className="min-w-0">
+          <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
             <VehicleArtwork type={v?.type ?? ""} />
           </div>
           <SectionHead
             title={v ? `${r.vehicle} · ${v.type}` : r.vehicle}
             action={<Battery value={v?.battery ?? null} />}
           />
-          <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
+          <dl className="record-details">
             <dt className="text-content-muted">Started</dt>
             <dd className="wrap-anywhere m-0">{time(r.start)}</dd>
             <dt className="text-content-muted">Elapsed time</dt>
@@ -85,11 +85,8 @@ function RideDetailView({ id }: RideDetailProps) {
                 (r.destination || "Not specified")}
             </dd>
           </dl>
-        </section>
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
+        </Panel>
+        <Panel data-slot="panel" className="min-w-0">
           <SectionHead
             title={
               r.status === "active"
@@ -102,17 +99,17 @@ function RideDetailView({ id }: RideDetailProps) {
           {r.status === "active" ? (
             <>
               <Field label="Return hub">
-                <select
+                <NativeSelect
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
-                  className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+                  wrapperClassName="max-w-full cursor-pointer"
                 >
                   {s.hubs.map((h) => (
                     <option value={h.id} key={h.id}>
                       {h.name} · {freeSpaces(s, h.id)} available now
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </Field>
               <Alert>
                 Space is checked on confirmation. Selecting a hub does not
@@ -175,14 +172,14 @@ function RideDetailView({ id }: RideDetailProps) {
               )}
               <Link
                 data-slot="button"
-                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-xs text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-accent [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
+                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-primary [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
                 to="/student"
               >
                 Back to overview
               </Link>
             </>
           )}
-        </section>
+        </Panel>
       </div>
     </>
   );

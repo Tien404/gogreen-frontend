@@ -1,10 +1,11 @@
+import { Panel, Badge, Button, Link, SectionHead } from "@/shared/ui";
 import { type AppContext } from "@/app/providers/AppContext";
 import { ActivityFeed } from "@/features/activity/components/ActivityFeed";
 import { Icon } from "@/shared/components/Icon";
 import { studentDate } from "@/integration/studentData";
 import { recordUrl } from "@/integration/studentRecords";
 import { time } from "@/shared/lib/time";
-import { Badge, Button, Link, SectionHead } from "@/shared/ui";
+
 type DashboardActivityProps = Pick<AppContext, "s" | "go"> & {
   student: boolean;
 };
@@ -26,17 +27,14 @@ export function DashboardActivity({ s, student, go }: DashboardActivityProps) {
       ]
     : [];
   return (
-    <div className="grid grid-cols-[1.45fr_1fr] gap-5 mt-5 max-[1200px]:grid-cols-[1.2fr_1fr] max-[900px]:grid-cols-2 max-[600px]:grid-cols-1 max-[600px]:mt-5">
-      <section
-        data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
+    <div className="grid grid-cols-[1.45fr_1fr] gap-5 mt-5 max-[1200px]:grid-cols-[1.2fr_1fr] max-[900px]:grid-cols-1 max-[600px]:grid-cols-1 max-[600px]:mt-5">
+      <Panel data-slot="panel" className="min-w-0">
         <SectionHead
           title="Recent activity"
           action={
             <Link
               data-slot="text-link"
-              className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+              className="leading-[16px] text-primary inline-flex items-center gap-2 text-sm font-semibold hover:underline"
               to={`/${s.role}/activity`}
             >
               View all <Icon name="arrow" size={16} />
@@ -66,14 +64,11 @@ export function DashboardActivity({ s, student, go }: DashboardActivityProps) {
             ))}
           </details>
         )}
-      </section>
-      <section
-        data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
+      </Panel>
+      <Panel data-slot="panel" className="min-w-0 self-start">
         <div
           data-slot="icon-box"
-          className="inline-flex items-center justify-center bg-soft text-accent w-11 h-11 rounded-xs shrink-0 mb-5"
+          className="inline-flex items-center justify-center bg-soft text-primary w-11 h-11 rounded-lg shrink-0 mb-5"
         >
           <Icon name={student ? "parking" : "alert"} size={24} />
         </div>
@@ -89,6 +84,28 @@ export function DashboardActivity({ s, student, go }: DashboardActivityProps) {
         </p>
         {student ? (
           <>
+            {!s.bookings.some(
+              (booking) =>
+                booking.owner === s.persona &&
+                ["checked-in", "confirmed", "overstaying"].includes(
+                  booking.status,
+                ),
+            ) &&
+              !s.charges.some((charge) =>
+                ["pending", "scheduled", "active"].includes(charge.status),
+              ) && (
+                <div>
+                  <p className="mb-4">
+                    No active parking bookings or charging sessions.
+                  </p>
+                  <Button
+                    variant="secondary"
+                    onClick={() => go("/student/parking/new")}
+                  >
+                    Book parking <Icon name="arrow" size={16} />
+                  </Button>
+                </div>
+              )}
             {s.bookings
               .filter(
                 (b) =>
@@ -101,7 +118,7 @@ export function DashboardActivity({ s, student, go }: DashboardActivityProps) {
                   to={`/student/parking/${encodeURIComponent(b.id)}`}
                   className="flex items-center justify-between gap-3 border-t border-solid border-t-divider text-sm py-4 px-0"
                 >
-                  <span>
+                  <span className="min-w-0 wrap-anywhere">
                     <strong>{s.hubs.find((h) => h.id === b.hub)?.name}</strong>
                     <small className="leading-[1.6] block">
                       {time(b.start)}–{time(b.end)} · {b.vehicle}
@@ -133,7 +150,7 @@ export function DashboardActivity({ s, student, go }: DashboardActivityProps) {
             Review incidents <Icon name="arrow" size={16} />
           </Button>
         )}
-      </section>
+      </Panel>
     </div>
   );
 }

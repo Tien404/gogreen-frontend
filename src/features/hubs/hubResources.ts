@@ -3,8 +3,10 @@ import type { ApiHub } from "@/integration/apiMappers";
 import { config } from "@/config/app";
 import type { Schemas } from "@/shared/api/contract.generated";
 import { hubPresentation } from "./hubPresentation";
+import type { Coordinates } from "@/shared/lib/coordinates";
 export type HubResources = {
   id: string;
+  coordinates?: Coordinates | null;
   name: string;
   area: string;
   capacity: number;
@@ -20,6 +22,7 @@ export type HubResources = {
 export function liveHub(hub: ApiHub, availableVehicles: number): HubResources {
   return {
     id: hub.id,
+    coordinates: hub.coordinates,
     name: hub.name,
     area: hubPresentation[hub.id]?.area ?? "Campus hub",
     capacity: hub.capacity,
@@ -66,6 +69,7 @@ export async function readPages<T>(
 export function hubState(hub: ApiHub, availableVehicles: number): Hub {
   return {
     id: hub.id,
+    coordinates: hub.coordinates,
     name: hub.name,
     capacity: hub.capacity,
     points: hub.points.length,

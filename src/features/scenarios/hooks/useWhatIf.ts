@@ -12,7 +12,7 @@ const demandType = "Demand surge";
 const faultType = "Charging-point failure";
 const liveTypes = [demandType, faultType];
 export function useWhatIf(id?: string, newScenario = false) {
-  const { s, go, api } = useApp();
+  const { s, go, api, notify } = useApp();
   const feed = useOptionalOperatorFeed();
   const network =
     feed?.result.status === "ready" ? feed.result.data : undefined;
@@ -101,7 +101,10 @@ export function useWhatIf(id?: string, newScenario = false) {
     const result = await command.run(() =>
       api.request("POST /simulations", { body }),
     );
-    if (result.ok) go(simulationUrl(result.data.run_id));
+    if (result.ok) {
+      notify("Scenario simulation completed.", "success");
+      go(simulationUrl(result.data.run_id));
+    }
     return;
   };
   return {

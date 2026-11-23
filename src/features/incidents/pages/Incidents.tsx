@@ -1,8 +1,8 @@
-import { OperatorScreenData } from "@/integration/OperatorScreenData";
-import { useSearchParams } from "react-router";
-import { Icon } from "@/shared/components/Icon";
-import { time } from "@/shared/lib/time";
 import {
+  Input,
+  NativeSelect,
+  Panel,
+  Textarea,
   Alert,
   Badge,
   Button,
@@ -11,6 +11,11 @@ import {
   Modal,
   PageTitle,
 } from "@/shared/ui";
+import { OperatorScreenData } from "@/integration/OperatorScreenData";
+import { useSearchParams } from "react-router";
+import { Icon } from "@/shared/components/Icon";
+import { time } from "@/shared/lib/time";
+
 import { ReportIncidentDialog } from "../components/ReportIncidentDialog";
 import { useIncidents } from "../hooks/useIncidents";
 export function Incidents() {
@@ -53,42 +58,39 @@ function IncidentsView() {
           </Button>
         }
       />
-      <div className="flex items-center gap-3 flex-wrap mb-5 max-[600px]:items-stretch max-[600px]:gap-2">
+      <div className="filter-bar">
         <div
           data-slot="search-input"
-          className="flex items-center bg-panel rounded-xs min-w-40 flex-1 gap-2 max-w-105 text-content-muted focus-within:outline-2 focus-within:outline-accent focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
+          className="flex items-center bg-panel rounded-lg min-w-40 flex-1 gap-2 max-w-105 text-content-muted focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
         >
           <Icon name="search" />
-          <input
+          <Input
             aria-label="Search incidents"
             value={search}
             placeholder="Search incidents or resources…"
             onChange={(e) => setSearch(e.target.value)}
-            className="border-0 border-solid border-control-border rounded-xs bg-transparent min-h-11 text-content text-sm max-w-full placeholder:text-content-muted hover:bg-soft w-full min-w-0 py-2 px-0"
+            className="max-w-full w-full min-w-0 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
-        <select
+        <NativeSelect
+          className="border-0 shadow-none"
           aria-label="Incident status"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0 py-2 px-3"
+          wrapperClassName="max-w-full cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0"
         >
           <option value="open">Open incidents</option>
           <option value="resolved">Resolved incidents</option>
           <option value="all">All incidents</option>
-        </select>
+        </NativeSelect>
       </div>
       <div className="grid gap-5">
         {items.map((i) => (
-          <section
-            key={i.id}
-            data-slot="panel"
-            className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-          >
+          <Panel key={i.id} data-slot="panel" className="min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
               <span
                 data-slot="icon-box"
-                className="inline-flex items-center justify-center bg-soft text-accent w-11 h-11 rounded-xs shrink-0"
+                className="inline-flex items-center justify-center bg-green-muted text-green-ink w-11 h-11 rounded-lg shrink-0"
               >
                 <Icon name="alert" />
               </span>
@@ -104,13 +106,13 @@ function IncidentsView() {
             <p className="leading-[1.65] mt-5 wrap-anywhere">{i.description}</p>
             <ol
               data-compact="true"
-              className="list-none [&_li:before]:content-[''] [&_li:before]:absolute [&_li:before]:-left-1.25 [&_li:before]:top-1.75 [&_li:before]:w-2.25 [&_li:before]:h-2.25 [&_li:before]:bg-accent [&_li:before]:rounded-full [&_li:last-child]:border-l-transparent [&_small]:block [&_small]:mt-1 data-[compact=true]:mt-5 [&[data-compact=true]_li]:pb-3 m-0 p-0"
+              className="list-none [&_li:before]:content-[''] [&_li:before]:absolute [&_li:before]:-left-1.25 [&_li:before]:top-1.75 [&_li:before]:w-2.25 [&_li:before]:h-2.25 [&_li:before]:bg-primary [&_li:before]:rounded-full [&_small]:block [&_small]:mt-1 data-[compact=true]:mt-5 [&[data-compact=true]_li]:pb-3 m-0 p-0"
             >
-              <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 border-l border-solid border-l-divider text-sm">
+              <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
                 Operator-recorded incident
               </li>
               {i.resolution && (
-                <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 border-l border-solid border-l-divider text-sm">
+                <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
                   <span className="wrap-anywhere">
                     Resolved: {i.resolution}
                   </span>
@@ -122,13 +124,26 @@ function IncidentsView() {
                 Resolve incident
               </Button>
             )}
-          </section>
+          </Panel>
         ))}
       </div>
       {!items.length && (
         <Empty
           title="No matching incidents"
           text="Try all statuses, or record an incident."
+          action={
+            filter !== "all" || search ? (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setFilter("all");
+                  setSearch("");
+                }}
+              >
+                Show all incidents
+              </Button>
+            ) : undefined
+          }
         />
       )}
       <ReportIncidentDialog
@@ -150,12 +165,12 @@ function IncidentsView() {
       >
         <form onSubmit={resolveIncident}>
           <Field label="Resolution and follow-up">
-            <textarea
+            <Textarea
               required
               name="reason"
               rows={3}
               placeholder="Describe inspection, outcome and any remaining action."
-              className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full placeholder:text-content-muted hover:bg-soft resize-y py-2 px-3"
+              className="max-w-full resize-y"
             />
           </Field>
           {error && <Alert tone="error">{error}</Alert>}

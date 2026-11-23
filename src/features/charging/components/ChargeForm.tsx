@@ -1,6 +1,7 @@
+import { NativeSelect, Input, Alert, Button, Field } from "@/shared/ui";
 import { Icon } from "@/shared/components/Icon";
 import { MobilityArtwork } from "@/shared/components/MobilityArtwork";
-import { Alert, Button, Field } from "@/shared/ui";
+
 import { useChargeForm } from "../hooks/useChargeForm";
 type ChargeFormProps = {
   onDone?: (id: string) => void;
@@ -22,10 +23,10 @@ export function ChargeForm({ onDone }: ChargeFormProps) {
   } = useChargeForm({ onDone });
   return (
     <form onSubmit={requestCharge}>
-      <div className="flex items-center gap-5 rounded-xs bg-soft p-4 mb-5">
+      <div className="flex items-center gap-5 rounded-lg bg-green-muted text-green-ink [&_p]:text-inherit p-4 mb-5">
         <MobilityArtwork
           name="charging-point"
-          className="h-21.5 w-6 shrink-0"
+          className="h-21.5 w-12 shrink-0"
         />
         <div className="min-w-0">
           <h3>A little more charge.</h3>
@@ -41,11 +42,11 @@ export function ChargeForm({ onDone }: ChargeFormProps) {
             : "Eligible shared vehicle"
         }
       >
-        <select
+        <NativeSelect
           required
           value={choice}
           onChange={(e) => setChoice(e.target.value)}
-          className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+          wrapperClassName="max-w-full cursor-pointer"
         >
           <option value="">Select a vehicle</option>
           {choice && !validChoice && (
@@ -56,29 +57,29 @@ export function ChargeForm({ onDone }: ChargeFormProps) {
           {eligible.map((e) => (
             <option key={e.label}>{e.label}</option>
           ))}
-        </select>
+        </NativeSelect>
       </Field>
       <Field
         label="Target battery (%)"
         hint="Target must exceed current battery. A pending request does not confirm a time slot."
       >
-        <input
+        <Input
           required
           type="number"
           min={1}
           max="100"
           value={target}
           onChange={(e) => setTarget(Number(e.target.value))}
-          className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full placeholder:text-content-muted hover:bg-soft py-2 px-3"
+          className="max-w-full"
         />
       </Field>
       <Field label="Need by · Asia/Ho_Chi_Minh">
         {
-          <input
+          <Input
             type="datetime-local"
             value={needBy}
             onChange={(e) => setNeedBy(e.target.value)}
-            className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft py-2 px-3"
+            className="max-w-full"
           />
         }
       </Field>

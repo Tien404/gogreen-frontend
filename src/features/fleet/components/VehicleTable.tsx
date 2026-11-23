@@ -1,6 +1,16 @@
+import {
+  Input,
+  NativeSelect,
+  Badge,
+  Battery,
+  Button,
+  Empty,
+  Link,
+  Modal,
+} from "@/shared/ui";
 import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
-import { Badge, Battery, Button, Empty, Link, Modal } from "@/shared/ui";
+
 import {
   useVehicleTable,
   type LiveVehicleTable,
@@ -29,13 +39,13 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
   } = useVehicleTable({ hub, live });
   return (
     <>
-      <div className="flex items-center gap-3 flex-wrap mb-5 max-[600px]:items-stretch max-[600px]:gap-2">
+      <div className="filter-bar">
         <div
           data-slot="search-input"
-          className="flex items-center bg-panel rounded-xs min-w-40 flex-1 gap-2 max-w-105 text-content-muted focus-within:outline-2 focus-within:outline-accent focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
+          className="flex items-center bg-panel rounded-lg min-w-40 flex-1 gap-2 max-w-105 text-content-muted focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
         >
           <Icon name="search" />
-          <input
+          <Input
             aria-label="Search shared vehicles"
             placeholder="Search vehicle ID or type…"
             value={search}
@@ -43,17 +53,18 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="border-0 border-solid border-control-border rounded-xs bg-transparent min-h-11 text-content text-sm max-w-full placeholder:text-content-muted hover:bg-soft w-full min-w-0 py-2 px-0"
+            className="max-w-full w-full min-w-0 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
-        <select
+        <NativeSelect
+          className="border-0 shadow-none"
           aria-label="Vehicle status"
           value={status}
           onChange={(e) => {
             setStatus(e.target.value);
             setPage(1);
           }}
-          className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0 py-2 px-3"
+          wrapperClassName="max-w-full cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0"
         >
           <option value="all">All statuses</option>
           {[
@@ -67,16 +78,17 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
           ].map((x) => (
             <option key={x}>{x}</option>
           ))}
-        </select>
-        <select
+        </NativeSelect>
+        <NativeSelect
+          className="border-0 shadow-none"
           aria-label="Sort vehicles"
           value={sort}
           onChange={(e) => setSort(e.target.value)}
-          className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0 py-2 px-3"
+          wrapperClassName="max-w-full cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0"
         >
           <option value="id">Vehicle ID</option>
           <option value="battery">Battery: highest first</option>
-        </select>
+        </NativeSelect>
       </div>
       <FleetTable
         list={list}
@@ -86,8 +98,25 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
         liveHubName={live?.hubName}
         setSelected={setSelected}
       />
-      {!list.length && <Empty />}
-      <div className="flex justify-end items-center gap-2 pt-5 **:data-[slot~=button]:text-xs **:data-[slot~=button]:min-h-9 max-[600px]:flex-wrap max-[600px]:*:data-[slot~=button]:flex-1 **:data-[slot~=button]:py-1 **:data-[slot~=button]:px-3">
+      {!list.length && (
+        <Empty
+          action={
+            search || status !== "all" ? (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setSearch("");
+                  setStatus("all");
+                  setPage(1);
+                }}
+              >
+                Clear filters
+              </Button>
+            ) : undefined
+          }
+        />
+      )}
+      <div className="flex justify-end items-center gap-2 pt-5 **:data-[slot~=button]:text-sm **:data-[slot~=button]:min-h-9 max-[600px]:flex-wrap max-[600px]:*:data-[slot~=button]:flex-1 **:data-[slot~=button]:py-1 **:data-[slot~=button]:px-3">
         <small className="leading-[1.6] mr-auto max-[600px]:w-full">
           {list.length} shared vehicles · Page {current} of {pages}
         </small>
@@ -115,10 +144,10 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
       >
         {v && (
           <>
-            <div className="h-50 rounded-xs bg-soft grid place-items-center text-accent mb-5 max-[600px]:h-42.5">
+            <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
               <Icon name="bike" size={64} />
             </div>
-            <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
+            <dl className="record-details">
               <dt className="text-content-muted">Type</dt>
               <dd className="wrap-anywhere m-0">{v.type}</dd>
               <dt className="text-content-muted">Battery</dt>
@@ -144,7 +173,7 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
             </dl>
             <Link
               data-slot="text-link"
-              className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+              className="leading-[16px] text-primary inline-flex items-center gap-2 text-sm font-semibold hover:underline"
               to="/operator/incidents"
             >
               Review or record an incident <Icon name="arrow" size={16} />

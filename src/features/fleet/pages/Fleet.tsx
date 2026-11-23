@@ -1,5 +1,6 @@
-import { OperatorScreenData } from "@/integration/OperatorScreenData";
 import { PageTitle } from "@/shared/ui";
+import { OperatorScreenData } from "@/integration/OperatorScreenData";
+
 import { VehicleTable } from "../components/VehicleTable";
 export function Fleet() {
   return (
@@ -8,14 +9,9 @@ export function Fleet() {
         title="Shared fleet"
         description="Inspect vehicles, batteries and availability across the campus network."
       />
-      <section
-        data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
-        <OperatorScreenData>
-          <VehicleTable />
-        </OperatorScreenData>
-      </section>
+      <OperatorScreenData>
+        <VehicleTable />
+      </OperatorScreenData>
     </>
   );
 }

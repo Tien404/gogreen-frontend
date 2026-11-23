@@ -1,3 +1,13 @@
+import {
+  Panel,
+  Alert,
+  Badge,
+  Battery,
+  Button,
+  Confirm,
+  PageTitle,
+  SectionHead,
+} from "@/shared/ui";
 import { useRefreshStudentData } from "@/integration/studentRefresh";
 import { recordUrl } from "@/integration/studentRecords";
 import { apiErrorMessage } from "@/shared/api/errors";
@@ -7,15 +17,7 @@ import { Missing } from "@/app/pages/Missing";
 import { useApp } from "@/app/providers/AppContext";
 import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
-import {
-  Alert,
-  Badge,
-  Battery,
-  Button,
-  Confirm,
-  PageTitle,
-  SectionHead,
-} from "@/shared/ui";
+
 type HoldDetailProps = {
   id: string;
 };
@@ -27,7 +29,7 @@ export function HoldDetail(props: HoldDetailProps) {
   );
 }
 function HoldDetailView({ id }: HoldDetailProps) {
-  const { s, go, api } = useApp();
+  const { s, go, api, notify } = useApp();
   const refresh = useRefreshStudentData();
   const command = useApiAction();
   const h = s.holds.find((h) => h.id === id && h.owner === s.persona)!;
@@ -43,15 +45,20 @@ function HoldDetailView({ id }: HoldDetailProps) {
         params: { reservation_id: h.id },
       }),
     );
-    if (result.ok) go(recordUrl("rental", result.data.rental_id));
-    else refresh?.();
+    if (result.ok) {
+      notify("Vehicle unlocked and picked up. Have a safe ride!", "success");
+      go(recordUrl("rental", result.data.rental_id));
+    } else refresh?.();
   }
   async function cancel() {
-    await command.run(() =>
+    const result = await command.run(() =>
       api.request("POST /rentals/reservations/{reservation_id}/cancel", {
         params: { reservation_id: h.id },
       }),
     );
+    if (result.ok) {
+      notify("Vehicle hold reservation cancelled.", "info");
+    }
     refresh?.();
   }
   return (
@@ -63,20 +70,17 @@ function HoldDetailView({ id }: HoldDetailProps) {
       />
       <div
         data-slot="two-col"
-        className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 max-[900px]:gap-4 max-[600px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1"
+        className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 max-[900px]:gap-4 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1"
       >
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
-          <div className="h-50 rounded-xs bg-soft grid place-items-center text-accent mb-5 max-[600px]:h-42.5">
+        <Panel data-slot="panel" className="min-w-0">
+          <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
             <Icon name="bike" size={96} />
           </div>
           <SectionHead
             title={v ? `${h.vehicle} · ${v.type}` : h.vehicle}
             action={<Battery value={v?.battery ?? null} />}
           />
-          <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
+          <dl className="record-details">
             <dt className="text-content-muted">Pickup location</dt>
             <dd className="wrap-anywhere m-0">{hubName(h.origin)}</dd>
             <dt className="text-content-muted">Intended destination</dt>
@@ -89,26 +93,31 @@ function HoldDetailView({ id }: HoldDetailProps) {
           <Alert>
             No return space is reserved. Check availability when you arrive.
           </Alert>
-        </section>
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
+        </Panel>
+        <Panel data-slot="panel" className="min-w-0">
           <span
-            data-slot="eyebrow"
-            className="text-xs font-semibold tracking-[1.7px] text-accent mb-3"
+            data-slot="hold-deadline"
+            className="text-sm font-medium text-primary"
           >
-            HOLD COUNTDOWN
+            {active ? "Hold countdown" : "Hold status"}
           </span>
           <div
-            className="text-lg leading-[1.3] tracking-[-3px] text-accent max-[600px]:text-lg my-5 mx-0"
-            aria-label={`${remaining} minutes remaining`}
+            className="text-3xl leading-[1.3] tracking-tight text-primary tabular-nums my-4 capitalize"
+            aria-label={active ? `${remaining} minutes remaining` : undefined}
           >
-            {String(remaining).padStart(2, "0")}
-            <span className="text-[#52705c]">:00</span>
+            {active ? (
+              <>
+                {remaining}
+                <span className="text-base font-normal normal-case"> min</span>
+              </>
+            ) : (
+              h.status.replaceAll("-", " ")
+            )}
           </div>
           <p className="leading-[1.65] mt-3 mb-5 mx-0">
-            Pick up your vehicle before the hold expires.
+            {active
+              ? "Pick up your vehicle before the hold expires."
+              : "This hold is no longer active."}
           </p>
           {command.error != null && (
             <Alert tone="error">{apiErrorMessage(command.error)}</Alert>
@@ -150,7 +159,7 @@ function HoldDetailView({ id }: HoldDetailProps) {
               </Button>
             </>
           )}
-        </section>
+        </Panel>
       </div>
     </>
   );

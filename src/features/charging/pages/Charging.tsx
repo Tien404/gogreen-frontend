@@ -1,8 +1,23 @@
+import {
+  Panel,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  Alert,
+  Badge,
+  Button,
+  Empty,
+  Link,
+  PageTitle,
+} from "@/shared/ui";
 import { OperatorScreenData } from "@/integration/OperatorScreenData";
 import { StudentData } from "@/integration/StudentScreenData";
 import { Missing } from "@/app/pages/Missing";
 import { Icon } from "@/shared/components/Icon";
-import { Alert, Badge, Button, Empty, Link, PageTitle } from "@/shared/ui";
+
 import { ChargeForm } from "../components/ChargeForm";
 import { ChargingSessionDetails } from "../components/ChargingSessionDetails";
 import { useCharging } from "../hooks/useCharging";
@@ -42,12 +57,9 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
           title="Request charging"
           description="Choose your vehicle, parking context and target charge."
         />
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-w-162.5 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
+        <Panel data-slot="panel" className="min-w-0 max-w-162.5">
           <ChargeForm />
-        </section>
+        </Panel>
       </>
     );
   if (id) {
@@ -55,14 +67,14 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
     return (
       <>
         <Link
-          className="inline-flex items-center gap-2 text-xs text-content-muted mb-5"
+          className="inline-flex items-center gap-2 text-sm text-content-muted mb-5"
           to={`/${s.role}/charging`}
         >
           <Icon name="arrow-left" size={16} /> Charging
         </Link>
         <PageTitle
-          title={`Charging ${c.id}`}
-          description={`${c.vehicle} · ${s.hubs.find((h) => h.id === c.hub)?.name}`}
+          title="Charging session"
+          description={`${c.id} · ${c.vehicle} · ${s.hubs.find((h) => h.id === c.hub)?.name}`}
           action={<Badge>{c.status}</Badge>}
         />
         <ChargingSessionDetails s={s} c={c} canAct={canAct} />
@@ -88,13 +100,17 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
         }
       />
       <div className="flex items-center gap-3 flex-wrap mb-5 max-[600px]:items-stretch max-[600px]:gap-2 max-[600px]:*:data-[slot~=search-input]:max-w-none max-[600px]:*:data-[slot~=search-input]:basis-full max-[600px]:[&_>_select]:max-w-full max-[600px]:[&_>_select]:flex-1 max-[600px]:[&_>_select]:min-w-0">
-        <div className="flex bg-surface-inset rounded-xs gap-1 [&_button[aria-pressed='true']]:bg-panel [&_button[aria-pressed='true']]:shadow-control [&_button[aria-pressed='true']]:text-content [&_button:hover]:bg-panel/80 max-[600px]:max-w-full max-[600px]:overflow-x-auto p-1">
+        <div
+          className="segmented-control"
+          role="group"
+          aria-label="Charging status filter"
+        >
           {["all", "queue", "schedule", "finished"].map((t) => (
             <button
               key={t}
               aria-pressed={tab === t}
               onClick={() => setTab(t)}
-              className="border-0 border-solid rounded-xs bg-transparent text-content-muted text-xs flex items-center gap-2 capitalize min-h-9 max-[600px]:flex-1 py-2 px-3 max-[600px]:p-2"
+              className="border-0 border-solid rounded-lg bg-transparent text-content-muted text-sm flex items-center gap-2 capitalize min-h-9 max-[600px]:flex-1 py-2 px-3 max-[600px]:p-2"
             >
               {t}
             </button>
@@ -107,57 +123,57 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
         }{" "}
         Active sessions are not interrupted for a new request.
       </Alert>
-      <div
-        data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
-        <div className="overflow-x-auto max-w-full max-[600px]:my-0 max-[600px]:-mx-1">
-          <table className="w-full border-collapse text-left text-sm max-[600px]:min-w-140">
-            <thead>
-              <tr>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+      <Panel data-slot="panel" className="min-w-0">
+        <div className="min-w-0 max-w-full">
+          <Table
+            aria-label="Charging requests and allocations"
+            className="w-full border-collapse text-left text-sm max-[600px]:min-w-190"
+          >
+            <TableHeader>
+              <TableRow>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Request / vehicle
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Hub
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Battery / target
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Status
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Allocation
-                </th>
-                <th className="align-middle first:pl-0 last:pr-0 text-xs font-medium text-content-muted bg-surface-muted whitespace-nowrap [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                </TableHead>
+                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&_tr:hover]:bg-surface-muted">
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="[&_tr:hover]:bg-surface-muted">
               {visible.map((c) => (
-                <tr key={c.id}>
-                  <th
+                <TableRow key={c.id}>
+                  <TableHead
                     scope="row"
-                    className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 font-medium whitespace-nowrap py-4 px-3"
+                    className="border-b border-solid border-b-divider "
                   >
                     {c.id}
                     <small className="leading-[1.6] block font-normal max-w-75">
                       {c.vehicle} ·{" "}
                       {c.owner === "operator" ? "Shared" : "Private"}
                     </small>
-                  </th>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                  </TableHead>
+                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     {s.hubs.find((h) => h.id === c.hub)?.name}
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                  </TableCell>
+                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     {c.battery === null ? "—" : `${c.battery}%`} / {c.target}%
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                  </TableCell>
+                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     <Badge>{c.status}</Badge>
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 py-4 px-3">
+                  </TableCell>
+                  <TableCell className="border-b border-solid border-b-divider ">
                     {c.point ?? "Awaiting point"}
                     <small className="leading-[1.6] block font-normal max-w-75">
                       {c.schedule && (
@@ -165,20 +181,20 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
                       )}
                       <span className="wrap-anywhere">{c.reason}</span>
                     </small>
-                  </td>
-                  <td className="border-b border-solid border-b-divider align-middle first:pl-0 last:pr-0 [&_small]:block [&_small]:font-normal [&_small]:max-w-75 py-4 px-3">
+                  </TableCell>
+                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     <Link
                       data-slot="text-link"
-                      className="leading-[16px] text-accent inline-flex items-center gap-2 text-xs font-semibold hover:underline"
+                      className="leading-[16px] text-primary inline-flex items-center gap-2 text-sm font-semibold hover:underline"
                       to={`/${s.role}/charging/${encodeURIComponent(c.id)}`}
                     >
                       View session <Icon name="arrow" size={16} />
                     </Link>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         {!visible.length && (
           <Empty
@@ -186,7 +202,7 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
             text="New requests will appear here."
           />
         )}
-      </div>
+      </Panel>
     </>
   );
 }

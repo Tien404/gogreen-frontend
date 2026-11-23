@@ -5,6 +5,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { Label } from "./primitives/label";
 
 type FieldProps = {
   label: string;
@@ -14,40 +15,57 @@ type FieldProps = {
 };
 
 export function Field({ label, children, hint, error }: FieldProps) {
-  const id = useId();
-
+  const generatedId = useId();
   const child = isValidElement(children)
     ? (children as ReactElement<{
+        id?: string;
         required?: boolean;
         "aria-describedby"?: string;
         "aria-invalid"?: boolean;
       }>)
     : null;
-
+  const id = child?.props.id ?? generatedId;
+  const descriptionId = `${id}-description`;
   return (
-    <label
+    <div
       data-slot="field"
-      className="flex flex-col gap-2 min-w-0 mb-5 text-sm leading-5 [&_input]:w-full [&_select]:w-full [&_textarea]:w-full [&:has(:invalid:not(:placeholder-shown):focus)_input]:border-danger"
+      className="mb-5 flex min-w-0 flex-col gap-2 [&_[data-slot=native-select-wrapper]]:w-full"
     >
-      <span className="font-medium">
-        {label}
-        {child?.props.required && <span aria-hidden="true"> *</span>}
-      </span>
+      <Label htmlFor={id} className="leading-5">
+        <span>
+          {label}
+          {child?.props.required && (
+            <span aria-hidden="true" className="ml-1">
+              *
+            </span>
+          )}
+        </span>
+      </Label>
       {child
         ? cloneElement(child, {
-            "aria-describedby": hint || error ? id : undefined,
-            "aria-invalid": error ? true : undefined,
+            id,
+            "aria-describedby":
+              [
+                child.props["aria-describedby"],
+                (hint || error) && descriptionId,
+              ]
+                .filter(Boolean)
+                .join(" ") || undefined,
+            "aria-invalid": error ? true : child.props["aria-invalid"],
           })
         : children}
       {(hint || error) && (
         <small
-          id={id}
-          data-error={!!error}
-          className="leading-[1.6] data-[error=true]:text-danger font-normal"
+          id={descriptionId}
+          className={
+            error
+              ? "text-sm leading-5 text-destructive"
+              : "text-sm leading-5 text-muted-foreground"
+          }
         >
           {error ?? hint}
         </small>
       )}
-    </label>
+    </div>
   );
 }

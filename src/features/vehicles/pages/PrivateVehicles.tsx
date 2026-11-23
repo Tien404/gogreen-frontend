@@ -1,7 +1,7 @@
-import { StudentData } from "@/integration/StudentScreenData";
-import { config } from "@/config/app";
-import { Icon } from "@/shared/components/Icon";
 import {
+  Panel,
+  Input,
+  NativeSelect,
   Alert,
   Battery,
   Button,
@@ -11,6 +11,10 @@ import {
   Modal,
   PageTitle,
 } from "@/shared/ui";
+import { StudentData } from "@/integration/StudentScreenData";
+import { config } from "@/config/app";
+import { Icon } from "@/shared/components/Icon";
+
 import { usePrivateVehicles } from "../hooks/usePrivateVehicles";
 export function PrivateVehicles() {
   return (
@@ -48,14 +52,10 @@ function PrivateVehiclesView() {
         {s.privateVehicles
           .filter((v) => v.owner === s.persona)
           .map((v) => (
-            <section
-              data-slot="panel"
-              className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-              key={v.id}
-            >
-              <div className="h-37.5 rounded-xs bg-soft flex items-center justify-center text-accent relative mb-5 [&_>_svg]:w-27.5 [&_>_svg]:h-27.5">
+            <Panel data-slot="panel" className="min-w-0" key={v.id}>
+              <div className="h-37.5 rounded-lg bg-soft flex items-center justify-center text-primary relative mb-5 [&_>_svg]:w-27.5 [&_>_svg]:h-27.5">
                 <Icon name="bike" size={96} />
-                <span className="absolute bottom-3 left-3 text-xs bg-panel/80 rounded-xs text-content-muted py-1 px-2">
+                <span className="absolute bottom-3 left-3 text-sm bg-panel/80 rounded-lg text-content-muted py-1 px-2">
                   Private {v.type}
                 </span>
               </div>
@@ -69,11 +69,11 @@ function PrivateVehiclesView() {
               <Link
                 to="/student/parking/new"
                 data-slot="button"
-                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-xs text-sm font-medium leading-[24px] whitespace-normal bg-surface-inset text-content [&:hover:not(:disabled)]:bg-soft w-full mt-5 py-2 px-5"
+                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal bg-surface-inset text-content [&:hover:not(:disabled)]:bg-soft w-full mt-5 py-2 px-5"
               >
                 Book parking <Icon name="arrow" size={16} />
               </Link>
-            </section>
+            </Panel>
           ))}
       </div>
       <Modal
@@ -86,33 +86,33 @@ function PrivateVehiclesView() {
       >
         <form onSubmit={registerVehicle}>
           <Field label="Vehicle identifier">
-            <input
+            <Input
               name="identifier"
               placeholder="e.g. CAMPUS-215"
               required
               maxLength={30}
-              className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full placeholder:text-content-muted hover:bg-soft py-2 px-3"
+              className="max-w-full"
             />
           </Field>
           <Field label="Vehicle type">
-            <select
+            <NativeSelect
               name="vehicleType"
-              className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+              wrapperClassName="max-w-full cursor-pointer"
             >
               {config.vehicleTypes.map((vehicleType) => (
                 <option key={vehicleType}>{vehicleType}</option>
               ))}
-            </select>
+            </NativeSelect>
           </Field>
           <Field label="Battery (%)">
-            <input
+            <Input
               name="battery"
               type="number"
               required
               min="0"
               max="100"
               defaultValue="60"
-              className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full placeholder:text-content-muted hover:bg-soft py-2 px-3"
+              className="max-w-full"
             />
           </Field>
           {error && <Alert tone="error">{error}</Alert>}

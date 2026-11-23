@@ -1,17 +1,15 @@
+import { Panel, Link, SectionHead } from "@/shared/ui";
 import { dispatchAdviceUrl } from "@/integration/operatorRecords";
 import type { Schemas } from "@/shared/api/contract.generated";
 import { Icon } from "@/shared/components/Icon";
-import { Link, SectionHead } from "@/shared/ui";
+
 export function ScenarioRecommendations({
   recommendations,
 }: {
   recommendations: Schemas["SimulationAdvice"][];
 }) {
   return (
-    <section
-      data-slot="panel"
-      className="mt-5 min-w-0 rounded-sm bg-panel p-5 max-[600px]:rounded-xs"
-    >
+    <Panel data-slot="panel" className="mt-5 min-w-0">
       <SectionHead title="Recommendations" />
       {recommendations.length ? (
         <ul className="divide-y divide-divider">
@@ -24,14 +22,17 @@ export function ScenarioRecommendations({
               >
                 <span
                   data-slot="icon-box"
-                  className="grid size-9 shrink-0 place-items-center rounded-xs bg-soft text-accent"
+                  className="grid size-9 shrink-0 place-items-center rounded-lg bg-green-muted text-green-ink"
                 >
                   <Icon name={url ? "dispatch" : "alert"} />
                 </span>
                 <div className="min-w-0 wrap-anywhere">
                   <p className="leading-[1.65]">{advice.reason}</p>
                   {url && (
-                    <Link to={url}>
+                    <Link
+                      to={url}
+                      className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary hover:underline"
+                    >
                       Review suggested dispatch <Icon name="arrow" size={16} />
                     </Link>
                   )}
@@ -45,6 +46,6 @@ export function ScenarioRecommendations({
           No coordination action was recommended.
         </p>
       )}
-    </section>
+    </Panel>
   );
 }

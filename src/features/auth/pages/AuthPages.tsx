@@ -1,5 +1,6 @@
+import { Input, Alert, Button, Field } from "@/shared/ui";
 import { useApp } from "@/app/providers/AppContext";
-import { Alert, Button, Field } from "@/shared/ui";
+
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import { Navigate, useLocation, useSearchParams } from "react-router";
 import { AuthLayout } from "../components/AuthLayout";
@@ -38,7 +39,7 @@ export function Login() {
       >
         <fieldset disabled={busy} className="m-0 min-w-0 border-0 p-0">
           <Field label="Email address" error={errors.email}>
-            <input
+            <Input
               name="email"
               type="email"
               autoComplete="username"
@@ -47,7 +48,6 @@ export function Login() {
               required
               maxLength={254}
               placeholder="you@university.edu"
-              className="min-h-6 rounded-xs border border-control-border bg-panel px-3 py-2 hover:bg-soft aria-invalid:border-danger"
             />
           </Field>
           <PasswordField
@@ -56,11 +56,11 @@ export function Login() {
             error={errors.password}
           />
           {error && (
-            <div ref={errorRef} tabIndex={-1} className="rounded-xs">
+            <div ref={errorRef} tabIndex={-1} className="rounded-lg">
               <Alert tone="error">{error}</Alert>
             </div>
           )}
-          <Button type="submit" disabled={busy} className="w-full min-h-6">
+          <Button type="submit" disabled={busy} className="w-full">
             {busy && (
               <LoaderCircle
                 size={18}
@@ -72,8 +72,8 @@ export function Login() {
           </Button>
         </fieldset>
       </form>
-      <p className="mt-5 text-center text-xs text-content-muted">
-        Use your student or operator account provided for this workspace.
+      <p className="mt-5 text-center text-sm text-content-muted">
+        Sign in with your campus student or operator account.
       </p>
     </AuthLayout>
   );

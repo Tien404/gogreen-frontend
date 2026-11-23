@@ -1,9 +1,7 @@
-import { ApiLoadError } from "@/shared/api/ApiFeedback";
-import { StudentData } from "@/integration/StudentScreenData";
-import { config } from "@/config/app";
-import { Icon } from "@/shared/components/Icon";
-import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
 import {
+  LoadingState,
+  Panel,
+  NativeSelect,
   Alert,
   Badge,
   Battery,
@@ -15,6 +13,12 @@ import {
   PageTitle,
   SectionHead,
 } from "@/shared/ui";
+import { ApiLoadError } from "@/shared/api/ApiFeedback";
+import { StudentData } from "@/integration/StudentScreenData";
+import { config } from "@/config/app";
+import { Icon } from "@/shared/components/Icon";
+import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
+
 import { useFindRide } from "../hooks/useFindRide";
 export function FindRide() {
   return (
@@ -48,52 +52,52 @@ function FindRideView() {
         title="Find your next ride"
         description="Choose a hub, pick a shared vehicle and get moving."
       />
-      <div
+      <Panel
         data-slot="panel"
-        className="bg-panel rounded-sm min-w-0 grid grid-cols-3 gap-5 mb-5 max-[1200px]:grid-cols-2 max-[600px]:rounded-xs max-[600px]:grid-cols-1 max-[600px]:gap-4 p-5 **:data-[slot~=field]:m-0 max-[600px]:p-5 max-[600px]:**:data-[slot~=field]:m-0"
+        className="min-w-0 grid grid-cols-3 gap-5 mb-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1 max-[600px]:gap-4 **:data-[slot~=field]:m-0 max-[600px]:**:data-[slot~=field]:m-0"
       >
         <Field label="Starting hub">
-          <select
+          <NativeSelect
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
-            className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+            wrapperClassName="max-w-full cursor-pointer"
           >
             {s.hubs.map((h) => (
               <option value={h.id} key={h.id}>
                 {h.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
         <Field
           label="Intended destination"
           hint="A return space is checked when you arrive."
         >
-          <select
+          <NativeSelect
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+            wrapperClassName="max-w-full cursor-pointer"
           >
             {s.hubs.map((h) => (
               <option value={h.id} key={h.id}>
                 {h.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
         <Field label="Vehicle type">
-          <select
+          <NativeSelect
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="border border-solid border-control-border rounded-xs bg-panel min-h-11 text-content text-sm max-w-full hover:bg-soft cursor-pointer py-2 px-3"
+            wrapperClassName="max-w-full cursor-pointer"
           >
             <option value="all">All vehicles</option>
             {config.vehicleTypes.map((vehicleType) => (
               <option key={vehicleType}>{vehicleType}</option>
             ))}
-          </select>
+          </NativeSelect>
         </Field>
-      </div>
+      </Panel>
       {origin === destination && (
         <Alert>
           Returning to the same hub is allowed. Return capacity is checked at
@@ -114,7 +118,7 @@ function FindRideView() {
       )}
       {error && <Alert tone="error">{error}</Alert>}
       {query.result.status === "loading" && (
-        <p role="status">Loading vehicles…</p>
+        <LoadingState label={"Loading vehicles…"} />
       )}
       {(query.refreshError ??
         (query.result.status === "error" ? query.result : null)) && (
@@ -127,21 +131,25 @@ function FindRideView() {
         />
       )}
       <SectionHead
-        title={`${vehicles.length} suitable vehicles`}
+        title={
+          query.result.status === "ready"
+            ? `${vehicles.length} suitable vehicles`
+            : "Available vehicles"
+        }
         subtitle={
           "Availability and battery eligibility are checked by the server."
         }
       />
       <div className="grid grid-cols-3 gap-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1">
         {vehicles.map((v) => (
-          <section
+          <Panel
             key={v.id}
             data-slot="panel"
-            className="bg-panel rounded-sm min-w-0 *:data-[slot~=button]:w-full *:data-[slot~=button]:mt-5 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
+            className="min-w-0 *:data-[slot~=button]:w-full *:data-[slot~=button]:mt-5"
           >
-            <div className="h-37.5 rounded-xs bg-soft flex items-center justify-center text-accent relative mb-5 [&_>_svg]:w-27.5 [&_>_svg]:h-27.5">
+            <div className="h-37.5 rounded-lg bg-soft flex items-center justify-center text-primary relative mb-5 [&_>_svg]:w-27.5 [&_>_svg]:h-27.5">
               <VehicleArtwork type={v.type} />
-              <span className="absolute bottom-3 left-3 text-xs bg-panel/80 rounded-xs text-content-muted py-1 px-2">
+              <span className="absolute bottom-3 left-3 text-sm bg-panel/80 rounded-lg text-content-muted py-1 px-2">
                 {v.type}
               </span>
             </div>
@@ -153,14 +161,14 @@ function FindRideView() {
               {s.hubs.find((h) => h.id === origin)?.name}
             </p>
             <Badge>Available</Badge>
-            <div className="text-xs text-content-muted flex gap-2 mt-4">
+            <div className="text-sm text-content-muted flex gap-2 mt-4">
               <Icon name="check" size={16} />
               {"Eligible for an immediate hold"}
             </div>
             <Button disabled={!!hold || !!ride} onClick={() => setSelected(v)}>
               Reserve now <Icon name="arrow" size={16} />
             </Button>
-          </section>
+          </Panel>
         ))}
       </div>
       {!vehicles.length && query.result.status === "ready" && (
@@ -169,7 +177,7 @@ function FindRideView() {
           text={"Try another origin or vehicle type."}
         />
       )}
-      <div className="flex items-center gap-2 text-xs text-content-muted mt-5">
+      <div className="flex items-center gap-2 text-sm text-content-muted mt-5">
         <Icon name="help" /> Low battery, unknown battery, stale and unavailable
         vehicles are excluded. Journey suitability unavailable for unknown
         readings.
@@ -182,7 +190,7 @@ function FindRideView() {
       >
         {v && (
           <>
-            <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
+            <dl className="record-details">
               <dt className="text-content-muted">Vehicle</dt>
               <dd className="wrap-anywhere m-0">
                 {v.id} · {v.type}

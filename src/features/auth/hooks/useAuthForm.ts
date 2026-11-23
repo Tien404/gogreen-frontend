@@ -53,11 +53,12 @@ export function useAuthForm() {
       if ("error" in result) {
         setErrors(result.fields ?? {});
         setError(result.error);
+        notify(result.error, "error");
         focusError(result.fields ?? {});
         return;
       }
       formRef.current?.reset();
-      notify(`Welcome back, ${result.user.name}.`);
+      notify(`Welcome back, ${result.user.name}.`, "success");
       navigate(loginDestination(params.get("returnTo"), result.user.role), {
         replace: true,
       });

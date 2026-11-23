@@ -6,7 +6,7 @@ import { useApp } from "@/app/providers/AppContext";
 import type { FormEvent } from "react";
 import { useState } from "react";
 export function usePrivateVehicles() {
-  const { s, api } = useApp();
+  const { s, api, notify } = useApp();
   const refresh = useRefreshStudentData();
   const command = useApiAction();
   const [open, setOpen] = useState(false);
@@ -23,6 +23,7 @@ export function usePrivateVehicles() {
       }),
     );
     if (result.ok) {
+      notify("Private vehicle added successfully.", "success");
       refresh?.();
       setOpen(false);
     }

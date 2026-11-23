@@ -5,7 +5,7 @@ import { apiErrorMessage } from "@/shared/api/errors";
 import { useApiAction } from "@/shared/api/useApiAction";
 import { useState } from "react";
 export function useRideDetail({ id }: { id: string }) {
-  const { s, api } = useApp();
+  const { s, api, notify } = useApp();
   const refresh = useRefreshStudentData();
   const command = useApiAction();
   const r = s.rides.find((ride) => ride.id === id && ride.owner === s.persona);
@@ -19,12 +19,18 @@ export function useRideDetail({ id }: { id: string }) {
   }
   const handleConfirm1 = async () => {
     if (!r || !destination) return;
-    await command.run(() =>
+    const result = await command.run(() =>
       api.request("POST /rentals/rentals/{rental_id}/return", {
         params: { rental_id: r.id },
         body: { return_hub_id: destination },
       }),
     );
+    if (result.ok) {
+      notify(
+        "Ride completed successfully. Thank you for riding green!",
+        "success",
+      );
+    }
     refresh?.();
     return;
   };

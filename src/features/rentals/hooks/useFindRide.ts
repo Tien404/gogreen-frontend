@@ -15,7 +15,7 @@ type Candidate = {
   battery: number | null;
 };
 export function useFindRide() {
-  const { s, go, api } = useApp();
+  const { s, go, api, notify } = useApp();
   const refresh = useRefreshStudentData();
   const [searchParams] = useSearchParams();
   const requestedOrigin = searchParams.get("origin");
@@ -77,8 +77,10 @@ export function useFindRide() {
         body: { vehicle_id: v.id, intended_hub_id: destination || null },
       }),
     );
-    if (result.ok) go(recordUrl("hold", result.data.reservation_id));
-    else {
+    if (result.ok) {
+      notify("Vehicle reserved! Head to the hub for pickup.", "success");
+      go(recordUrl("hold", result.data.reservation_id));
+    } else {
       refresh?.();
       query.retry();
     }

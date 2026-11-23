@@ -5,7 +5,7 @@ import { useApiAction } from "@/shared/api/useApiAction";
 import { useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router";
 export function useDispatches({ id }: { id?: string }) {
-  const { s, go, api, refreshOperations } = useApp();
+  const { s, go, api, refreshOperations, notify } = useApp();
   const [params] = useSearchParams();
   const advisedVehicle = params.get("vehicle_id");
   const [open, setOpen] = useState(Boolean(!id && advisedVehicle));
@@ -38,7 +38,7 @@ export function useDispatches({ id }: { id?: string }) {
   const action = async (type: string) => {
     if (d) {
       if (type !== "start-dispatch" && type !== "complete-dispatch") return;
-      await command.run(() =>
+      const result = await command.run(() =>
         api.request(
           type === "start-dispatch"
             ? "POST /redistribution-tasks/{task_id}/start"
@@ -46,6 +46,14 @@ export function useDispatches({ id }: { id?: string }) {
           { params: { task_id: d.id } },
         ),
       );
+      if (result.ok) {
+        notify(
+          type === "start-dispatch"
+            ? "Dispatch task started."
+            : "Dispatch task completed.",
+          "success",
+        );
+      }
       refreshOperations?.();
       return;
     }
@@ -67,6 +75,7 @@ export function useDispatches({ id }: { id?: string }) {
       }),
     );
     if (result.ok) {
+      notify("Vehicle redistribution dispatch created.", "success");
       refreshOperations?.();
       go(dispatchUrl(result.data.task_id));
     }

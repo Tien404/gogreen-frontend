@@ -1,3 +1,13 @@
+import {
+  Panel,
+  Alert,
+  Badge,
+  Button,
+  Confirm,
+  Link,
+  PageTitle,
+  SectionHead,
+} from "@/shared/ui";
 import { useRefreshStudentData } from "@/integration/studentRefresh";
 import { studentDate } from "@/integration/studentData";
 import { recordUrl } from "@/integration/studentRecords";
@@ -7,15 +17,7 @@ import { StudentData } from "@/integration/StudentScreenData";
 import { Missing } from "@/app/pages/Missing";
 import { useApp } from "@/app/providers/AppContext";
 import { Icon } from "@/shared/components/Icon";
-import {
-  Alert,
-  Badge,
-  Button,
-  Confirm,
-  Link,
-  PageTitle,
-  SectionHead,
-} from "@/shared/ui";
+
 import { useState } from "react";
 type ParkingDetailProps = {
   id: string;
@@ -28,7 +30,7 @@ export function ParkingDetail(props: ParkingDetailProps) {
   );
 }
 function ParkingDetailView({ id }: ParkingDetailProps) {
-  const { s, api } = useApp();
+  const { s, api, notify } = useApp();
   const refresh = useRefreshStudentData();
   const command = useApiAction();
   const b = s.bookings.find((b) => b.id === id && b.owner === s.persona)!;
@@ -36,7 +38,7 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
   const action = async (type: string) => {
     if (b) {
       const params = { reservation_id: b.id };
-      await command.run(() => {
+      const result = await command.run(() => {
         if (type === "check-in")
           return api.request(
             "POST /parking/reservations/{reservation_id}/check-in",
@@ -51,6 +53,13 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
           params: { session_id: b.sessionId! },
         });
       });
+      if (result.ok) {
+        if (type === "check-in")
+          notify("Checked in to parking space.", "success");
+        else if (type === "cancel-booking")
+          notify("Parking reservation cancelled.", "info");
+        else notify("Checked out of parking space.", "success");
+      }
       refresh?.();
       return;
     }
@@ -59,28 +68,25 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
   return (
     <>
       <Link
-        className="inline-flex items-center gap-2 text-xs text-content-muted mb-5"
+        className="inline-flex items-center gap-2 text-sm text-content-muted mb-5"
         to="/student"
       >
         <Icon name="arrow-left" size={16} /> Overview
       </Link>
       <PageTitle
-        title={`Parking ${b.id}`}
-        description={`${s.hubs.find((h) => h.id === b.hub)?.name} · ${b.vehicle}`}
+        title="Parking booking"
+        description={`${b.id} · ${s.hubs.find((h) => h.id === b.hub)?.name} · ${b.vehicle}`}
         action={<Badge>{b.status}</Badge>}
       />
       <div
         data-slot="two-col"
-        className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 [&_>_[data-slot~=panel]_>_p]:mt-3 [&_>_[data-slot~=panel]_>_p]:mb-5 max-[900px]:gap-4 max-[600px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1 [&_>_[data-slot~=panel]_>_p]:mx-0"
+        className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 [&_>_[data-slot~=panel]_>_p]:mt-3 [&_>_[data-slot~=panel]_>_p]:mb-5 max-[900px]:gap-4 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1 [&_>_[data-slot~=panel]_>_p]:mx-0"
       >
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
-          <div className="h-50 rounded-xs bg-soft grid place-items-center text-accent mb-5 max-[600px]:h-42.5">
+        <Panel data-slot="panel" className="min-w-0">
+          <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
             <Icon name="parking" size={64} />
           </div>
-          <dl className="grid grid-cols-[minmax(100px,0.8fr)_1.2fr] gap-4 text-sm **:data-[slot~=badge]:align-top my-5 mx-0">
+          <dl className="record-details">
             <dt className="text-content-muted">Vehicle</dt>
             <dd className="wrap-anywhere m-0">
               {s.privateVehicles.find((v) => v.id === b.vehicle)?.identifier ??
@@ -123,11 +129,8 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
                 <Badge>{c.status}</Badge>
               </Link>
             ))}
-        </section>
-        <section
-          data-slot="panel"
-          className="bg-panel rounded-sm min-w-0 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-        >
+        </Panel>
+        <Panel data-slot="panel" className="min-w-0">
           <SectionHead title="Manage your booking" />
           {command.error != null && (
             <Alert tone="error">{apiErrorMessage(command.error)}</Alert>
@@ -198,13 +201,13 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
               <Link
                 to="/student/parking/new"
                 data-slot="button"
-                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-xs text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-accent [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
+                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-primary [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
               >
                 Book parking again
               </Link>
             </>
           )}
-        </section>
+        </Panel>
       </div>
     </>
   );

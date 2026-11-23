@@ -33,9 +33,10 @@ export function WorkspaceSidebar({
     setSigningOut(true);
     const result = await auth.signOut();
     if (result.error) {
-      notify(result.error);
+      notify(result.error, "error");
       setSigningOut(false);
     } else {
+      notify("Signed out successfully.", "info");
       go("/login");
     }
   };
@@ -53,7 +54,7 @@ export function WorkspaceSidebar({
         <Brand />
         <button
           data-slot="icon-button"
-          className="hidden items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-xs text-content-muted hover:bg-surface-inset hover:text-accent max-[900px]:inline-flex"
+          className="hidden items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-lg text-content-muted hover:bg-surface-inset hover:text-primary max-[900px]:inline-flex"
           onClick={closeMenu}
           aria-label="Close navigation"
         >
@@ -69,7 +70,7 @@ export function WorkspaceSidebar({
           >
             <h2
               id={`nav-${group.label.toLowerCase()}`}
-              className="text-content-muted text-xs font-medium tracking-wider uppercase mb-2 px-3"
+              className="text-content-muted text-sm font-medium tracking-wider uppercase mb-2 px-3"
             >
               {group.label}
             </h2>
@@ -79,7 +80,7 @@ export function WorkspaceSidebar({
                 key={path}
                 end={!path}
                 data-parking-active={path === "parking/new" && !!parkingMatch}
-                className="flex items-center gap-3 rounded-xs text-sm text-content-muted w-full bg-transparent text-left mb-1 leading-5 hover:bg-surface-muted hover:text-content [[aria-current=page],[data-parking-active=true]]:bg-soft [[aria-current=page],[data-parking-active=true]]:text-accent [[aria-current=page],[data-parking-active=true]]:font-semibold [&:is([aria-current=page],[data-parking-active=true])_svg]:stroke-accent py-3 px-4"
+                className="flex items-center gap-3 rounded-lg text-sm text-content-muted w-full bg-transparent text-left mb-1 leading-5 hover:bg-surface-muted hover:text-content [[aria-current=page],[data-parking-active=true]]:bg-soft [[aria-current=page],[data-parking-active=true]]:text-primary [[aria-current=page],[data-parking-active=true]]:font-semibold [&_svg]:stroke-current py-3 px-4"
               >
                 <Icon name={icon} />
                 {label}
@@ -92,20 +93,20 @@ export function WorkspaceSidebar({
         <button
           disabled={signingOut}
           onClick={signOut}
-          className="flex w-full items-center gap-3 rounded-xs py-3 px-4 text-sm text-content-muted hover:bg-soft hover:text-accent"
+          className="flex w-full items-center gap-3 rounded-lg py-3 px-4 text-sm text-content-muted hover:bg-soft hover:text-primary"
         >
           <Icon name="logout" /> {signingOut ? "Logging out…" : "Log out"}
         </button>
         <div className="border-t border-solid border-t-divider mt-4 mb-0 flex gap-3 items-center -mx-5 p-5 max-[1200px]:-mx-4 max-[1200px]:p-4">
           <div
             data-slot="avatar"
-            className="w-9 h-9 bg-surface-inset rounded-lg text-content grid place-items-center text-xs font-semibold shrink-0"
+            className="w-9 h-9 bg-surface-inset rounded-full text-content grid place-items-center text-sm font-semibold shrink-0"
           >
             {initials(profile.name)}
           </div>
           <span>
-            <strong className="block text-xs">{profile.name}</strong>
-            <small className="leading-[1.6] block text-xs">
+            <strong className="block text-sm">{profile.name}</strong>
+            <small className="leading-[1.6] block text-sm">
               {s.role === "student" ? "Student" : "Operator"}
             </small>
           </span>

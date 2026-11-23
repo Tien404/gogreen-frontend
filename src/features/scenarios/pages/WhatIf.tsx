@@ -1,8 +1,5 @@
-import { OperatorScreenData } from "@/integration/OperatorScreenData";
-import { simulationLabel, simulationUrl } from "@/integration/operatorRecords";
-import { RecordFeedback } from "@/shared/api/ApiRecordUi";
-import { Icon } from "@/shared/components/Icon";
 import {
+  Panel,
   Badge,
   Button,
   Empty,
@@ -10,6 +7,11 @@ import {
   PageTitle,
   SectionHead,
 } from "@/shared/ui";
+import { OperatorScreenData } from "@/integration/OperatorScreenData";
+import { simulationLabel, simulationUrl } from "@/integration/operatorRecords";
+import { RecordFeedback } from "@/shared/api/ApiRecordUi";
+import { Icon } from "@/shared/components/Icon";
+
 import { ScenarioForm } from "../components/ScenarioForm";
 import { ScenarioResult } from "../components/ScenarioResult";
 import { useWhatIf } from "../hooks/useWhatIf";
@@ -96,7 +98,7 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
     <>
       <PageTitle
         title="What-if scenarios"
-        description="Explore illustrative outcomes before making a change to the network."
+        description="Forecast network outcomes before making changes to operations."
         action={
           <Button onClick={() => go("/operator/what-if/new")}>
             <Icon name="plus" />
@@ -104,16 +106,16 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
           </Button>
         }
       />
-      <div className="grid grid-cols-3 gap-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1">
+      <div className="grid grid-cols-2 gap-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1">
         {types.map((t, i) => (
-          <section
+          <Panel
             data-slot="panel"
-            className="bg-panel rounded-sm min-w-0 **:data-[slot~=button]:text-xs max-[600px]:rounded-xs p-5 max-[600px]:p-5"
+            className="min-w-0 **:data-[slot~=button]:text-sm"
             key={t}
           >
             <span
               data-slot="icon-box"
-              className="inline-flex items-center justify-center bg-soft text-accent w-11 h-11 rounded-xs shrink-0 mb-5"
+              className="inline-flex items-center justify-center bg-green-muted text-green-ink w-11 h-11 rounded-lg shrink-0 mb-5"
             >
               <Icon
                 name={
@@ -124,16 +126,10 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
                 size={24}
               />
             </span>
-            <span
-              data-slot="eyebrow"
-              className="text-xs font-semibold tracking-[1.7px] text-accent mb-3 block"
-            >
-              SUPPORTED PRESET 0{i + 1}
-            </span>
             <h3>{t}</h3>
             <p className="leading-[1.65] mt-2 mb-5 mx-0">
               {i === 0
-                ? "Model additional arrivals at Metro Interchange Hub."
+                ? "Model surge in arrival demand at a selected hub."
                 : "Model the loss of a working charging point."}
             </p>
             <Button
@@ -147,13 +143,10 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
             >
               {"Configure scenario"} <Icon name="arrow" size={16} />
             </Button>
-          </section>
+          </Panel>
         ))}
       </div>
-      <section
-        data-slot="panel"
-        className="mt-5 bg-panel rounded-sm min-w-0 max-[600px]:mt-5 max-[600px]:rounded-xs p-5 max-[600px]:p-5"
-      >
+      <Panel data-slot="panel" className="mt-5 min-w-0 max-[600px]:mt-5">
         <SectionHead title="Recent runs" />
         {
           <>
@@ -181,7 +174,7 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
             )}
           </>
         }
-      </section>
+      </Panel>
     </>
   );
 }

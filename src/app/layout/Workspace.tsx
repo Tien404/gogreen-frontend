@@ -31,7 +31,7 @@ function WorkspaceGuard({ role }: WorkspaceGuardProps) {
         className="min-h-dvh flex flex-col items-center justify-center gap-5 text-center *:data-[slot~=brand]:mb-5 p-5"
       >
         <Brand />
-        <h1 className="leading-[1.15] text-lg">
+        <h1 className="leading-[1.15] text-4xl">
           This workspace is for{" "}
           {role === "operator" ? "campus operators" : "students"}.
         </h1>
@@ -73,18 +73,15 @@ function WorkspaceLayout({ role }: WorkspaceLayoutProps) {
     setMenu,
     notifications,
     setNotifications,
-    profile,
-    setProfile,
-    auth,
     handleNavigationKeyDown,
     navRef,
     menuRef,
     closeMenu,
   } = useWorkspace(role);
   return (
-    <div className="flex min-h-dvh">
+    <div className="workspace flex min-h-dvh">
       <a
-        className="fixed -top-25 left-67.5 z-300 bg-accent text-on-dark rounded-xs focus:top-3 focus:text-on-dark max-[900px]:left-5 py-3 px-5"
+        className="fixed -top-25 left-67.5 z-300 bg-primary text-on-dark rounded-lg focus:top-3 focus:text-on-dark max-[900px]:left-5 py-3 px-5"
         href="#main-content"
       >
         Skip to main content
@@ -113,15 +110,11 @@ function WorkspaceLayout({ role }: WorkspaceLayoutProps) {
         s={s}
         route={route}
         setNotifications={setNotifications}
-        setProfile={setProfile}
         location={location}
       />
       <WorkspaceDialogs
         notifications={notifications}
         setNotifications={setNotifications}
-        profile={profile}
-        setProfile={setProfile}
-        auth={auth}
       />
     </div>
   );

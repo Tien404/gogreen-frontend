@@ -1,6 +1,5 @@
 import { Badge as StatusBadge } from "./primitives/badge";
 import { type ReactNode } from "react";
-import { Icon } from "../components/Icon";
 
 type BadgeProps = { children: ReactNode };
 
@@ -32,14 +31,66 @@ export function Badge({ children }: BadgeProps) {
 
 type BatteryProps = { value: number | null };
 
+const BATTERY_INNER_MAX_WIDTH = 12.5;
+
 export function Battery({ value }: BatteryProps) {
+  const level = value === null ? null : Math.max(0, Math.min(100, value));
+  const tone =
+    level === null
+      ? "unknown"
+      : level < 20
+        ? "critical"
+        : level < 50
+          ? "low"
+          : "good";
+  const fillWidth =
+    level === null || level === 0
+      ? 0
+      : Math.max(1.5, (level / 100) * BATTERY_INNER_MAX_WIDTH);
+
   return (
     <span
-      data-low={value !== null && value < 25}
-      className="inline-flex gap-2 items-center text-primary text-sm font-semibold whitespace-nowrap data-[low=true]:text-warning"
+      data-slot="battery"
+      data-tone={tone}
+      className="inline-flex items-center gap-2 text-sm font-semibold whitespace-nowrap tabular-nums text-primary data-[tone=low]:text-warning data-[tone=critical]:text-danger data-[tone=unknown]:text-content-muted data-[tone=unknown]:font-medium"
     >
-      <Icon name="battery" size={18} />
-      {value === null ? "Unknown" : `${value}%`}
+      <svg
+        viewBox="0 0 22 14"
+        width="20"
+        height="13"
+        fill="none"
+        aria-hidden="true"
+        focusable="false"
+        className="shrink-0"
+      >
+        <rect
+          x="1"
+          y="2"
+          width="16.5"
+          height="10"
+          rx="2.5"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeDasharray={level === null ? "2.5 2" : undefined}
+        />
+        <path
+          d="M19.5 5v4"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        {fillWidth > 0 && (
+          <rect
+            x="3"
+            y="4"
+            width={fillWidth}
+            height="6"
+            rx="1"
+            fill="currentColor"
+          />
+        )}
+      </svg>
+      <span>{value === null ? "Unknown" : `${value}%`}</span>
     </span>
   );
 }

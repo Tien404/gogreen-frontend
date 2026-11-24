@@ -34,23 +34,26 @@ export function WorkspaceContent({
         route={route}
         setNotifications={setNotifications}
       />
-      <main
-        id="main-content"
-        className="bg-canvas rounded-xl flex flex-1 flex-col w-full pt-5 pb-0 max-w-400 outline-none focus-visible:outline-3 focus-visible:outline-primary focus-visible:-outline-offset-4 min-[1600px]:pt-7 min-[1600px]:pb-0 max-[1200px]:pt-6 max-[1200px]:pb-0 max-[600px]:pt-6 max-[600px]:pb-0 px-6 mx-auto min-[1600px]:px-7 max-[1200px]:px-6 max-[600px]:px-5"
-        tabIndex={-1}
-      >
-        <div className="flex-1">
-          <div key={`${location.pathname}${location.search}-${s.persona}`}>
-            <Outlet />
+      <div className="rounded-xl bg-canvas flex-1 flex">
+        <main
+          id="main-content"
+          className="flex flex-1 flex-col w-full pt-5 pb-0 max-w-400 outline-none focus-visible:outline-3 focus-visible:outline-primary focus-visible:-outline-offset-4 min-[1600px]:pt-7 min-[1600px]:pb-0 max-[1200px]:pt-6 max-[1200px]:pb-0 max-[600px]:pt-6 max-[600px]:pb-0 px-6 mx-auto min-[1600px]:px-7 max-[1200px]:px-6 max-[600px]:px-5"
+          tabIndex={-1}
+        >
+          <div className="flex-1">
+            <div key={`${location.pathname}${location.search}-${s.persona}`}>
+              <Outlet />
+            </div>
           </div>
-        </div>
-        <footer className="mt-6 flex justify-between text-sm text-content-muted gap-3 max-[600px]:flex-col max-[600px]:mt-5 max-[600px]:gap-1 py-5 px-0 max-[600px]:py-5 max-[600px]:px-0">
-          <span>
-            {config.brand} <span className="my-0 mx-2">·</span> {config.tagline}
-          </span>
-          <span>{config.campus}</span>
-        </footer>
-      </main>
+          <footer className="mt-6 flex justify-between text-sm text-content-muted gap-3 max-[600px]:flex-col max-[600px]:mt-5 max-[600px]:gap-1 py-5 px-0 max-[600px]:py-5 max-[600px]:px-0">
+            <span>
+              {config.brand} <span className="my-0 mx-2">·</span>{" "}
+              {config.tagline}
+            </span>
+            <span>{config.campus}</span>
+          </footer>
+        </main>
+      </div>
     </div>
   );
 }

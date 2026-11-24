@@ -19,7 +19,7 @@ function Table({
       }
       tabIndex={scrollable ? 0 : undefined}
       className={cn(
-        "relative w-full max-w-full rounded-xl bg-panel",
+        "relative w-full max-w-full rounded-xl bg-panel in-data-[slot=panel]:border in-data-[slot=panel]:border-divider",
         scrollable
           ? "overflow-x-auto focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2"
           : "overflow-visible",
@@ -54,7 +54,10 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
     <tbody
       data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
+      className={cn(
+        "[&_tr:last-child]:border-0 [&_tr:last-child_th]:border-b-0 [&_tr:last-child_td]:border-b-0",
+        className,
+      )}
       {...props}
     />
   );

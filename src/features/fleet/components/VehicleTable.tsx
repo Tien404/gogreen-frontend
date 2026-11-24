@@ -44,7 +44,7 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
       <div className="filter-bar">
         <div
           data-slot="search-input"
-          className="flex items-center bg-panel rounded-lg min-w-40 flex-1 gap-2 max-w-105 text-content-muted focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
+          className="flex items-center bg-panel border border-divider rounded-lg min-w-40 flex-1 gap-2 max-w-105 text-content-muted transition-colors in-data-[slot=panel]:bg-surface-inset in-data-[slot=panel]:focus-within:bg-panel focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
         >
           <Icon name="search" />
           <Input
@@ -59,7 +59,7 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
           />
         </div>
         <Select
-          className="border-0 shadow-none"
+          className="border border-divider bg-panel shadow-none in-data-[slot=panel]:bg-surface-inset in-data-[slot=panel]:hover:bg-surface-muted"
           aria-label="Vehicle status"
           value={status}
           onValueChange={(value) => {
@@ -82,7 +82,7 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
           ))}
         </Select>
         <Select
-          className="border-0 shadow-none"
+          className="border border-divider bg-panel shadow-none in-data-[slot=panel]:bg-surface-inset in-data-[slot=panel]:hover:bg-surface-muted"
           aria-label="Sort vehicles"
           value={sort}
           onValueChange={(value) => setSort(value)}

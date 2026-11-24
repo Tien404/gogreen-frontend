@@ -1,3 +1,4 @@
+import { Parking } from "@/features/parking/pages/Parking";
 import { Activity } from "@/features/activity/pages/Activity";
 import { Login, SignUp } from "@/features/auth/pages/AuthPages";
 import { Charging } from "@/features/charging/pages/Charging";
@@ -43,6 +44,7 @@ export const appRoutes: RouteObject[] = [
       { id: "student-hold", path: "holds/:holdId", Component: HoldPage },
       { id: "student-ride", path: "rides/:rideId", Component: RidePage },
       { id: "student-vehicles", path: "vehicles", Component: PrivateVehicles },
+      { id: "student-parking-list", path: "parking", Component: Parking },
       { id: "student-new-parking", path: "parking/new", Component: ParkingNew },
       {
         id: "student-parking",

@@ -1,5 +1,5 @@
 import {
-  NativeSelect,
+  Select,
   Input,
   Textarea,
   Alert,
@@ -48,10 +48,10 @@ export function ReportIncidentDialog({
     >
       <form onSubmit={reportIncident}>
         <Field label="Affected resource">
-          <NativeSelect
+          <Select
             name="resource"
             value={resource}
-            onChange={(event) => setResource(event.target.value)}
+            onValueChange={setResource}
             required
             wrapperClassName="max-w-full cursor-pointer"
           >
@@ -66,18 +66,18 @@ export function ReportIncidentDialog({
                 <option value="parking">Parking space · enter ID</option>
               </>
             }
-          </NativeSelect>
+          </Select>
         </Field>
         {resource === "parking" && (
           <>
             <Field label="Hub">
-              <NativeSelect name="hub" required wrapperClassName="">
+              <Select name="hub" required wrapperClassName="">
                 {s.hubs.map((hub) => (
                   <option value={hub.id} key={hub.id}>
                     {hub.name}
                   </option>
                 ))}
-              </NativeSelect>
+              </Select>
             </Field>
             <Field label="Parking-space ID">
               <Input name="parking" required maxLength={100} />
@@ -89,7 +89,7 @@ export function ReportIncidentDialog({
           className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 [&_>_[data-slot~=panel]_>_p]:mt-3 [&_>_[data-slot~=panel]_>_p]:mb-5 max-[900px]:gap-4 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1 [&_>_[data-slot~=panel]_>_p]:mx-0"
         >
           <Field label="Type">
-            <NativeSelect
+            <Select
               name="type"
               key={resource}
               defaultValue={type}
@@ -98,17 +98,17 @@ export function ReportIncidentDialog({
               <option>Vehicle fault</option>
               <option>Point fault</option>
               <option>Hub capacity</option>
-            </NativeSelect>
+            </Select>
           </Field>
           <Field label="Severity">
-            <NativeSelect
+            <Select
               name="severity"
               wrapperClassName="max-w-full cursor-pointer"
             >
               <option>Medium</option>
               <option>High</option>
               <option>Low</option>
-            </NativeSelect>
+            </Select>
           </Field>
         </div>
         <Field label="Description">

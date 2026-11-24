@@ -1,6 +1,8 @@
+import { vehicleLabel } from "@/integration/recordLabels";
+import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
 import {
   Input,
-  NativeSelect,
+  Select,
   Badge,
   Battery,
   Button,
@@ -56,12 +58,12 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
             className="max-w-full w-full min-w-0 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
-        <NativeSelect
+        <Select
           className="border-0 shadow-none"
           aria-label="Vehicle status"
           value={status}
-          onChange={(e) => {
-            setStatus(e.target.value);
+          onValueChange={(value) => {
+            setStatus(value);
             setPage(1);
           }}
           wrapperClassName="max-w-full cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0"
@@ -78,17 +80,17 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
           ].map((x) => (
             <option key={x}>{x}</option>
           ))}
-        </NativeSelect>
-        <NativeSelect
+        </Select>
+        <Select
           className="border-0 shadow-none"
           aria-label="Sort vehicles"
           value={sort}
-          onChange={(e) => setSort(e.target.value)}
+          onValueChange={(value) => setSort(value)}
           wrapperClassName="max-w-full cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0"
         >
           <option value="id">Vehicle ID</option>
           <option value="battery">Battery: highest first</option>
-        </NativeSelect>
+        </Select>
       </div>
       <FleetTable
         list={list}
@@ -136,7 +138,7 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
         </Button>
       </div>
       <Modal
-        title={v?.id ?? "Vehicle"}
+        title={v ? vehicleLabel(s, v.id) : "Vehicle"}
         description="Shared fleet vehicle details"
         drawer
         open={!!v}
@@ -145,7 +147,7 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
         {v && (
           <>
             <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
-              <Icon name="bike" size={64} />
+              <VehicleArtwork type={v.type} />
             </div>
             <dl className="record-details">
               <dt className="text-content-muted">Type</dt>

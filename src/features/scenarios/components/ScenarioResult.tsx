@@ -1,4 +1,11 @@
-import { Panel, Alert, Badge, Link, PageTitle } from "@/shared/ui";
+import {
+  Panel,
+  Alert,
+  Badge,
+  Link,
+  PageTitle,
+  RecordReference,
+} from "@/shared/ui";
 import type { State } from "@/domain/types";
 import { metricLabel, simulationLabel } from "@/integration/operatorRecords";
 import { campusTime } from "@/integration/studentRecords";
@@ -26,6 +33,7 @@ export function ScenarioResult({ s, run, revision }: ScenarioResultProps) {
         description={`${run.horizon_minutes}-minute horizon · Snapshot at ${campusTime(run.snapshot_at)}`}
         action={<Badge>completed</Badge>}
       />
+      <RecordReference value={run.run_id} label="Simulation reference" />
       <Alert>
         Baseline and scenario values are calculated from the same snapshot.
       </Alert>

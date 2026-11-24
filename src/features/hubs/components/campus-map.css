@@ -110,9 +110,11 @@
   background: var(--primary);
   color: var(--primary-foreground);
 }
-.campus-hub-pin svg {
-  width: 26px;
-  height: 26px;
+.campus-hub-logo {
+  width: 32px;
+  height: 32px;
+  background: currentColor;
+  mask: url("/brand/gogreen-symbol.svg") center / contain no-repeat;
 }
 .campus-hub-count {
   position: absolute;
@@ -160,9 +162,6 @@
     flex-direction: column;
     gap: 4px;
     padding: 12px;
-  }
-  .campus-map-heading > button {
-    padding-left: 0;
   }
   .campus-map-canvas {
     height: 330px;

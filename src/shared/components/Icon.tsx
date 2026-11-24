@@ -11,6 +11,7 @@ import {
   CircleHelp,
   Clock3,
   FlaskConical,
+  Focus,
   LayoutGrid,
   Leaf,
   LogOut,
@@ -48,6 +49,7 @@ const icons: Record<string, LucideIcon> = {
   clock: Clock3,
   dispatch: Truck,
   flask: FlaskConical,
+  focus: Focus,
   grid: LayoutGrid,
   help: CircleHelp,
   leaf: Leaf,
@@ -64,15 +66,16 @@ const icons: Record<string, LucideIcon> = {
   user: UserRound,
 };
 
-type IconProps = { name: string; size?: number };
+type IconProps = { name: string; size?: number; strokeWidth?: number };
 
-export function Icon({ name, size = 20 }: IconProps) {
+export function Icon({ name, size = 20, strokeWidth = 1.75 }: IconProps) {
   const Glyph = icons[name] ?? LayoutGrid;
 
   return (
     <Glyph
+      data-icon={name}
       size={size}
-      strokeWidth={1.75}
+      strokeWidth={strokeWidth}
       aria-hidden="true"
       focusable="false"
     />

@@ -1,7 +1,7 @@
 import {
   LoadingState,
   Panel,
-  NativeSelect,
+  Select,
   Alert,
   Badge,
   Battery,
@@ -57,9 +57,9 @@ function FindRideView() {
         className="min-w-0 grid grid-cols-3 gap-5 mb-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1 max-[600px]:gap-4 **:data-[slot~=field]:m-0 max-[600px]:**:data-[slot~=field]:m-0"
       >
         <Field label="Starting hub">
-          <NativeSelect
+          <Select
             value={origin}
-            onChange={(e) => setOrigin(e.target.value)}
+            onValueChange={(value) => setOrigin(value)}
             wrapperClassName="max-w-full cursor-pointer"
           >
             {s.hubs.map((h) => (
@@ -67,15 +67,15 @@ function FindRideView() {
                 {h.name}
               </option>
             ))}
-          </NativeSelect>
+          </Select>
         </Field>
         <Field
           label="Intended destination"
           hint="A return space is checked when you arrive."
         >
-          <NativeSelect
+          <Select
             value={destination}
-            onChange={(e) => setDestination(e.target.value)}
+            onValueChange={(value) => setDestination(value)}
             wrapperClassName="max-w-full cursor-pointer"
           >
             {s.hubs.map((h) => (
@@ -83,37 +83,37 @@ function FindRideView() {
                 {h.name}
               </option>
             ))}
-          </NativeSelect>
+          </Select>
         </Field>
         <Field label="Vehicle type">
-          <NativeSelect
+          <Select
             value={type}
-            onChange={(e) => setType(e.target.value)}
+            onValueChange={(value) => setType(value)}
             wrapperClassName="max-w-full cursor-pointer"
           >
             <option value="all">All vehicles</option>
             {config.vehicleTypes.map((vehicleType) => (
               <option key={vehicleType}>{vehicleType}</option>
             ))}
-          </NativeSelect>
+          </Select>
         </Field>
       </Panel>
-      {origin === destination && (
-        <Alert>
-          Returning to the same hub is allowed. Return capacity is checked at
-          arrival.
-        </Alert>
-      )}
       {(hold || ride) && (
         <Alert>
-          You already have an active {hold ? "hold" : "ride"}.{" "}
-          <Link
-            to={
-              hold ? `/student/holds/${hold.id}` : `/student/rides/${ride!.id}`
-            }
-          >
-            View it here <Icon name="arrow" size={16} />
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>You already have an active {hold ? "hold" : "ride"}.</span>
+            <Link
+              className="font-semibold"
+              to={
+                hold
+                  ? `/student/holds/${hold.id}`
+                  : `/student/rides/${ride!.id}`
+              }
+            >
+              View {hold ? "hold" : "active ride"}{" "}
+              <Icon name="arrow" size={16} />
+            </Link>
+          </div>
         </Alert>
       )}
       {error && <Alert tone="error">{error}</Alert>}
@@ -135,9 +135,6 @@ function FindRideView() {
           query.result.status === "ready"
             ? `${vehicles.length} suitable vehicles`
             : "Available vehicles"
-        }
-        subtitle={
-          "Availability and battery eligibility are checked by the server."
         }
       />
       <div className="grid grid-cols-3 gap-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1">
@@ -179,8 +176,7 @@ function FindRideView() {
       )}
       <div className="flex items-center gap-2 text-sm text-content-muted mt-5">
         <Icon name="help" /> Low battery, unknown battery, stale and unavailable
-        vehicles are excluded. Journey suitability unavailable for unknown
-        readings.
+        vehicles are excluded.
       </div>
       <Modal
         title={`Hold ${v?.id ?? "vehicle"}?`}

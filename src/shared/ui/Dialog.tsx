@@ -17,6 +17,7 @@ type ModalProps = {
   open?: boolean;
   onOpenChange?: (v: boolean) => void;
   drawer?: boolean;
+  onCloseAutoFocus?: (event: Event) => void;
 };
 
 export function Modal({
@@ -27,6 +28,7 @@ export function Modal({
   open,
   onOpenChange,
   drawer = false,
+  onCloseAutoFocus,
 }: ModalProps) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -48,6 +50,8 @@ export function Modal({
           openerRef.current = document.activeElement as HTMLElement;
         }}
         onCloseAutoFocus={(event) => {
+          onCloseAutoFocus?.(event);
+          if (event.defaultPrevented) return;
           if (
             !trigger ||
             !triggerRef.current?.isConnected ||

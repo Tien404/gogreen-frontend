@@ -12,7 +12,7 @@ export function Alert({ children, tone = "info" }: AlertProps) {
     <ShadcnAlert
       variant={tone === "error" ? "destructive" : "default"}
       data-tone={tone}
-      className="border-0 bg-warning-surface text-warning leading-6 [&_p]:text-inherit data-[tone=error]:bg-danger-surface data-[tone=error]:text-danger [&_a]:underline p-4 my-5 mx-0"
+      className="border-0 bg-warning-surface text-warning leading-6 [&_p]:text-inherit data-[tone=error]:bg-danger-surface data-[tone=error]:text-danger [&_a]:underline [&_a]:inline-flex [&_a]:items-center [&_a]:gap-2 [&_a]:justify-self-start p-4 my-5 mx-0"
       role={tone === "error" ? "alert" : "status"}
     >
       <Icon name={tone === "error" ? "alert" : "help"} />

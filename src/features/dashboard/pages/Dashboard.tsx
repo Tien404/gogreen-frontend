@@ -68,7 +68,7 @@ function DashboardView() {
               <Link
                 key={title}
                 to={`/student/${path}`}
-                className="bg-panel rounded-lg flex items-center gap-4  hover:text-content [&_>_svg]:ml-auto [&_>_svg]:text-content-muted [&_>_svg]:w-4.5 max-[1200px]:gap-2 max-[1200px]:[&_>_svg]:hidden max-[600px]:gap-4 max-[600px]:[&_>_svg]:block p-5 max-[1200px]:p-4 max-[600px]:p-4"
+                className="interactive-card bg-panel rounded-lg flex items-center gap-4 hover:text-content [&_>_svg]:ml-auto [&_>_svg]:text-content-muted [&_>_svg]:w-4.5 max-[1200px]:gap-2 max-[1200px]:[&_>_svg]:hidden max-[600px]:gap-4 max-[600px]:[&_>_svg]:block p-5 max-[1200px]:p-4 max-[600px]:p-4"
               >
                 <span
                   data-slot="icon-box"
@@ -254,9 +254,7 @@ function CurrentDateTime() {
       <Icon name="sun" />
       <time dateTime={now.toISOString()}>
         {date}
-        <small className="leading-[1.6]">
-          {currentTime} · {config.timezone}
-        </small>
+        <small className="leading-[1.6]">{currentTime}</small>
       </time>
     </div>
   );

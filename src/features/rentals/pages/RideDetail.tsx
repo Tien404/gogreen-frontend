@@ -1,6 +1,9 @@
+import { rememberedVehicleType } from "../model/vehiclePresentation";
+import { vehicleLabel } from "@/integration/recordLabels";
 import {
   Panel,
-  NativeSelect,
+  RecordReference,
+  Select,
   Alert,
   Badge,
   Battery,
@@ -53,7 +56,7 @@ function RideDetailView({ id }: RideDetailProps) {
               ? "You’ve arrived."
               : "Ride disputed"
         }
-        description={`${r.id} · ${r.status === "active" ? "Your ride is active" : r.status === "completed" ? "Ride completed" : "Ride disputed"}`}
+        description={`${vehicleLabel(s, r.vehicle)} · ${r.status === "active" ? "Your ride is active" : r.status === "completed" ? "Ride completed" : "Ride disputed"}`}
         action={<Badge>{r.status}</Badge>}
       />
       <div
@@ -62,7 +65,9 @@ function RideDetailView({ id }: RideDetailProps) {
       >
         <Panel data-slot="panel" className="min-w-0">
           <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
-            <VehicleArtwork type={v?.type ?? ""} />
+            <VehicleArtwork
+              type={v?.type ?? rememberedVehicleType(r.vehicle) ?? ""}
+            />
           </div>
           <SectionHead
             title={v ? `${r.vehicle} · ${v.type}` : r.vehicle}
@@ -85,6 +90,7 @@ function RideDetailView({ id }: RideDetailProps) {
                 (r.destination || "Not specified")}
             </dd>
           </dl>
+          <RecordReference value={r.id} label="Ride reference" />
         </Panel>
         <Panel data-slot="panel" className="min-w-0">
           <SectionHead
@@ -99,9 +105,9 @@ function RideDetailView({ id }: RideDetailProps) {
           {r.status === "active" ? (
             <>
               <Field label="Return hub">
-                <NativeSelect
+                <Select
                   value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
+                  onValueChange={(value) => setDestination(value)}
                   wrapperClassName="max-w-full cursor-pointer"
                 >
                   {s.hubs.map((h) => (
@@ -109,7 +115,7 @@ function RideDetailView({ id }: RideDetailProps) {
                       {h.name} · {freeSpaces(s, h.id)} available now
                     </option>
                   ))}
-                </NativeSelect>
+                </Select>
               </Field>
               <Alert>
                 Space is checked on confirmation. Selecting a hub does not

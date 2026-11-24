@@ -1,3 +1,4 @@
+import { activityResourceLabel } from "@/integration/recordLabels";
 import { useApp } from "@/app/providers/AppContext";
 import { currentProfile } from "@/domain/identity";
 import { useState } from "react";
@@ -11,7 +12,7 @@ export function useActivity() {
       (s.role === "operator" ||
         a.persona === s.persona ||
         (!a.persona && a.actor === currentProfile(s).name)) &&
-      `${a.action} ${a.resource} ${a.reason}`
+      `${a.action} ${activityResourceLabel(s, a)} ${a.resource} ${a.reason}`
         .toLowerCase()
         .replaceAll(/[-_]/g, " ")
         .includes(search) &&

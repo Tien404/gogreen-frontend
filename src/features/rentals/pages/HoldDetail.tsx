@@ -1,5 +1,9 @@
+import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
+import { rememberedVehicleType } from "../model/vehiclePresentation";
+import { vehicleLabel } from "@/integration/recordLabels";
 import {
   Panel,
+  RecordReference,
   Alert,
   Badge,
   Battery,
@@ -38,7 +42,8 @@ function HoldDetailView({ id }: HoldDetailProps) {
   if (!h) return <Missing />;
   const remaining = active ? Math.max(0, Math.ceil(h.expires - s.clock)) : 0;
   const hubName = (id: string) =>
-    s.hubs.find((hub) => hub.id === id)?.name ?? (id || "Not specified");
+    s.hubs.find((hub) => hub.id === id)?.name ??
+    (id ? "Unknown hub" : "Not specified");
   async function pickup() {
     const result = await command.run(() =>
       api.request("POST /rentals/reservations/{reservation_id}/pickup", {
@@ -65,7 +70,7 @@ function HoldDetailView({ id }: HoldDetailProps) {
     <>
       <PageTitle
         title={active ? "Your ride is waiting." : `Hold ${h.status}`}
-        description={`${h.id} · Pick up at ${hubName(h.origin)}`}
+        description={`${vehicleLabel(s, h.vehicle)} · Pick up at ${hubName(h.origin)}`}
         action={<Badge>{h.status}</Badge>}
       />
       <div
@@ -74,7 +79,9 @@ function HoldDetailView({ id }: HoldDetailProps) {
       >
         <Panel data-slot="panel" className="min-w-0">
           <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
-            <Icon name="bike" size={96} />
+            <VehicleArtwork
+              type={v?.type ?? rememberedVehicleType(h.vehicle) ?? ""}
+            />
           </div>
           <SectionHead
             title={v ? `${h.vehicle} · ${v.type}` : h.vehicle}
@@ -86,10 +93,9 @@ function HoldDetailView({ id }: HoldDetailProps) {
             <dt className="text-content-muted">Intended destination</dt>
             <dd className="wrap-anywhere m-0">{hubName(h.destination)}</dd>
             <dt className="text-content-muted">Hold expires</dt>
-            <dd className="wrap-anywhere m-0">
-              {time(h.expires)} · Asia/Ho_Chi_Minh
-            </dd>
+            <dd className="wrap-anywhere m-0">{time(h.expires)}</dd>
           </dl>
+          <RecordReference value={h.id} label="Hold reference" />
           <Alert>
             No return space is reserved. Check availability when you arrive.
           </Alert>

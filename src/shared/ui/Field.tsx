@@ -29,7 +29,7 @@ export function Field({ label, children, hint, error }: FieldProps) {
   return (
     <div
       data-slot="field"
-      className="mb-5 flex min-w-0 flex-col gap-2 [&_[data-slot=native-select-wrapper]]:w-full"
+      className="mb-5 flex min-w-0 flex-col gap-2 [&_[data-slot=select-wrapper]]:w-full"
     >
       <Label htmlFor={id} className="leading-5">
         <span>

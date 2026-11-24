@@ -3,12 +3,7 @@ const assert = require("node:assert/strict");
 const { test } = require("node:test");
 const { createElement: h } = require("react");
 const { renderToStaticMarkup: render } = require("react-dom/server");
-const {
-  Field,
-  Input,
-  NativeSelect,
-  Button,
-} = require("../src/shared/ui/index.ts");
+const { Field, Input, Select, Button } = require("../src/shared/ui/index.ts");
 const { cn } = require("../src/shared/lib/utils.ts");
 
 test("field keeps an existing control ID and associates its label, hint and error", () => {
@@ -31,13 +26,13 @@ test("field keeps an existing control ID and associates its label, hint and erro
   assert.doesNotMatch(html, /Use your account/);
 });
 
-test("native select retains native form submission, required and disabled semantics", () => {
+test("custom select associates its trigger with the field and retains required/disabled semantics", () => {
   const html = render(
     h(
       Field,
       { label: "Hub" },
       h(
-        NativeSelect,
+        Select,
         {
           name: "hub",
           required: true,
@@ -51,8 +46,9 @@ test("native select retains native form submission, required and disabled semant
   assert.match(html, /<select[^>]+name="hub"/);
   assert.match(html, /required=""/);
   assert.match(html, /disabled=""/);
-  assert.match(html, /<option value="metro" selected=""/);
-  const id = html.match(/<select[^>]+id="([^"]+)"/)[1];
+  assert.match(html, /role="combobox"/);
+  assert.match(html, />Metro<\/span>/);
+  const id = html.match(/<button[^>]+id="([^"]+)"/)[1];
   assert.ok(html.includes(`for="${id}"`));
 });
 

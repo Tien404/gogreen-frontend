@@ -12,7 +12,6 @@ import {
 export function useHubs() {
   const { s, api } = useApp();
   const [search, setSearch] = useState("");
-  const [view, setView] = useState("map");
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState("");
   const load = useCallback(
@@ -62,8 +61,6 @@ export function useHubs() {
     retry,
     search,
     setSearch,
-    view,
-    setView,
     filter,
     setFilter,
     selected,

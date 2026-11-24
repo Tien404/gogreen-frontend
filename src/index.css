@@ -16,6 +16,7 @@
   --color-surface-muted: #f1f3f4;
   --color-surface-inset: #f1f3f4;
   --color-divider: #e2e5e9;
+  --color-table-hover: #e7eaed;
   --color-control-border: #7d9183;
   --color-soft: var(--green-surface);
 
@@ -37,7 +38,7 @@
 
   /* Shared effects, typography, spacing, shape and motion. */
 
-  --font-sans: saans, "saans Fallback", Arial, sans-serif;
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
   --animate-duration-instant: 150ms;
   --animate-duration-fast: 200ms;
   --animate-fade-in: fade-in 150ms ease-out;
@@ -296,7 +297,7 @@
       flex-basis: 100%;
       max-width: none;
     }
-    .filter-bar > [data-slot="native-select-wrapper"] {
+    .filter-bar > [data-slot="select-wrapper"] {
       flex: 1 1 120px;
     }
   }
@@ -342,23 +343,32 @@
 
 @layer components {
   .segmented-control {
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
     gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
+    background: var(--color-surface-inset);
   }
   .segmented-control button {
     min-height: 44px;
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: 7px;
     font-size: 14px;
     color: var(--color-content-muted);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
   }
   .segmented-control button[aria-pressed="true"] {
-    background: var(--green-surface);
+    background: var(--color-panel);
     color: var(--primary);
     font-weight: 600;
   }
   .segmented-control button:hover {
+    background: rgba(255, 255, 255, 0.5);
     color: var(--primary);
   }
 }
@@ -374,7 +384,7 @@
   --toastify-color-dark: #1c1e21;
   --toastify-color-info: var(--primary);
   --toastify-color-success: var(--primary);
-  --toastify-color-warning: #875408;
+  --toastify-color-warning: #c08a12;
   --toastify-color-error: #a3352d;
   --toastify-toast-width: 360px;
   --toastify-toast-background: #ffffff;
@@ -385,7 +395,7 @@
   --toastify-color-progress-light: var(--primary);
   --toastify-color-progress-info: var(--primary);
   --toastify-color-progress-success: var(--primary);
-  --toastify-color-progress-warning: #875408;
+  --toastify-color-progress-warning: #efc654;
   --toastify-color-progress-error: #a3352d;
 }
 
@@ -406,4 +416,43 @@
 
 .Toastify__toast--success .Toastify__toast-icon svg {
   fill: var(--primary);
+}
+
+.interactive-card {
+  cursor: pointer;
+}
+.interactive-card:hover,
+.interactive-card:focus-visible {
+  background: var(--color-panel);
+}
+a [data-icon="arrow"],
+button [data-icon="arrow"] {
+  transition:
+    transform 180ms ease,
+    color 180ms ease;
+}
+a:hover [data-icon="arrow"],
+a:focus-visible [data-icon="arrow"],
+button:enabled:hover [data-icon="arrow"],
+button:enabled:focus-visible [data-icon="arrow"] {
+  transform: translateX(4px);
+}
+.interactive-card:hover [data-icon="arrow"],
+.interactive-card:focus-visible [data-icon="arrow"] {
+  color: var(--primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  a [data-icon="arrow"],
+  button [data-icon="arrow"] {
+    transition: none;
+    transform: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .segmented-control {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
 }

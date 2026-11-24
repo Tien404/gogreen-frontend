@@ -8,7 +8,7 @@ import {
   Empty,
   Input,
   Link,
-  NativeSelect,
+  Select,
   Table,
   TableBody,
   TableCaption,
@@ -28,8 +28,6 @@ export function Hubs() {
     retry,
     search,
     setSearch,
-    view,
-    setView,
     filter,
     setFilter,
     selected,
@@ -61,7 +59,7 @@ export function Hubs() {
       <div
         className="hub-directory-toolbar"
         role="group"
-        aria-label="Hub filters and view"
+        aria-label="Hub filters"
       >
         <div data-slot="search-input" className="hub-directory-search">
           <Icon name="search" size={18} />
@@ -73,31 +71,18 @@ export function Hubs() {
             className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
-        <NativeSelect
+        <Select
           className="border-0 shadow-none"
           wrapperClassName="hub-directory-filter"
           aria-label="Filter hub resources"
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onValueChange={(value) => setFilter(value)}
         >
           <option value="all">All resources</option>
           <option value="vehicles">Shared vehicles available</option>
           <option value="parking">Parking available</option>
           <option value="charging">Charging available</option>
-        </NativeSelect>
-        <div className="hub-directory-views" role="group" aria-label="Hub view">
-          {["map", "list"].map((v) => (
-            <button
-              key={v}
-              type="button"
-              aria-pressed={view === v}
-              onClick={() => setView(v)}
-            >
-              <Icon name={v === "map" ? "map" : "menu"} size={16} />
-              {v === "map" ? "Map" : "List"}
-            </button>
-          ))}
-        </div>
+        </Select>
       </div>
 
       {source.status === "loading" && <LoadingState label={"Loading hubs…"} />}
@@ -119,7 +104,7 @@ export function Hubs() {
               </Button>
             )}
           </div>
-          {view === "map" && hubs.length > 0 && (
+          {hubs.length > 0 && (
             <CampusMap
               selected={selected}
               onSelect={setSelected}

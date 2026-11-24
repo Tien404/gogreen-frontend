@@ -1,4 +1,4 @@
-import { Panel, NativeSelect, Input, Alert, Button, Field } from "@/shared/ui";
+import { Panel, Select, Input, Alert, Button, Field } from "@/shared/ui";
 import { Icon } from "@/shared/components/Icon";
 
 import type { WhatIfModel } from "../hooks/useWhatIf";
@@ -51,20 +51,20 @@ export function ScenarioForm({
       <Panel data-slot="panel" className="min-w-0">
         <form onSubmit={runScenario}>
           <Field label="Scenario category">
-            <NativeSelect
+            <Select
               value={type}
-              onChange={(e) => setType(e.target.value)}
+              onValueChange={(value) => setType(value)}
               wrapperClassName="max-w-full cursor-pointer"
             >
               {types.map((t) => (
                 <option key={t}>{t}</option>
               ))}
-            </NativeSelect>
+            </Select>
           </Field>
           <Field label="Affected hub">
-            <NativeSelect
+            <Select
               value={hub}
-              onChange={(e) => setHub(e.target.value)}
+              onValueChange={(value) => setHub(value)}
               wrapperClassName="max-w-full cursor-pointer"
             >
               {
@@ -77,7 +77,7 @@ export function ScenarioForm({
                   ))}
                 </>
               }
-            </NativeSelect>
+            </Select>
           </Field>
           <Field label="Horizon (minutes)">
             {
@@ -93,10 +93,10 @@ export function ScenarioForm({
           </Field>
           {fault ? (
             <Field label="Charging point">
-              <NativeSelect
+              <Select
                 required
                 value={point}
-                onChange={(e) => setPoint(e.target.value)}
+                onValueChange={(value) => setPoint(value)}
                 wrapperClassName=""
               >
                 <option value="">Choose a working point</option>
@@ -111,7 +111,7 @@ export function ScenarioForm({
                     {item.resource_id}
                   </option>
                 ))}
-              </NativeSelect>
+              </Select>
             </Field>
           ) : (
             <Field label="Additional rental requests">

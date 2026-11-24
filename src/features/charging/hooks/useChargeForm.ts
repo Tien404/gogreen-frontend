@@ -1,3 +1,4 @@
+import { parkingLabel, vehicleLabel } from "@/integration/recordLabels";
 import { campusInputToIso, recordUrl } from "@/integration/studentRecords";
 import { apiErrorMessage } from "@/shared/api/errors";
 import { useApiAction } from "@/shared/api/useApiAction";
@@ -18,18 +19,18 @@ export function useChargeForm({ onDone }: { onDone?: (id: string) => void }) {
     )
     .map((booking) => ({
       id: booking.vehicle,
-      label: `${booking.vehicle} · ${booking.id}`,
+      label: `${vehicleLabel(s, booking.vehicle)} · ${parkingLabel(s, booking)}`,
       booking: booking.id,
     }));
   const [choice, setChoice] = useState(
-    eligible.find((row) => row.booking === params.get("parking"))?.label ??
-      eligible[0]?.label ??
+    eligible.find((row) => row.booking === params.get("parking"))?.booking ??
+      eligible[0]?.booking ??
       "",
   );
   const [needBy, setNeedBy] = useState("");
   const [target, setTarget] = useState(80);
   const [error, setError] = useState("");
-  const selected = eligible.find((e) => e.label === choice);
+  const selected = eligible.find((e) => e.booking === choice);
   const requestCharge = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selected) return;
@@ -61,6 +62,25 @@ export function useChargeForm({ onDone }: { onDone?: (id: string) => void }) {
   };
   return {
     student,
+    selectedContext: selected
+      ? {
+          vehicle: vehicleLabel(s, selected.id),
+          parking: parkingLabel(
+            s,
+            s.bookings.find((booking) => booking.id === selected.booking)!,
+          ),
+          battery:
+            s.privateVehicles.find((vehicle) => vehicle.id === selected.id)
+              ?.battery ?? null,
+          hub:
+            s.hubs.find(
+              (hub) =>
+                hub.id ===
+                s.bookings.find((booking) => booking.id === selected.booking)
+                  ?.hub,
+            )?.name ?? "Unknown hub",
+        }
+      : null,
 
     needBy,
     setNeedBy,

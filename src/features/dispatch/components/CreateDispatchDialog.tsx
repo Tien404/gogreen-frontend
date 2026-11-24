@@ -1,4 +1,5 @@
-import { NativeSelect, Input, Alert, Button, Field, Modal } from "@/shared/ui";
+import { vehicleLabel } from "@/integration/recordLabels";
+import { Select, Input, Alert, Button, Field, Modal } from "@/shared/ui";
 import { freeSpaces } from "@/domain/selectors";
 
 import type { DispatchesModel } from "../hooks/useDispatches";
@@ -50,10 +51,10 @@ export function CreateDispatchDialog({
     >
       <form onSubmit={submitDispatch}>
         <Field label="Source hub">
-          <NativeSelect
+          <Select
             value={source}
-            onChange={(e) => {
-              setSource(e.target.value);
+            onValueChange={(value) => {
+              setSource(value);
               setVehicles([]);
               setReview(false);
             }}
@@ -64,13 +65,13 @@ export function CreateDispatchDialog({
                 {h.name}
               </option>
             ))}
-          </NativeSelect>
+          </Select>
         </Field>
         <Field label="Destination hub">
-          <NativeSelect
+          <Select
             value={destination}
-            onChange={(e) => {
-              setDestination(e.target.value);
+            onValueChange={(value) => {
+              setDestination(value);
               setReview(false);
             }}
             wrapperClassName="max-w-full cursor-pointer"
@@ -80,7 +81,7 @@ export function CreateDispatchDialog({
                 {h.name}
               </option>
             ))}
-          </NativeSelect>
+          </Select>
         </Field>
         <fieldset className="border border-solid border-divider rounded-lg mt-0 mb-5 p-4 mx-0">
           <legend className="text-sm py-0 px-2">
@@ -89,7 +90,7 @@ export function CreateDispatchDialog({
           <div className="grid gap-3 max-h-55 overflow-auto">
             {candidates.map((v) => (
               <label
-                key={v.id}
+                key={vehicleLabel(s, v.id)}
                 className="flex gap-3 text-sm items-center min-h-11"
               >
                 <Input
@@ -106,7 +107,7 @@ export function CreateDispatchDialog({
                   }}
                   className="size-4.5 shrink-0 accent-primary p-0 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 focus-visible:ring-0"
                 />
-                {v.id} · {v.type} ·{" "}
+                {vehicleLabel(s, v.id)} · {v.type} ·{" "}
                 {v.battery === null ? "Battery unavailable" : `${v.battery}%`}
               </label>
             ))}

@@ -1,5 +1,8 @@
+import { MobilityArtwork } from "@/shared/components/MobilityArtwork";
+import { parkingLabel, vehicleLabel } from "@/integration/recordLabels";
 import {
   Panel,
+  RecordReference,
   Alert,
   Badge,
   Button,
@@ -69,13 +72,13 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
     <>
       <Link
         className="inline-flex items-center gap-2 text-sm text-content-muted mb-5"
-        to="/student"
+        to="/student/parking"
       >
-        <Icon name="arrow-left" size={16} /> Overview
+        <Icon name="arrow-left" size={16} /> Parking
       </Link>
       <PageTitle
         title="Parking booking"
-        description={`${b.id} · ${s.hubs.find((h) => h.id === b.hub)?.name} · ${b.vehicle}`}
+        description={`${vehicleLabel(s, b.vehicle)} · ${parkingLabel(s, b)}`}
         action={<Badge>{b.status}</Badge>}
       />
       <div
@@ -84,14 +87,14 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
       >
         <Panel data-slot="panel" className="min-w-0">
           <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
-            <Icon name="parking" size={64} />
+            <MobilityArtwork
+              name="campus-hub-reduced"
+              className="h-40 w-full"
+            />
           </div>
           <dl className="record-details">
             <dt className="text-content-muted">Vehicle</dt>
-            <dd className="wrap-anywhere m-0">
-              {s.privateVehicles.find((v) => v.id === b.vehicle)?.identifier ??
-                b.vehicle}
-            </dd>
+            <dd className="wrap-anywhere m-0">{vehicleLabel(s, b.vehicle)}</dd>
             <dt className="text-content-muted">Hub</dt>
             <dd className="wrap-anywhere m-0">
               {s.hubs.find((h) => h.id === b.hub)?.name}
@@ -100,10 +103,12 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
             <dd className="wrap-anywhere m-0">{studentDate(b.start)}</dd>
             <dt className="text-content-muted">Ends</dt>
             <dd className="wrap-anywhere m-0">{studentDate(b.end)}</dd>
-            <dt className="text-content-muted">Timezone</dt>
-            <dd className="wrap-anywhere m-0">Asia/Ho_Chi_Minh</dd>
             <dt className="text-content-muted">Service</dt>
-            <dd className="wrap-anywhere m-0">{b.service}</dd>
+            <dd className="wrap-anywhere m-0">
+              {s.charges.some((charge) => charge.booking === b.id)
+                ? "Parking + charging request"
+                : b.service}
+            </dd>
             {b.space && (
               <>
                 <dt className="text-content-muted">Parking space</dt>
@@ -117,6 +122,7 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
                 : "No current space occupied by this booking"}
             </dd>
           </dl>
+          <RecordReference value={b.id} label="Parking reference" />
           {s.charges
             .filter((c) => c.booking === b.id)
             .map((c) => (
@@ -125,7 +131,9 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
                 key={c.id}
                 to={recordUrl("charging", c.id)}
               >
-                <span className="min-w-0 wrap-anywhere">{c.id} · Charging</span>
+                <span className="min-w-0 wrap-anywhere">
+                  Charging · {c.target}% target
+                </span>
                 <Badge>{c.status}</Badge>
               </Link>
             ))}
@@ -136,13 +144,18 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
             <Alert tone="error">{apiErrorMessage(command.error)}</Alert>
           )}
           {error && <Alert tone="error">{error}</Alert>}
-          {["confirmed", "checked-in"].includes(b.status) && (
-            <Link
-              to={`/student/charging/new?${new URLSearchParams({ parking: b.id })}`}
-            >
-              Request charging
-            </Link>
-          )}
+          {["confirmed", "checked-in"].includes(b.status) &&
+            !s.charges.some(
+              (charge) =>
+                charge.booking === b.id &&
+                ["pending", "scheduled", "active"].includes(charge.status),
+            ) && (
+              <Link
+                to={`/student/charging/new?${new URLSearchParams({ parking: b.id })}`}
+              >
+                Request charging
+              </Link>
+            )}
           {b.status === "confirmed" && (
             <>
               <Alert>
@@ -156,7 +169,7 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
               </Button>
               <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
                 <Confirm
-                  title={`Cancel ${b.id}?`}
+                  title="Cancel this parking booking?"
                   description={
                     "Cancel this parking booking and any charging request linked to it."
                   }

@@ -113,6 +113,8 @@ test("student routes use shared screens and wait for server data", () => {
     "/student/holds/hold-1",
     "/student/rides/ride-1",
     "/student/vehicles",
+    "/student/parking",
+    "/student/parking",
     "/student/parking/new",
     "/student/parking/booking-1",
     "/student/charging",

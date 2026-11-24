@@ -13,7 +13,7 @@ export function HubCards({ limit = 4 }: HubCardsProps) {
       {s.hubs.slice(0, limit).map((h) => (
         <Link
           to={`/${s.role}/hubs/${encodeURIComponent(h.id)}`}
-          className="rounded-lg bg-panel block min-w-0  hover:text-content p-5 max-[600px]:p-5"
+          className="interactive-card rounded-lg bg-panel block min-w-0 hover:text-content p-5 max-[600px]:p-5"
           key={h.id}
         >
           <div className="flex justify-between items-center mb-5 gap-2 max-[600px]:mb-3">

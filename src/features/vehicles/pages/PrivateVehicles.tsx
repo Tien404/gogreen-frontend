@@ -1,7 +1,7 @@
 import {
   Panel,
   Input,
-  NativeSelect,
+  Select,
   Alert,
   Battery,
   Button,
@@ -13,6 +13,7 @@ import {
 } from "@/shared/ui";
 import { StudentData } from "@/integration/StudentScreenData";
 import { config } from "@/config/app";
+import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
 import { Icon } from "@/shared/components/Icon";
 
 import { usePrivateVehicles } from "../hooks/usePrivateVehicles";
@@ -24,8 +25,16 @@ export function PrivateVehicles() {
   );
 }
 function PrivateVehiclesView() {
-  const { s, open, setOpen, error, registerVehicle, busy } =
-    usePrivateVehicles();
+  const {
+    s,
+    open,
+    setOpen,
+    error,
+    registerVehicle,
+    busy,
+    openCharging,
+    chargingVehicle,
+  } = usePrivateVehicles();
   return (
     <>
       <PageTitle
@@ -38,10 +47,6 @@ function PrivateVehiclesView() {
           </Button>
         }
       />
-      <Alert>
-        Private vehicles belong to your account. They are separate from shared
-        rentals and operator dispatch.
-      </Alert>
       {!s.privateVehicles.length && (
         <Empty
           title="No private vehicles"
@@ -54,7 +59,7 @@ function PrivateVehiclesView() {
           .map((v) => (
             <Panel data-slot="panel" className="min-w-0" key={v.id}>
               <div className="h-37.5 rounded-lg bg-soft flex items-center justify-center text-primary relative mb-5 [&_>_svg]:w-27.5 [&_>_svg]:h-27.5">
-                <Icon name="bike" size={96} />
+                <VehicleArtwork type={v.type} />
                 <span className="absolute bottom-3 left-3 text-sm bg-panel/80 rounded-lg text-content-muted py-1 px-2">
                   Private {v.type}
                 </span>
@@ -64,15 +69,26 @@ function PrivateVehiclesView() {
                 <Battery value={v.battery} />
               </div>
               <p className="leading-[1.65] mt-1 mb-3 mx-0">
-                {v.id} · Your private vehicle
+                {v.type} · Your private vehicle
               </p>
-              <Link
-                to="/student/parking/new"
-                data-slot="button"
-                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal bg-surface-inset text-content [&:hover:not(:disabled)]:bg-soft w-full mt-5 py-2 px-5"
-              >
-                Book parking <Icon name="arrow" size={16} />
-              </Link>
+              <div className="mt-5 grid grid-cols-2 gap-2 max-[400px]:grid-cols-1">
+                <Button variant="secondary" asChild>
+                  <Link
+                    to={`/student/parking/new?vehicle=${encodeURIComponent(v.id)}`}
+                  >
+                    Book parking <Icon name="arrow" size={16} />
+                  </Link>
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => void openCharging(v.id)}
+                  disabled={chargingVehicle !== null}
+                  aria-busy={chargingVehicle === v.id}
+                >
+                  <Icon name="bolt" size={16} />
+                  {chargingVehicle === v.id ? "Checking…" : "Charging"}
+                </Button>
+              </div>
             </Panel>
           ))}
       </div>
@@ -95,14 +111,14 @@ function PrivateVehiclesView() {
             />
           </Field>
           <Field label="Vehicle type">
-            <NativeSelect
+            <Select
               name="vehicleType"
               wrapperClassName="max-w-full cursor-pointer"
             >
               {config.vehicleTypes.map((vehicleType) => (
                 <option key={vehicleType}>{vehicleType}</option>
               ))}
-            </NativeSelect>
+            </Select>
           </Field>
           <Field label="Battery (%)">
             <Input

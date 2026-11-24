@@ -1,3 +1,4 @@
+import { vehicleLabel } from "@/integration/recordLabels";
 import {
   Panel,
   Table,
@@ -64,7 +65,7 @@ function DispatchesView({ id }: DispatchesProps) {
         </Link>
         <PageTitle
           title="Vehicle dispatch"
-          description={`${d.id} · ${s.hubs.find((h) => h.id === d.source)?.name} → ${s.hubs.find((h) => h.id === d.destination)?.name}`}
+          description={`${d.vehicles.map((id) => vehicleLabel(s, id)).join(", ")} · ${s.hubs.find((h) => h.id === d.source)?.name} → ${s.hubs.find((h) => h.id === d.destination)?.name}`}
           action={<Badge>{d.status}</Badge>}
         />
         <DispatchDetails
@@ -117,21 +118,21 @@ function DispatchesView({ id }: DispatchesProps) {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="[&_tr:hover]:bg-surface-muted">
+            <TableBody>
               {s.dispatches.map((d) => (
                 <TableRow key={d.id}>
                   <TableHead
                     scope="row"
                     className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75"
                   >
-                    {d.id}
+                    {d.vehicles.map((id) => vehicleLabel(s, id)).join(", ")}
                   </TableHead>
                   <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     {s.hubs.find((h) => h.id === d.source)?.name} →{" "}
                     {s.hubs.find((h) => h.id === d.destination)?.name}
                   </TableCell>
                   <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                    {d.vehicles.join(", ")}
+                    {d.vehicles.map((id) => vehicleLabel(s, id)).join(", ")}
                   </TableCell>
                   <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                     <Badge>{d.status}</Badge>

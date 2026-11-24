@@ -1,3 +1,4 @@
+import { chargingLabel, vehicleLabel } from "@/integration/recordLabels";
 import {
   Panel,
   Table,
@@ -57,9 +58,7 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
           title="Request charging"
           description="Choose your vehicle, parking context and target charge."
         />
-        <Panel data-slot="panel" className="min-w-0 max-w-162.5">
-          <ChargeForm />
-        </Panel>
+        <ChargeForm />
       </>
     );
   if (id) {
@@ -74,7 +73,7 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
         </Link>
         <PageTitle
           title="Charging session"
-          description={`${c.id} · ${c.vehicle} · ${s.hubs.find((h) => h.id === c.hub)?.name}`}
+          description={chargingLabel(s, c)}
           action={<Badge>{c.status}</Badge>}
         />
         <ChargingSessionDetails s={s} c={c} canAct={canAct} />
@@ -110,7 +109,7 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
               key={t}
               aria-pressed={tab === t}
               onClick={() => setTab(t)}
-              className="border-0 border-solid rounded-lg bg-transparent text-content-muted text-sm flex items-center gap-2 capitalize min-h-9 max-[600px]:flex-1 py-2 px-3 max-[600px]:p-2"
+              className="capitalize"
             >
               {t}
             </button>
@@ -120,8 +119,7 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
       <Alert>
         {
           "Charging priority uses need-by time, lower battery, then request order."
-        }{" "}
-        Active sessions are not interrupted for a new request.
+        }
       </Alert>
       <Panel data-slot="panel" className="min-w-0">
         <div className="min-w-0 max-w-full">
@@ -132,7 +130,7 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
             <TableHeader>
               <TableRow>
                 <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                  Request / vehicle
+                  Vehicle
                 </TableHead>
                 <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
                   Hub
@@ -151,16 +149,16 @@ function ChargingView({ id, newRequest = false }: ChargingProps) {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="[&_tr:hover]:bg-surface-muted">
+            <TableBody>
               {visible.map((c) => (
                 <TableRow key={c.id}>
                   <TableHead
                     scope="row"
                     className="border-b border-solid border-b-divider "
                   >
-                    {c.id}
+                    {vehicleLabel(s, c.vehicle)}
                     <small className="leading-[1.6] block font-normal max-w-75">
-                      {c.vehicle} ·{" "}
+                      Target {c.target}% ·{" "}
                       {c.owner === "operator" ? "Shared" : "Private"}
                     </small>
                   </TableHead>

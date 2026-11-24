@@ -32,7 +32,13 @@ type VehicleArtworkProps = { type: string };
 export function VehicleArtwork({ type }: VehicleArtworkProps) {
   return (
     <MobilityArtwork
-      name={type === "Electric motorcycle" ? "electric-motorcycle" : "e-bike"}
+      name={
+        type === "Electric motorcycle"
+          ? "electric-motorcycle"
+          : type === "Electric bicycle"
+            ? "e-bike"
+            : "campus-hub-reduced"
+      }
       className="h-30 w-37.5 drop-shadow-[0_10px_8px] drop-shadow-content/10"
     />
   );

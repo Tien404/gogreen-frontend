@@ -50,6 +50,7 @@ export const studentScreens = {
   hold: ["hubs", "hold"],
   ride: ["hubs", "ride"],
   privateVehicles: ["privateVehicles"],
+  parkingList: ["hubs", "bookings", "privateVehicles", "charges"],
   newParking: ["hubs", "privateVehicles"],
   parking: ["hubs", "privateVehicles", "booking", "charges"],
   charging: ["hubs", "charges", "privateVehicles"],

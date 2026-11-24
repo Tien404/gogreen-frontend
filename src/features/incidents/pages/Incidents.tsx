@@ -1,6 +1,8 @@
+import { assetLabel } from "@/integration/recordLabels";
+import { RecordReference } from "@/shared/ui/RecordReference";
 import {
   Input,
-  NativeSelect,
+  Select,
   Panel,
   Textarea,
   Alert,
@@ -72,17 +74,17 @@ function IncidentsView() {
             className="max-w-full w-full min-w-0 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
-        <NativeSelect
+        <Select
           className="border-0 shadow-none"
           aria-label="Incident status"
           value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          onValueChange={(value) => setFilter(value)}
           wrapperClassName="max-w-full cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0"
         >
           <option value="open">Open incidents</option>
           <option value="resolved">Resolved incidents</option>
           <option value="all">All incidents</option>
-        </NativeSelect>
+        </Select>
       </div>
       <div className="grid gap-5">
         {items.map((i) => (
@@ -95,14 +97,15 @@ function IncidentsView() {
                 <Icon name="alert" />
               </span>
               <div className={"flex-1 min-w-32 wrap-anywhere"}>
-                <h3>{i.resource}</h3>
+                <h3>{assetLabel(s, i.resource)}</h3>
                 <small className="leading-[1.6] block">
-                  {i.id} · {i.type} · Reported {time(i.time)}
+                  {i.type} · Reported {time(i.time)}
                 </small>
               </div>
               <Badge>{i.severity}</Badge>
               <Badge>{i.status}</Badge>
             </div>
+            <RecordReference value={i.id} label="Incident reference" />
             <p className="leading-[1.65] mt-5 wrap-anywhere">{i.description}</p>
             <ol
               data-compact="true"

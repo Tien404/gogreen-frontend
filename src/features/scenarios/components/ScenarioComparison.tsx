@@ -24,7 +24,7 @@ type LiveProps = {
 export function ScenarioComparison({ run, s, revision }: LiveProps) {
   const details = [
     ["Hub", s.hubs.find((hub) => hub.id === run.hub_id)?.name ?? run.hub_id],
-    ["Captured · Vietnam time", campusTime(run.snapshot_at)],
+    ["Captured", campusTime(run.snapshot_at)],
     ["Operational revision", run.snapshot_revision],
     ["Model", run.model_version],
     ["Horizon", `${run.horizon_minutes} minutes`],

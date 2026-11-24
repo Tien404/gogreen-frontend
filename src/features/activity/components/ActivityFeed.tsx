@@ -1,4 +1,5 @@
-import { Input, NativeSelect, Badge, Button, Empty, Link } from "@/shared/ui";
+import { activityResourceLabel } from "@/integration/recordLabels";
+import { Input, Select, Badge, Button, Empty, Link } from "@/shared/ui";
 import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
 
@@ -25,11 +26,11 @@ export function ActivityFeed({ compact = false }: ActivityFeedProps) {
               className="max-w-full w-full min-w-0 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
             />
           </div>
-          <NativeSelect
+          <Select
             className="border-0 shadow-none"
             aria-label="Filter activity outcome"
             value={outcome}
-            onChange={(e) => setOutcome(e.target.value)}
+            onValueChange={(value) => setOutcome(value)}
             wrapperClassName="max-w-full cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0"
           >
             <option value="all">All outcomes</option>
@@ -38,7 +39,7 @@ export function ActivityFeed({ compact = false }: ActivityFeedProps) {
                 <option key={x}>{x}</option>
               ),
             )}
-          </NativeSelect>
+          </Select>
         </div>
       )}
       <div role="list" aria-label="Activity records">
@@ -79,10 +80,10 @@ export function ActivityFeed({ compact = false }: ActivityFeedProps) {
                         : `/${s.role}/activity`
                     }
                   >
-                    {a.resource}
+                    {activityResourceLabel(s, a)}
                   </Link>
                 ) : (
-                  a.resource
+                  activityResourceLabel(s, a)
                 )}
               </small>
             </div>

@@ -7,7 +7,7 @@ export { PageTitle, SectionHead } from "./Headings";
 export { Badge, Battery } from "./Status";
 export { Input } from "./primitives/input";
 export { Textarea } from "./primitives/textarea";
-export { NativeSelect } from "./primitives/native-select";
+export { Select } from "./primitives/select";
 export { Label } from "./primitives/label";
 export { Panel } from "./Panel";
 export {
@@ -20,3 +20,5 @@ export {
   TableCell,
   TableCaption,
 } from "./primitives/table";
+
+export { RecordReference } from "./RecordReference";

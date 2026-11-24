@@ -1,3 +1,5 @@
+import { vehicleLabel } from "@/integration/recordLabels";
+import { RecordReference } from "@/shared/ui/RecordReference";
 import { Panel, Alert, Button, Confirm, SectionHead } from "@/shared/ui";
 import { studentDate } from "@/integration/studentData";
 
@@ -24,7 +26,9 @@ export function DispatchDetails({
         <SectionHead title="Movement details" />
         <dl className="record-details">
           <dt className="text-content-muted">Shared vehicles</dt>
-          <dd className="wrap-anywhere m-0">{d.vehicles.join(", ")}</dd>
+          <dd className="wrap-anywhere m-0">
+            {d.vehicles.map((id) => vehicleLabel(s, id)).join(", ")}
+          </dd>
           <dt className="text-content-muted">Source hub</dt>
           <dd className="wrap-anywhere m-0">
             {s.hubs.find((h) => h.id === d.source)?.name}
@@ -51,6 +55,7 @@ export function DispatchDetails({
                   : "In transit · belongs to neither hub"}
           </dd>
         </dl>
+        <RecordReference value={d.id} label="Dispatch reference" />
         {d.reason && (
           <Alert tone={d.status === "failed" ? "error" : "info"}>
             <span className="wrap-anywhere">{d.reason}</span>
@@ -94,7 +99,7 @@ export function DispatchDetails({
           {d.status === "planned" && (
             <>
               <Confirm
-                title={`Start ${d.id}?`}
+                title="Start this dispatch?"
                 description={`${d.vehicles.length} vehicle(s) leave the source and become in transit.`}
                 trigger={<Button disabled={busy}>Start dispatch</Button>}
                 onConfirm={() => action("start-dispatch")}

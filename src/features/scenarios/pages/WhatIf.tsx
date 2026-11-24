@@ -1,3 +1,4 @@
+import { campusTime } from "@/integration/studentRecords";
 import {
   Panel,
   Badge,
@@ -160,7 +161,8 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
                 <span className="min-w-0 wrap-anywhere">
                   <strong>{simulationLabel(run.scenario_type)}</strong>
                   <small className="block">
-                    {run.run_id} · {run.horizon_minutes} minutes
+                    {run.horizon_minutes} minutes ·{" "}
+                    {campusTime(run.snapshot_at)}
                   </small>
                 </span>
                 <Badge>completed</Badge>

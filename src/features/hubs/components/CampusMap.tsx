@@ -122,8 +122,10 @@ export function CampusMap({
       if (!entry || entry.label !== label) {
         const content = document.createElement("span");
         content.className = "campus-hub-pin";
-        content.innerHTML =
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="m15 6 2 4h3M12 17.5l-4-7H5m3 0h8l-4 7M8 7H5"/></svg>';
+        const logo = document.createElement("span");
+        logo.className = "campus-hub-logo";
+        logo.setAttribute("aria-hidden", "true");
+        content.append(logo);
         const count = document.createElement("span");
         count.className = "campus-hub-count";
         count.textContent = String(hub.availableVehicles);
@@ -216,11 +218,13 @@ export function CampusMap({
           <span>{config.campus}</span>
         </div>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
+          className="text-content-muted"
           onClick={showAll}
           disabled={!runtime || !located.length}
         >
+          <Icon name="focus" size={16} />
           Focus hubs
         </Button>
       </div>

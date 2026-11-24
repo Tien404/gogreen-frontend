@@ -1,3 +1,4 @@
+import { vehicleLabel } from "@/integration/recordLabels";
 import { Panel, Badge, Button, Link, SectionHead } from "@/shared/ui";
 import { type AppContext } from "@/app/providers/AppContext";
 import { ActivityFeed } from "@/features/activity/components/ActivityFeed";
@@ -121,7 +122,8 @@ export function DashboardActivity({ s, student, go }: DashboardActivityProps) {
                   <span className="min-w-0 wrap-anywhere">
                     <strong>{s.hubs.find((h) => h.id === b.hub)?.name}</strong>
                     <small className="leading-[1.6] block">
-                      {time(b.start)}–{time(b.end)} · {b.vehicle}
+                      {time(b.start)}–{time(b.end)} ·{" "}
+                      {vehicleLabel(s, b.vehicle)}
                     </small>
                   </span>
                   <Badge>{b.status}</Badge>
@@ -139,7 +141,9 @@ export function DashboardActivity({ s, student, go }: DashboardActivityProps) {
                 >
                   <span className="min-w-0 wrap-anywhere">
                     <strong>Charging</strong>
-                    <small className="block">{charge.vehicle}</small>
+                    <small className="block">
+                      {vehicleLabel(s, charge.vehicle)}
+                    </small>
                   </span>
                   <Badge>{charge.status}</Badge>
                 </Link>

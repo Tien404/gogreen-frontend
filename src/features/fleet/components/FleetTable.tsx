@@ -1,3 +1,4 @@
+import { vehicleLabel } from "@/integration/recordLabels";
 import {
   Table,
   TableHeader,
@@ -51,16 +52,16 @@ export function FleetTable({
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="[&_tr:hover]:bg-surface-muted">
+        <TableBody>
           {list.slice((current - 1) * 8, current * 8).map((v) => {
             const canFindRide = v.status === "available";
             return (
-              <TableRow key={v.id}>
+              <TableRow key={vehicleLabel(s, v.id)}>
                 <TableHead
                   scope="row"
                   className="border-b border-solid border-b-divider "
                 >
-                  {v.id}
+                  {vehicleLabel(s, v.id)}
                   <small className="leading-[1.6] block font-normal max-w-75">
                     {v.type}
                   </small>

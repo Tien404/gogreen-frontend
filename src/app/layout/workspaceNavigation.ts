@@ -17,7 +17,7 @@ export const studentNav: NavigationGroup[] = [
     label: "Services",
     items: [
       { icon: "bike", label: "Find a ride", path: "find-ride" },
-      { icon: "parking", label: "Parking", path: "parking/new" },
+      { icon: "parking", label: "Parking", path: "parking" },
       { icon: "bolt", label: "Charging", path: "charging" },
     ],
   },

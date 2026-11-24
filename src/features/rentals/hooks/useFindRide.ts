@@ -1,3 +1,4 @@
+import { rememberVehicleType } from "../model/vehiclePresentation";
 import { useApp } from "@/app/providers/AppContext";
 import { useRefreshStudentData } from "@/integration/studentRefresh";
 import { readPages } from "@/features/hubs/hubResources";
@@ -87,6 +88,7 @@ export function useFindRide() {
     return;
   };
   function setSelected(vehicle: Candidate | null) {
+    if (vehicle) rememberVehicleType(vehicle);
     command.setError(null);
     selectVehicle(vehicle);
   }

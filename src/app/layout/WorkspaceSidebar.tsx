@@ -48,9 +48,9 @@ export function WorkspaceSidebar({
       aria-label="Workspace navigation"
       onKeyDown={handleNavigationKeyDown}
       data-open={menu}
-      className="w-62.5 bg-panel fixed top-0 right-auto bottom-0 left-0 flex flex-col z-30 pt-5 pb-0 overflow-y-auto max-[1200px]:w-55 max-[900px]:w-55 max-[900px]:-translate-x-full max-[900px]:transition-transform max-[900px]:duration-200 max-[900px]:data-[open=true]:translate-x-0 max-[900px]:invisible max-[900px]:data-[open=true]:visible px-5 max-[1200px]:px-4"
+      className="w-62.5 bg-panel fixed top-0 right-auto bottom-0 left-0 flex flex-col z-30 pt-6 max-[900px]:pt-5 pb-0 overflow-y-auto max-[1200px]:w-55 max-[900px]:w-55 max-[900px]:-translate-x-full max-[900px]:transition-transform max-[900px]:duration-200 max-[900px]:data-[open=true]:translate-x-0 max-[900px]:invisible max-[900px]:data-[open=true]:visible px-5 max-[1200px]:px-4"
     >
-      <div className="mb-5 flex justify-between items-center max-[900px]:gap-2 max-[900px]:**:data-[slot~=brand]:text-sm">
+      <div className="mb-8 max-[1200px]:mb-7 max-[900px]:mb-6 flex justify-between items-center max-[900px]:gap-2 max-[900px]:**:data-[slot~=brand]:text-sm">
         <Brand />
         <button
           data-slot="icon-button"
@@ -79,10 +79,10 @@ export function WorkspaceSidebar({
                 to={`/${role}${path ? `/${path}` : ""}`}
                 key={path}
                 end={!path}
-                data-parking-active={path === "parking/new" && !!parkingMatch}
-                className="flex items-center gap-3 rounded-lg text-sm text-content-muted w-full bg-transparent text-left mb-1 leading-5 hover:bg-surface-muted hover:text-content [[aria-current=page],[data-parking-active=true]]:bg-soft [[aria-current=page],[data-parking-active=true]]:text-primary [[aria-current=page],[data-parking-active=true]]:font-semibold [&_svg]:stroke-current py-3 px-4"
+                data-parking-active={path === "parking" && !!parkingMatch}
+                className="font-medium flex items-center gap-3 rounded-lg text-sm text-content-muted w-full bg-transparent text-left mb-1 leading-5 hover:bg-surface-muted [[aria-current=page],[data-parking-active=true]]:bg-soft [[aria-current=page],[data-parking-active=true]]:text-primary [[aria-current=page],[data-parking-active=true]]:font-medium [&_svg]:stroke-current py-3 px-4"
               >
-                <Icon name={icon} />
+                <Icon name={icon} strokeWidth={2} />
                 {label}
               </NavLink>
             ))}

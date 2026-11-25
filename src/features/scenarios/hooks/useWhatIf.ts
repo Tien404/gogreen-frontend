@@ -1,40 +1,35 @@
 import { useApp } from "@/app/providers/AppContext";
 import { readPages } from "@/features/hubs/hubResources";
 import { useOptionalOperatorFeed } from "@/integration/operatorFeed";
-import { simulationUrl } from "@/integration/operatorRecords";
-import type { Schemas } from "@/shared/api/contract.generated";
+import { simulationTypes, simulationUrl } from "@/integration/operatorRecords";
+import type { Operations, Schemas } from "@/shared/api/contract.generated";
 import { apiErrorMessage } from "@/shared/api/errors";
 import { useApiAction } from "@/shared/api/useApiAction";
 import { useApiQuery } from "@/shared/api/useApiQuery";
 import { useCallback, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router";
-const demandType = "Demand surge";
-const faultType = "Charging-point failure";
-const liveTypes = [demandType, faultType];
+type ScenarioType = Schemas["SimulationRunOut"]["scenario_type"];
+type FleetDirection = Schemas["FleetImbalance"]["direction"];
+export const scenarioKinds = Object.keys(simulationTypes) as ScenarioType[];
 export function useWhatIf(id?: string, newScenario = false) {
   const { s, go, api, notify } = useApp();
   const feed = useOptionalOperatorFeed();
   const network =
     feed?.result.status === "ready" ? feed.result.data : undefined;
   const [params] = useSearchParams();
-  const faultHubs =
-    network?.data.hubs.filter(
-      (hub) =>
-        hub.status === "ACTIVE" &&
-        hub.charging_points.some((point) => point.status !== "UNAVAILABLE"),
-    ) ?? [];
-  const metro = network?.data.hubs.find(
-    (hub) => hub.hub_id === "metro" && hub.status === "ACTIVE",
+  const activeHubs =
+    network?.data.hubs.filter((hub) => hub.status === "ACTIVE") ?? [];
+  const [type, selectType] = useState<ScenarioType>(
+    () =>
+      scenarioKinds.find(
+        (kind) => simulationTypes[kind].query === params.get("scenario"),
+      ) ?? "RENTAL_DEMAND_SURGE",
   );
-  const [type, selectType] = useState(
-    params.get("scenario") === "charger" ? faultType : demandType,
-  );
-  const [hub, selectHub] = useState(
-    type === faultType ? (faultHubs[0]?.hub_id ?? "") : "metro",
-  );
+  const [selectedHub, selectHub] = useState("");
   const [point, setPoint] = useState("");
   const [horizon, setHorizon] = useState("60");
-  const [demand, setDemand] = useState("3");
+  const [amount, setAmount] = useState("3");
+  const [direction, setDirection] = useState<FleetDirection>("SHORTAGE");
   const command = useApiAction();
   const load = useCallback(
     async (signal: AbortSignal) =>
@@ -59,45 +54,58 @@ export function useWhatIf(id?: string, newScenario = false) {
   });
   const liveRuns = query.result.status === "ready" ? query.result.data : [];
   const liveRun = id ? liveRuns[0] : undefined;
-  const liveHubs = type === faultType ? faultHubs : metro ? [metro] : [];
-  const points =
-    type === faultType
-      ? (faultHubs
-          .find((item) => item.hub_id === hub)
-          ?.charging_points.filter((item) => item.status !== "UNAVAILABLE") ??
-        [])
-      : [];
+  const fault = type === "CHARGER_FAULT";
+  const liveHubs = fault
+    ? activeHubs.filter((item) =>
+        item.charging_points.some((entry) => entry.status !== "UNAVAILABLE"),
+      )
+    : activeHubs;
+  const defaultHub =
+    type === "RENTAL_DEMAND_SURGE"
+      ? (liveHubs.find((item) => item.hub_id === "metro") ?? liveHubs[0])
+      : liveHubs[0];
+  const hub = selectedHub || defaultHub?.hub_id || "";
+  const currentHub = liveHubs.find((item) => item.hub_id === hub);
+  const points = fault
+    ? (currentHub?.charging_points.filter(
+        (item) => item.status !== "UNAVAILABLE",
+      ) ?? [])
+    : [];
   const valid =
-    type === faultType
-      ? points.some((item) => item.resource_id === point)
-      : Boolean(metro);
+    Boolean(currentHub) &&
+    (!fault || points.some((item) => item.resource_id === point));
+
   function setType(next: string) {
-    selectType(next);
-    selectHub(next === faultType ? (faultHubs[0]?.hub_id ?? "") : "metro");
+    const kind = scenarioKinds.find((item) => item === next);
+    if (!kind) return;
+    selectType(kind);
+    selectHub("");
     setPoint("");
     command.setError(null);
   }
   function setHub(next: string) {
     selectHub(next);
     setPoint("");
+    command.setError(null);
+  }
+  function changeDirection(next: string) {
+    if (next === "SHORTAGE" || next === "CONCENTRATION") setDirection(next);
   }
   const runScenario = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!valid) return;
-    const body: Schemas["RentalDemandSurge"] | Schemas["ChargerFault"] =
-      type === faultType
-        ? {
-            scenario_type: "CHARGER_FAULT",
-            charging_point_id: point,
-            hub_id: hub,
-            horizon_minutes: Number(horizon),
-          }
-        : {
-            scenario_type: "RENTAL_DEMAND_SURGE",
-            hub_id: "metro",
-            horizon_minutes: Number(horizon),
-            demand_count: Number(demand),
-          };
+    const base = { hub_id: hub, horizon_minutes: Number(horizon) };
+    const body: Operations["POST /simulations"]["body"] =
+      type === "CHARGER_FAULT"
+        ? { ...base, scenario_type: type, charging_point_id: point }
+        : type === "FLEET_IMBALANCE"
+          ? {
+              ...base,
+              scenario_type: type,
+              direction,
+              vehicle_count: Number(amount),
+            }
+          : { ...base, scenario_type: type, demand_count: Number(amount) };
     const result = await command.run(() =>
       api.request("POST /simulations", { body }),
     );
@@ -116,8 +124,10 @@ export function useWhatIf(id?: string, newScenario = false) {
     setHub,
     horizon,
     setHorizon,
-    demand,
-    setDemand,
+    amount,
+    setAmount,
+    direction,
+    changeDirection,
     busy: command.busy,
     error: command.error ? apiErrorMessage(command.error) : "",
     runScenario,
@@ -126,13 +136,11 @@ export function useWhatIf(id?: string, newScenario = false) {
     liveRun,
     query,
     revision: network?.revision ?? null,
-    types: liveTypes,
     liveHubs,
     points,
     point,
     setPoint,
     valid,
-    fault: type === faultType,
   };
 }
 export type WhatIfModel = ReturnType<typeof useWhatIf>;

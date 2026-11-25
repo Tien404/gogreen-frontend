@@ -9,13 +9,17 @@ import {
   SectionHead,
 } from "@/shared/ui";
 import { OperatorScreenData } from "@/integration/OperatorScreenData";
-import { simulationLabel, simulationUrl } from "@/integration/operatorRecords";
+import {
+  simulationLabel,
+  simulationTypes,
+  simulationUrl,
+} from "@/integration/operatorRecords";
 import { RecordFeedback } from "@/shared/api/ApiRecordUi";
 import { Icon } from "@/shared/components/Icon";
 
 import { ScenarioForm } from "../components/ScenarioForm";
 import { ScenarioResult } from "../components/ScenarioResult";
-import { useWhatIf } from "../hooks/useWhatIf";
+import { scenarioKinds, useWhatIf } from "../hooks/useWhatIf";
 type WhatIfProps = {
   id?: string;
   newScenario?: boolean;
@@ -28,32 +32,8 @@ export function WhatIf(props: WhatIfProps) {
   );
 }
 function WhatIfView({ id, newScenario = false }: WhatIfProps) {
-  const {
-    s,
-    liveRun,
-    liveRuns,
-    revision,
-    query,
-    types,
-    liveHubs,
-    points,
-    point,
-    setPoint,
-    valid,
-    fault,
-    go,
-    type,
-    setType,
-    hub,
-    setHub,
-    horizon,
-    setHorizon,
-    demand,
-    setDemand,
-    busy,
-    error,
-    runScenario,
-  } = useWhatIf(id, newScenario);
+  const model = useWhatIf(id, newScenario);
+  const { s, liveRun, liveRuns, revision, query, go } = model;
   if (id && !liveRun)
     return (
       <RecordFeedback
@@ -73,26 +53,7 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
             "Choose inputs and compare outcomes from an operational snapshot."
           }
         />
-        <ScenarioForm
-          runScenario={runScenario}
-          type={type}
-          setType={setType}
-          hub={hub}
-          setHub={setHub}
-          horizon={horizon}
-          setHorizon={setHorizon}
-          demand={demand}
-          setDemand={setDemand}
-          error={error}
-          busy={busy}
-          types={types}
-          liveHubs={liveHubs}
-          points={points}
-          point={point}
-          setPoint={setPoint}
-          valid={valid}
-          fault={fault}
-        />
+        <ScenarioForm {...model} />
       </>
     );
   return (
@@ -108,44 +69,36 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
         }
       />
       <div className="grid grid-cols-2 gap-5 max-[1200px]:grid-cols-2 max-[600px]:grid-cols-1">
-        {types.map((t, i) => (
-          <Panel
-            data-slot="panel"
-            className="min-w-0 **:data-[slot~=button]:text-sm"
-            key={t}
-          >
-            <span
-              data-slot="icon-box"
-              className="inline-flex items-center justify-center bg-green-muted text-green-ink w-11 h-11 rounded-lg shrink-0 mb-5"
+        {scenarioKinds.map((kind) => {
+          const scenario = simulationTypes[kind];
+          return (
+            <Panel
+              data-slot="panel"
+              className="min-w-0 **:data-[slot~=button]:text-sm"
+              key={kind}
             >
-              <Icon
-                name={
-                  i === 1
-                    ? "bolt"
-                    : ["activity", "parking", "bolt", "alert", "dispatch"][i]
+              <span
+                data-slot="icon-box"
+                className="inline-flex items-center justify-center bg-green-muted text-green-ink w-11 h-11 rounded-lg shrink-0 mb-5"
+              >
+                <Icon name={scenario.icon} size={24} />
+              </span>
+              <h3>{scenario.label}</h3>
+              <p className="leading-[1.65] mt-2 mb-5 mx-0">
+                {scenario.description}
+              </p>
+              <Button
+                variant="secondary"
+                aria-label={`Configure ${scenario.label.toLowerCase()}`}
+                onClick={() =>
+                  go(`/operator/what-if/new?scenario=${scenario.query}`)
                 }
-                size={24}
-              />
-            </span>
-            <h3>{t}</h3>
-            <p className="leading-[1.65] mt-2 mb-5 mx-0">
-              {i === 0
-                ? "Model surge in arrival demand at a selected hub."
-                : "Model the loss of a working charging point."}
-            </p>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                go(
-                  `/operator/what-if/new?scenario=${i === 0 ? "rental" : "charger"}`,
-                );
-                return;
-              }}
-            >
-              {"Configure scenario"} <Icon name="arrow" size={16} />
-            </Button>
-          </Panel>
-        ))}
+              >
+                {"Configure scenario"} <Icon name="arrow" size={16} />
+              </Button>
+            </Panel>
+          );
+        })}
       </div>
       <Panel data-slot="panel" className="mt-5 min-w-0 max-[600px]:mt-5">
         <SectionHead title="Recent runs" />

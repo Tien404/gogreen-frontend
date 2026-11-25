@@ -1,7 +1,15 @@
 import { Panel, Select, Input, Alert, Button, Field } from "@/shared/ui";
 import { Icon } from "@/shared/components/Icon";
 
-import type { WhatIfModel } from "../hooks/useWhatIf";
+import { simulationTypes } from "@/integration/operatorRecords";
+import { scenarioKinds, type WhatIfModel } from "../hooks/useWhatIf";
+
+const amountLabels = {
+  RENTAL_DEMAND_SURGE: "Additional rental requests",
+  PARKING_CAPACITY: "Additional parking arrivals",
+  CHARGING_DEMAND_SURGE: "Additional charging requests",
+  FLEET_IMBALANCE: "Number of rental vehicles",
+};
 type ScenarioFormProps = Pick<
   WhatIfModel,
   | "runScenario"
@@ -11,17 +19,17 @@ type ScenarioFormProps = Pick<
   | "setHub"
   | "horizon"
   | "setHorizon"
-  | "demand"
-  | "setDemand"
+  | "amount"
+  | "setAmount"
+  | "direction"
+  | "changeDirection"
   | "error"
   | "busy"
-  | "types"
   | "liveHubs"
   | "points"
   | "point"
   | "setPoint"
   | "valid"
-  | "fault"
 >;
 export function ScenarioForm({
   runScenario,
@@ -31,17 +39,17 @@ export function ScenarioForm({
   setHub,
   horizon,
   setHorizon,
-  demand,
-  setDemand,
+  amount,
+  setAmount,
+  direction,
+  changeDirection,
   error,
   busy,
-  types,
   liveHubs,
   points,
   point,
   setPoint,
   valid,
-  fault,
 }: ScenarioFormProps) {
   return (
     <div
@@ -56,13 +64,16 @@ export function ScenarioForm({
               onValueChange={(value) => setType(value)}
               wrapperClassName="max-w-full cursor-pointer"
             >
-              {types.map((t) => (
-                <option key={t}>{t}</option>
+              {scenarioKinds.map((kind) => (
+                <option key={kind} value={kind}>
+                  {simulationTypes[kind].label}
+                </option>
               ))}
             </Select>
           </Field>
           <Field label="Affected hub">
             <Select
+              required
               value={hub}
               onValueChange={(value) => setHub(value)}
               wrapperClassName="max-w-full cursor-pointer"
@@ -91,13 +102,20 @@ export function ScenarioForm({
               />
             }
           </Field>
-          {fault ? (
+          {type === "FLEET_IMBALANCE" && (
+            <Field label="Fleet condition">
+              <Select value={direction} onValueChange={changeDirection}>
+                <option value="SHORTAGE">Shortage</option>
+                <option value="CONCENTRATION">Excessive concentration</option>
+              </Select>
+            </Field>
+          )}
+          {type === "CHARGER_FAULT" ? (
             <Field label="Charging point">
               <Select
                 required
                 value={point}
                 onValueChange={(value) => setPoint(value)}
-                wrapperClassName=""
               >
                 <option value="">Choose a working point</option>
                 {point &&
@@ -114,14 +132,14 @@ export function ScenarioForm({
               </Select>
             </Field>
           ) : (
-            <Field label="Additional rental requests">
+            <Field label={amountLabels[type]}>
               <Input
                 type="number"
                 min="1"
                 max="1000"
                 required
-                value={demand}
-                onChange={(e) => setDemand(e.target.value)}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
               />
             </Field>
           )}

@@ -49,7 +49,7 @@ export function PasswordField({
           aria-label={`${visible ? "Hide" : "Show"} ${label.toLowerCase()}`}
           aria-pressed={visible}
           onClick={() => setVisible((value) => !value)}
-          className="absolute right-1 top-1/2 -translate-y-1/2 grid size-11 place-items-center rounded-lg text-content-muted hover:bg-soft hover:text-primary disabled:opacity-50"
+          className="absolute right-1 top-1/2 -translate-y-1/2 grid size-11 place-items-center rounded-lg bg-transparent text-content-muted hover:bg-transparent hover:text-primary disabled:opacity-50"
         >
           {visible ? (
             <EyeOff size={20} strokeWidth={1.75} aria-hidden="true" />

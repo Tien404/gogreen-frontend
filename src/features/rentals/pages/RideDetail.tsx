@@ -1,11 +1,10 @@
+import { StudentJourney } from "@/features/student-mobility/StudentJourney";
 import { rememberedVehicleType } from "../model/vehiclePresentation";
 import { vehicleLabel } from "@/integration/recordLabels";
 import {
   Panel,
-  RecordReference,
   Select,
   Alert,
-  Badge,
   Battery,
   Button,
   Confirm,
@@ -47,61 +46,34 @@ function RideDetailView({ id }: RideDetailProps) {
   } = useRideDetail({ id });
   if (!r) return <Missing />;
   return (
-    <>
+    <StudentJourney
+      hub={r.origin}
+      destination={r.status === "active" ? destination : r.destination}
+      selectedHub={destination}
+      onHubSelect={
+        r.status === "active"
+          ? (id) => {
+              setDestination(id);
+              clearError();
+            }
+          : undefined
+      }
+      active={r.status === "active"}
+    >
       <PageTitle
         title={
           r.status === "active"
-            ? "Enjoy the journey."
+            ? "Ride in progress"
             : r.status === "completed"
               ? "You’ve arrived."
               : "Ride disputed"
         }
-        description={`${vehicleLabel(s, r.vehicle)} · ${r.status === "active" ? "Your ride is active" : r.status === "completed" ? "Ride completed" : "Ride disputed"}`}
-        action={<Badge>{r.status}</Badge>}
       />
       <div
         data-slot="two-col"
         className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 max-[900px]:gap-4 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1"
       >
         <Panel data-slot="panel" className="min-w-0">
-          <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
-            <VehicleArtwork
-              type={v?.type ?? rememberedVehicleType(r.vehicle) ?? ""}
-            />
-          </div>
-          <SectionHead
-            title={v ? `${r.vehicle} · ${v.type}` : r.vehicle}
-            action={<Battery value={v?.battery ?? null} />}
-          />
-          <dl className="record-details">
-            <dt className="text-content-muted">Started</dt>
-            <dd className="wrap-anywhere m-0">{time(r.start)}</dd>
-            <dt className="text-content-muted">Elapsed time</dt>
-            <dd className="wrap-anywhere m-0">
-              {Math.max(0, Math.floor((r.end ?? s.clock) - r.start))} minutes
-            </dd>
-            <dt className="text-content-muted">Origin</dt>
-            <dd className="wrap-anywhere m-0">
-              {s.hubs.find((h) => h.id === r.origin)?.name}
-            </dd>
-            <dt className="text-content-muted">Destination</dt>
-            <dd className="wrap-anywhere m-0">
-              {s.hubs.find((h) => h.id === r.destination)?.name ??
-                (r.destination || "Not specified")}
-            </dd>
-          </dl>
-          <RecordReference value={r.id} label="Ride reference" />
-        </Panel>
-        <Panel data-slot="panel" className="min-w-0">
-          <SectionHead
-            title={
-              r.status === "active"
-                ? "Ready to return?"
-                : r.status === "completed"
-                  ? "Return confirmed"
-                  : "Ride status"
-            }
-          />
           {r.status === "active" ? (
             <>
               <Field label="Return hub">
@@ -117,10 +89,6 @@ function RideDetailView({ id }: RideDetailProps) {
                   ))}
                 </Select>
               </Field>
-              <Alert>
-                Space is checked on confirmation. Selecting a hub does not
-                reserve it.
-              </Alert>
               {error && (
                 <Alert tone="error">
                   {error}
@@ -147,8 +115,7 @@ function RideDetailView({ id }: RideDetailProps) {
                   </div>
                   {!suggestions.length && (
                     <p className="leading-[1.65] mt-3 mb-5 mx-0">
-                      No alternative hub is available. Your ride remains active;
-                      review hubs again later.
+                      No alternative hub is available.
                     </p>
                   )}
                 </>
@@ -157,8 +124,11 @@ function RideDetailView({ id }: RideDetailProps) {
                 title={`Return at ${s.hubs.find((h) => h.id === destination)?.name}?`}
                 description="If capacity is available, the ride completes and this vehicle occupies one space."
                 trigger={
-                  <Button disabled={busy || !destination}>
-                    Confirm return <Icon name="check" />
+                  <Button
+                    className="max-[600px]:w-full"
+                    disabled={busy || !destination}
+                  >
+                    Return <Icon name="check" />
                   </Button>
                 }
                 onConfirm={handleConfirm1}
@@ -166,27 +136,63 @@ function RideDetailView({ id }: RideDetailProps) {
             </>
           ) : (
             <>
-              {r.status === "completed" ? (
-                <Alert>
-                  Vehicle returned to{" "}
-                  {s.hubs.find((h) => h.id === r.destination)?.name ??
-                    (r.destination || "Not specified")}
-                  . Occupancy was updated once.
-                </Alert>
-              ) : (
-                <Alert>This ride is disputed.</Alert>
+              {r.status === "completed" && (
+                <div className="mb-4 rounded-xl bg-green-muted p-3.5 text-sm">
+                  <strong className="block text-primary">
+                    Vehicle returned to{" "}
+                    {s.hubs.find((h) => h.id === r.destination)?.name ??
+                      (r.destination || "hub")}
+                  </strong>
+                  <span className="mt-1 block text-content-muted">
+                    Ride duration:{" "}
+                    {Math.max(0, Math.floor((r.end ?? s.clock) - r.start))}{" "}
+                    minutes
+                  </span>
+                </div>
               )}
               <Link
                 data-slot="button"
-                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-primary [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
+                className="active:translate-y-px inline-flex w-full items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-primary [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
                 to="/student"
               >
-                Back to overview
+                Back to home
               </Link>
             </>
           )}
         </Panel>
+        <Panel data-slot="panel" className="min-w-0">
+          <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
+            <VehicleArtwork
+              type={v?.type ?? rememberedVehicleType(r.vehicle) ?? ""}
+            />
+          </div>
+          <SectionHead
+            title={
+              v
+                ? `${vehicleLabel(s, r.vehicle)} · ${v.type}`
+                : vehicleLabel(s, r.vehicle)
+            }
+            action={<Battery value={v?.battery ?? null} />}
+          />
+          <dl className="record-details">
+            <dt className="text-content-muted">Started</dt>
+            <dd className="wrap-anywhere m-0">{time(r.start)}</dd>
+            <dt className="text-content-muted">Elapsed time</dt>
+            <dd className="wrap-anywhere m-0">
+              {Math.max(0, Math.floor((r.end ?? s.clock) - r.start))} minutes
+            </dd>
+            <dt className="text-content-muted">Origin</dt>
+            <dd className="wrap-anywhere m-0">
+              {s.hubs.find((h) => h.id === r.origin)?.name}
+            </dd>
+            <dt className="text-content-muted">Destination</dt>
+            <dd className="wrap-anywhere m-0">
+              {s.hubs.find((h) => h.id === r.destination)?.name ??
+                (r.destination || "Not specified")}
+            </dd>
+          </dl>
+        </Panel>
       </div>
-    </>
+    </StudentJourney>
   );
 }

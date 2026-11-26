@@ -1,5 +1,4 @@
 import { assetLabel } from "@/integration/recordLabels";
-import { RecordReference } from "@/shared/ui/RecordReference";
 import {
   Input,
   Select,
@@ -52,7 +51,6 @@ function IncidentsView() {
     <>
       <PageTitle
         title="Incidents"
-        description="Record faults, track exceptions and document how they were resolved."
         action={
           <Button onClick={() => setOpen(true)}>
             <Icon name="plus" />
@@ -61,21 +59,17 @@ function IncidentsView() {
         }
       />
       <div className="filter-bar">
-        <div
-          data-slot="search-input"
-          className="flex items-center bg-panel rounded-lg min-w-40 flex-1 gap-2 max-w-105 text-content-muted focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
-        >
+        <div data-slot="search-input" className="filter-search">
           <Icon name="search" />
           <Input
             aria-label="Search incidents"
             value={search}
             placeholder="Search incidents or resources…"
             onChange={(e) => setSearch(e.target.value)}
-            className="max-w-full w-full min-w-0 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
         <Select
-          className="border-0 shadow-none"
           aria-label="Incident status"
           value={filter}
           onValueChange={(value) => setFilter(value)}
@@ -105,7 +99,6 @@ function IncidentsView() {
               <Badge>{i.severity}</Badge>
               <Badge>{i.status}</Badge>
             </div>
-            <RecordReference value={i.id} label="Incident reference" />
             <p className="leading-[1.65] mt-5 wrap-anywhere">{i.description}</p>
             <ol
               data-compact="true"
@@ -123,8 +116,12 @@ function IncidentsView() {
               )}
             </ol>
             {i.status === "open" && (
-              <Button variant="secondary" onClick={() => setResolve(i.id)}>
-                Resolve incident
+              <Button
+                variant="secondary"
+                className="max-[600px]:w-full"
+                onClick={() => setResolve(i.id)}
+              >
+                Resolve
               </Button>
             )}
           </Panel>
@@ -143,7 +140,7 @@ function IncidentsView() {
                   setSearch("");
                 }}
               >
-                Show all incidents
+                Clear filters
               </Button>
             ) : undefined
           }
@@ -177,8 +174,8 @@ function IncidentsView() {
             />
           </Field>
           {error && <Alert tone="error">{error}</Alert>}
-          <Button type="submit" disabled={busy}>
-            Confirm resolution
+          <Button type="submit" className="max-[600px]:w-full" disabled={busy}>
+            Confirm
           </Button>
         </form>
       </Modal>

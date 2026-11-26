@@ -1,23 +1,15 @@
+import { StudentActivityCard } from "@/features/student-mobility/StudentActivityCard";
+import { StudentJourney } from "@/features/student-mobility/StudentJourney";
+import { StudentRecordLink } from "@/features/student-mobility/StudentRecordLink";
+import { currentStudentActivities } from "@/features/student-mobility/studentActivities";
+import { recordUrl } from "@/integration/studentRecords";
 import { useState } from "react";
 import { useApp } from "@/app/providers/AppContext";
 import { StudentData } from "@/integration/StudentScreenData";
 import { studentDate } from "@/integration/studentData";
 import { vehicleLabel } from "@/integration/recordLabels";
 import { Icon } from "@/shared/components/Icon";
-import {
-  Badge,
-  Button,
-  Empty,
-  Link,
-  PageTitle,
-  Panel,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/shared/ui";
+import { Button, Empty, Link, PageTitle, Panel } from "@/shared/ui";
 
 export function Parking() {
   return (
@@ -43,24 +35,39 @@ function ParkingList() {
               )),
     )
     .sort((a, b) => b.start - a.start);
+  const currentBooking =
+    bookings.find((item) =>
+      ["checked-in", "overstaying"].includes(item.status),
+    ) ?? bookings.find((item) => item.status === "confirmed");
+  const activeCard = currentStudentActivities(s).find(
+    (item) => item.kind === "parking",
+  );
   return (
-    <>
+    <StudentJourney
+      hub={currentBooking?.hub}
+      active={Boolean(activeCard)}
+      availabilityMode="parking"
+    >
       <PageTitle
         title="Parking"
-        description="Your parking bookings, current stays and history."
         action={
-          <Button asChild>
+          <Button asChild size="sm">
             <Link to="/student/parking/new">
-              <Icon name="plus" />
-              Book parking
+              <Icon name="plus" size={16} />
+              New parking
             </Link>
           </Button>
         }
       />
+      {activeCard && (
+        <div className="mb-5">
+          <StudentActivityCard activity={activeCard} headingLevel={2} />
+        </div>
+      )}
       <div
         role="group"
         aria-label="Parking status filter"
-        className="segmented-control mb-5"
+        className="segmented-control mb-4"
       >
         {["all", "upcoming", "parked", "history"].map((value) => (
           <button
@@ -74,59 +81,30 @@ function ParkingList() {
         ))}
       </div>
       {visible.length ? (
-        <Panel>
-          <Table aria-label="Your parking bookings" className="min-w-190">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Vehicle</TableHead>
-                <TableHead>Hub</TableHead>
-                <TableHead>Parking interval</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>
-                  <span className="sr-only">Details</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {visible.map((booking) => (
-                <TableRow key={booking.id}>
-                  <TableHead scope="row">
-                    {vehicleLabel(s, booking.vehicle)}
-                  </TableHead>
-                  <TableCell>
-                    {s.hubs.find((hub) => hub.id === booking.hub)?.name ??
-                      "Parking hub"}
-                  </TableCell>
-                  <TableCell>
-                    {studentDate(booking.start)}
-                    <span className="block text-content-muted">
-                      to {studentDate(booking.end)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {s.charges.some((charge) => charge.booking === booking.id)
-                      ? "Parking + charging"
-                      : "Parking only"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge>{booking.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      className="inline-flex min-h-11 items-center gap-2 whitespace-nowrap font-semibold text-primary"
-                      to={`/student/parking/${encodeURIComponent(booking.id)}`}
-                    >
-                      View booking <Icon name="arrow" size={16} />
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Panel>
+        <ul aria-label="Your parking bookings" className="grid gap-3">
+          {visible.map((booking) => (
+            <StudentRecordLink
+              key={booking.id}
+              to={recordUrl("parking", booking.id)}
+              title={vehicleLabel(s, booking.vehicle)}
+              location={
+                s.hubs.find((hub) => hub.id === booking.hub)?.name ??
+                "Parking hub"
+              }
+              detail={
+                studentDate(booking.start) +
+                " – " +
+                studentDate(booking.end) +
+                (s.charges.some((charge) => charge.booking === booking.id)
+                  ? " · Parking + charging"
+                  : "")
+              }
+              status={booking.status}
+            />
+          ))}
+        </ul>
       ) : (
-        <Panel>
+        <Panel className="bg-surface-muted">
           <Empty
             title={
               bookings.length
@@ -141,17 +119,17 @@ function ParkingList() {
             action={
               bookings.length ? (
                 <Button variant="secondary" onClick={() => setFilter("all")}>
-                  Show all bookings
+                  Show all
                 </Button>
               ) : (
                 <Button asChild>
-                  <Link to="/student/parking/new">Book parking</Link>
+                  <Link to="/student/parking/new">New parking</Link>
                 </Button>
               )
             }
           />
         </Panel>
       )}
-    </>
+    </StudentJourney>
   );
 }

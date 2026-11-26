@@ -10,7 +10,7 @@ import { parkAndCharge, type ParkAndChargeInput } from "../model/parkAndCharge";
 import type { FormEvent } from "react";
 import { useState } from "react";
 export function useParkingNew() {
-  const { s, go, api, notify } = useApp();
+  const { s, go, api } = useApp();
   const command = useApiAction();
   const initialStart = Math.floor(s.clock) + 5;
   const [attemptedReview, setAttemptedReview] = useState(false);
@@ -28,10 +28,17 @@ export function useParkingNew() {
   const [chargingError, setChargingError] = useState("");
   const service = withCharging ? "Parking + charging request" : "Parking only";
   const [hub, setHub] = useState(
-    s.hubs.find((h) => h.id === "north")?.id ?? s.hubs[0]?.id ?? "",
+    s.hubs.find((h) => h.id === params.get("hub"))?.id ??
+      s.hubs.find((h) => h.id === "north")?.id ??
+      s.hubs[0]?.id ??
+      "",
   );
   const [start, setStart] = useState(inputTime(initialStart));
   const [end, setEnd] = useState(inputTime(initialStart + 60));
+  const [startNow, setStartNow] = useState(false);
+  const [duration, setDuration] = useState("60");
+  const durationValid =
+    Number.isSafeInteger(Number(duration)) && Number(duration) > 0;
   const [review, setReview] = useState(false);
   const [vehicle, setVehicle] = useState(
     s.privateVehicles.find(
@@ -41,7 +48,9 @@ export function useParkingNew() {
       "",
   );
   const intervalErrors = parkingIntervalErrors(start, end, s.clock);
-  const valid = !intervalErrors.start && !intervalErrors.end;
+  const valid = startNow
+    ? durationValid
+    : !intervalErrors.start && !intervalErrors.end;
   const chargeInputError = () => {
     const battery = s.privateVehicles.find((v) => v.id === vehicle)?.battery;
     if (
@@ -69,8 +78,12 @@ export function useParkingNew() {
         parking: {
           hub_id: hub,
           vehicle_id: vehicle,
-          starts_at: campusInputToIso(start),
-          ends_at: campusInputToIso(end),
+          ...(startNow
+            ? { duration_minutes: Number(duration) }
+            : {
+                starts_at: campusInputToIso(start),
+                ends_at: campusInputToIso(end),
+              }),
         },
         charging: withCharging
           ? {
@@ -91,18 +104,8 @@ export function useParkingNew() {
       setReview(false);
       if (result.data.status === "partial") {
         setChargingError(apiErrorMessage(result.data.error));
-        notify(
-          "Parking booked; charging request failed. You can retry charging without booking again.",
-          "warning",
-        );
       } else {
         setChargingError("");
-        notify(
-          withCharging
-            ? "Parking booked and charging requested. Check your server-assigned schedule in the booking."
-            : "Parking space reserved successfully.",
-          "success",
-        );
         go(recordUrl("parking", result.data.parking.reservation_id));
       }
     }
@@ -115,7 +118,6 @@ export function useParkingNew() {
       }),
     );
     if (result.ok) {
-      notify("Parking booking cancelled.", "info");
       go(recordUrl("parking", createdParking.reservation_id));
     }
   };
@@ -132,8 +134,19 @@ export function useParkingNew() {
     s,
 
     error: command.error ? apiErrorMessage(command.error) : validationError,
-    startError: attemptedReview ? intervalErrors.start : undefined,
-    endError: attemptedReview ? intervalErrors.end : undefined,
+    startNow,
+    setStartNow: (next: boolean) => {
+      setStartNow(next);
+      command.setError(null);
+    },
+    duration,
+    setDuration,
+    durationError:
+      attemptedReview && startNow && !durationValid
+        ? "Enter a duration of at least one minute."
+        : undefined,
+    startError: attemptedReview && !startNow ? intervalErrors.start : undefined,
+    endError: attemptedReview && !startNow ? intervalErrors.end : undefined,
     moveIntervalForward: () => {
       const next = moveParkingInterval(start, end, s.clock);
       setStart(next.start);

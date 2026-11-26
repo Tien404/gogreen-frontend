@@ -2,6 +2,7 @@ import { Parking } from "@/features/parking/pages/Parking";
 import { Activity } from "@/features/activity/pages/Activity";
 import { Login, SignUp } from "@/features/auth/pages/AuthPages";
 import { Charging } from "@/features/charging/pages/Charging";
+import { StudentHome } from "@/features/student-mobility/StudentHome";
 import { Dashboard } from "@/features/dashboard/pages/Dashboard";
 import { Dispatches } from "@/features/dispatch/pages/Dispatches";
 import { Fleet } from "@/features/fleet/pages/Fleet";
@@ -37,7 +38,7 @@ export const appRoutes: RouteObject[] = [
     path: "/student",
     Component: StudentWorkspace,
     children: [
-      { id: "student-overview", index: true, Component: Dashboard },
+      { id: "student-overview", index: true, Component: StudentHome },
       { id: "student-hubs", path: "hubs", Component: Hubs },
       { id: "student-hub", path: "hubs/:hubId", Component: HubPage },
       { id: "student-find-ride", path: "find-ride", Component: FindRide },

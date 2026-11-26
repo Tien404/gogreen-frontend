@@ -23,7 +23,7 @@ export function WorkspaceTopbar({
         <button
           ref={menuRef}
           data-slot="icon-button"
-          className="hidden items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-lg text-content-muted hover:bg-surface-inset hover:text-primary max-[900px]:inline-flex"
+          className="hidden items-center justify-center w-9 h-9 bg-action-muted rounded-lg text-content-muted hover:bg-action-muted-hover hover:text-primary max-[900px]:inline-flex"
           aria-expanded={menu}
           onClick={() => setMenu(true)}
           aria-label="Open navigation"
@@ -43,7 +43,7 @@ export function WorkspaceTopbar({
         {!!feed && (
           <button
             data-slot="icon-button"
-            className="inline-flex items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-lg text-content-muted hover:bg-surface-inset hover:text-primary relative"
+            className="relative inline-flex items-center justify-center w-9 h-9 bg-action-muted rounded-lg text-content-muted hover:bg-action-muted-hover hover:text-primary"
             aria-label={
               alertCount
                 ? `Open notifications, ${alertCount} active alerts`

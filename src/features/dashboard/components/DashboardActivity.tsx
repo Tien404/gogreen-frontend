@@ -150,7 +150,11 @@ export function DashboardActivity({ s, student, go }: DashboardActivityProps) {
               ))}
           </>
         ) : (
-          <Button variant="secondary" onClick={() => go("/operator/incidents")}>
+          <Button
+            variant="secondary"
+            className="max-[600px]:w-full"
+            onClick={() => go("/operator/incidents")}
+          >
             Review incidents <Icon name="arrow" size={16} />
           </Button>
         )}

@@ -5,10 +5,7 @@ import { VehicleTable } from "../components/VehicleTable";
 export function Fleet() {
   return (
     <>
-      <PageTitle
-        title="Shared fleet"
-        description="Inspect vehicles, batteries and availability across the campus network."
-      />
+      <PageTitle title="Shared fleet" />
       <OperatorScreenData>
         <VehicleTable />
       </OperatorScreenData>

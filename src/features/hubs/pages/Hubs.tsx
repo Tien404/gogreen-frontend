@@ -1,4 +1,3 @@
-import { config } from "@/config/app";
 import { ApiLoadError } from "@/shared/api/ApiFeedback";
 import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
@@ -44,10 +43,6 @@ export function Hubs() {
       <header className="hub-directory-heading">
         <div>
           <h1 id="hub-directory-title">Campus hubs</h1>
-          <p>
-            Find shared vehicles, parking and charging around the{" "}
-            {config.campus}.
-          </p>
         </div>
         {source.status === "ready" && source.data.clock !== null && (
           <p className="hub-directory-updated">
@@ -113,87 +108,144 @@ export function Hubs() {
             />
           )}
           {hubs.length > 0 && (
-            <div
-              className="hub-directory-table"
-              role="region"
-              aria-label="Compare hub resources"
-              tabIndex={0}
-            >
-              <Table scrollable={false}>
-                <TableCaption className="sr-only">
-                  Hub resources. Occupancy is occupied spaces out of capacity;
-                  charging is available points out of total.
-                </TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead scope="col">Hub</TableHead>
-                    <TableHead scope="col">Vehicles available</TableHead>
-                    <TableHead scope="col">Occupied / capacity</TableHead>
-                    <TableHead scope="col">Parking available</TableHead>
-                    <TableHead scope="col">Charging points available</TableHead>
-                    <TableHead scope="col">
-                      <span className="sr-only">Details</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {hubs.map((h) => (
-                    <TableRow key={h.id} data-selected={selected === h.id}>
-                      <TableHead scope="row">
-                        <Link to={`/${role}/hubs/${encodeURIComponent(h.id)}`}>
-                          {h.name}
-                        </Link>
-                        <small>{h.area}</small>
+            <>
+              <ul
+                aria-label="Campus hubs"
+                className="mt-5 grid gap-3 md:hidden"
+              >
+                {hubs.map((h) => (
+                  <li key={h.id}>
+                    <Link
+                      to={`/${role}/hubs/${encodeURIComponent(h.id)}`}
+                      className="block rounded-xl bg-panel p-4 transition-colors hover:bg-green-muted/40"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h2 className="text-base font-semibold text-content">
+                            {h.name}
+                          </h2>
+                          <p className="mt-0.5 text-sm text-content-muted">
+                            {h.area}
+                          </p>
+                        </div>
+                        <Icon name="chevron" size={18} />
+                      </div>
+                      <dl className="mt-3 grid grid-cols-3 gap-2 rounded-lg bg-surface-muted p-2.5 text-center text-xs">
+                        <div>
+                          <dt className="text-content-muted">Vehicles</dt>
+                          <dd className="mt-0.5 text-sm font-semibold tabular-nums text-content">
+                            {h.availableVehicles}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-content-muted">Parking</dt>
+                          <dd className="mt-0.5 text-sm font-semibold tabular-nums text-content">
+                            {h.parkingAvailable}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-content-muted">Chargers</dt>
+                          <dd className="mt-0.5 text-sm font-semibold tabular-nums text-content">
+                            {h.availablePoints}/{h.points.length}
+                          </dd>
+                        </div>
+                      </dl>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <div
+                className="hub-directory-table hidden md:block"
+                role="region"
+                aria-label="Compare hub resources"
+                tabIndex={0}
+              >
+                <Table scrollable={false}>
+                  <TableCaption className="sr-only">
+                    Hub resources. Occupancy is occupied spaces out of capacity;
+                    charging is available points out of total.
+                  </TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead scope="col">Hub</TableHead>
+                      <TableHead scope="col">Vehicles available</TableHead>
+                      <TableHead scope="col">Occupied / capacity</TableHead>
+                      <TableHead scope="col">Parking available</TableHead>
+                      <TableHead scope="col">
+                        Charging points available
                       </TableHead>
-                      <TableCell>
-                        <strong className="hub-directory-number">
-                          {h.availableVehicles}
-                        </strong>
-                        <span className="sr-only"> vehicles available</span>
-                      </TableCell>
-                      <TableCell>
-                        <strong className="hub-directory-number">
-                          {h.occupied}
-                        </strong>
-                        <span className="hub-directory-total">
-                          {" "}
-                          / {h.capacity}
-                        </span>
-                        <span className="sr-only"> spaces occupied</span>
-                      </TableCell>
-                      <TableCell>
-                        <strong className="hub-directory-number">
-                          {h.parkingAvailable}
-                        </strong>
-                        <span className="sr-only"> spaces available now</span>
-                      </TableCell>
-                      <TableCell>
-                        <strong className="hub-directory-number">
-                          {h.availablePoints}
-                        </strong>
-                        <span className="hub-directory-total">
-                          {" "}
-                          / {h.points.length}
-                        </span>
-                        <span className="sr-only">
-                          {" "}
-                          charging points available
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Link
-                          className="hub-directory-detail"
-                          aria-label={`View ${h.name}`}
-                          to={`/${role}/hubs/${encodeURIComponent(h.id)}`}
-                        >
-                          View hub <Icon name="arrow" size={16} />
-                        </Link>
-                      </TableCell>
+                      <TableHead scope="col">
+                        <span className="sr-only">Details</span>
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {hubs.map((h) => (
+                      <TableRow key={h.id} data-selected={selected === h.id}>
+                        <TableHead scope="row">
+                          <Link
+                            to={`/${role}/hubs/${encodeURIComponent(h.id)}`}
+                          >
+                            {h.name}
+                          </Link>
+                          <small>{h.area}</small>
+                        </TableHead>
+                        <TableCell>
+                          <strong className="hub-directory-number">
+                            {h.availableVehicles}
+                          </strong>
+                          <span className="sr-only"> vehicles available</span>
+                        </TableCell>
+                        <TableCell>
+                          <strong className="hub-directory-number">
+                            {h.occupied}
+                          </strong>
+                          <span className="hub-directory-total">
+                            {" "}
+                            / {h.capacity}
+                          </span>
+                          <span className="sr-only"> spaces occupied</span>
+                        </TableCell>
+                        <TableCell>
+                          <strong className="hub-directory-number">
+                            {h.parkingAvailable}
+                          </strong>
+                          <span className="sr-only"> spaces available now</span>
+                        </TableCell>
+                        <TableCell>
+                          <strong className="hub-directory-number">
+                            {h.availablePoints}
+                          </strong>
+                          <span className="hub-directory-total">
+                            {" "}
+                            / {h.points.length}
+                          </span>
+                          <span className="sr-only">
+                            {" "}
+                            charging points available
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <Link
+                            className="hub-directory-detail"
+                            aria-label={`View ${h.name}`}
+                            to={`/${role}/hubs/${encodeURIComponent(h.id)}`}
+                          >
+                            {role === "operator" ? (
+                              <Icon name="chevron" size={18} />
+                            ) : (
+                              <>
+                                View hub <Icon name="arrow" size={16} />
+                              </>
+                            )}
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
           {!hubs.length &&
             (source.data.hubs.length ? (

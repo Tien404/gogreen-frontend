@@ -1,15 +1,14 @@
+import { StudentJourney } from "@/features/student-mobility/StudentJourney";
 import { MobilityArtwork } from "@/shared/components/MobilityArtwork";
-import { parkingLabel, vehicleLabel } from "@/integration/recordLabels";
+import { vehicleLabel } from "@/integration/recordLabels";
 import {
   Panel,
-  RecordReference,
   Alert,
   Badge,
   Button,
   Confirm,
   Link,
   PageTitle,
-  SectionHead,
 } from "@/shared/ui";
 import { useRefreshStudentData } from "@/integration/studentRefresh";
 import { studentDate } from "@/integration/studentData";
@@ -69,7 +68,11 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
   };
   if (!b) return <Missing />;
   return (
-    <>
+    <StudentJourney
+      hub={b.hub}
+      active={["confirmed", "checked-in", "overstaying"].includes(b.status)}
+      availabilityMode="parking"
+    >
       <Link
         className="inline-flex items-center gap-2 text-sm text-content-muted mb-5"
         to="/student/parking"
@@ -77,14 +80,101 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
         <Icon name="arrow-left" size={16} /> Parking
       </Link>
       <PageTitle
-        title="Parking booking"
-        description={`${vehicleLabel(s, b.vehicle)} · ${parkingLabel(s, b)}`}
-        action={<Badge>{b.status}</Badge>}
+        title={
+          b.status === "checked-in"
+            ? "Parking checked in"
+            : b.status === "confirmed"
+              ? "Parking reserved"
+              : b.status === "overstaying"
+                ? "Parking time exceeded"
+                : b.status === "completed"
+                  ? "Checked out"
+                  : b.status === "cancelled"
+                    ? "Parking cancelled"
+                    : "Parking expired"
+        }
       />
       <div
         data-slot="two-col"
-        className="grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 [&_>_[data-slot~=panel]_>_p]:mt-3 [&_>_[data-slot~=panel]_>_p]:mb-5 max-[900px]:gap-4 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1 [&_>_[data-slot~=panel]_>_p]:mx-0"
+        className="grid grid-cols-2 gap-5 max-[900px]:grid-cols-1 max-[900px]:gap-4"
       >
+        <Panel data-slot="panel" className="grid content-start gap-3">
+          {command.error != null && (
+            <Alert tone="error">{apiErrorMessage(command.error)}</Alert>
+          )}
+          {error && <Alert tone="error">{error}</Alert>}
+          {["confirmed", "checked-in"].includes(b.status) &&
+            !s.charges.some(
+              (charge) =>
+                charge.booking === b.id &&
+                ["pending", "scheduled", "active"].includes(charge.status),
+            ) && (
+              <Link
+                to={`/student/charging/new?${new URLSearchParams({ parking: b.id })}`}
+              >
+                Request charging
+              </Link>
+            )}
+          {b.status === "confirmed" && (
+            <>
+              <p className="text-sm text-content-muted">
+                {`Check-in opens at ${studentDate(b.start)}.`}
+              </p>
+              <div className="flex items-stretch gap-3 max-[600px]:grid max-[600px]:grid-cols-2 max-[600px]:*:data-[slot~=button]:w-full">
+                <Confirm
+                  title="Cancel this parking booking?"
+                  description={
+                    "Cancel this parking booking and any charging request linked to it."
+                  }
+                  trigger={
+                    <Button variant="secondary" disabled={command.busy}>
+                      Cancel
+                    </Button>
+                  }
+                  onConfirm={() => action("cancel-booking")}
+                />
+                <Button
+                  disabled={command.busy}
+                  onClick={() => action("check-in")}
+                >
+                  Checkin <Icon name="check" />
+                </Button>
+              </div>
+            </>
+          )}
+          {["checked-in", "overstaying"].includes(b.status) && (
+            <>
+              {b.status === "overstaying" && (
+                <Alert tone="error">
+                  Your vehicle still occupies the space.
+                </Alert>
+              )}
+              <div className="flex items-center flex-wrap gap-3 max-[600px]:*:data-[slot~=button]:w-full">
+                <Confirm
+                  title="Check out this vehicle?"
+                  description="One parking space will be released and active charging stopped. Confirm only when ready to leave."
+                  trigger={
+                    <Button disabled={command.busy || !b.sessionId}>
+                      Check out
+                    </Button>
+                  }
+                  onConfirm={() => action("checkout")}
+                />
+              </div>
+            </>
+          )}
+          {["completed", "cancelled", "expired"].includes(b.status) && (
+            <>
+              <Link
+                to="/student/parking/new"
+                data-slot="button"
+                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-primary [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5 max-[600px]:w-full"
+              >
+                Book parking again
+              </Link>
+            </>
+          )}
+        </Panel>
         <Panel data-slot="panel" className="min-w-0">
           <div className="h-50 rounded-lg bg-soft grid place-items-center text-primary mb-5 max-[600px]:h-42.5">
             <MobilityArtwork
@@ -122,7 +212,6 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
                 : "No current space occupied by this booking"}
             </dd>
           </dl>
-          <RecordReference value={b.id} label="Parking reference" />
           {s.charges
             .filter((c) => c.booking === b.id)
             .map((c) => (
@@ -138,90 +227,7 @@ function ParkingDetailView({ id }: ParkingDetailProps) {
               </Link>
             ))}
         </Panel>
-        <Panel data-slot="panel" className="min-w-0">
-          <SectionHead title="Manage your booking" />
-          {command.error != null && (
-            <Alert tone="error">{apiErrorMessage(command.error)}</Alert>
-          )}
-          {error && <Alert tone="error">{error}</Alert>}
-          {["confirmed", "checked-in"].includes(b.status) &&
-            !s.charges.some(
-              (charge) =>
-                charge.booking === b.id &&
-                ["pending", "scheduled", "active"].includes(charge.status),
-            ) && (
-              <Link
-                to={`/student/charging/new?${new URLSearchParams({ parking: b.id })}`}
-              >
-                Request charging
-              </Link>
-            )}
-          {b.status === "confirmed" && (
-            <>
-              <Alert>
-                {`Check-in opens at ${studentDate(b.start)}. The server checks whether your booking is still eligible.`}
-              </Alert>
-              <Button
-                disabled={command.busy}
-                onClick={() => action("check-in")}
-              >
-                Check in vehicle <Icon name="check" />
-              </Button>
-              <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
-                <Confirm
-                  title="Cancel this parking booking?"
-                  description={
-                    "Cancel this parking booking and any charging request linked to it."
-                  }
-                  trigger={
-                    <Button variant="ghost" disabled={command.busy}>
-                      Cancel booking
-                    </Button>
-                  }
-                  onConfirm={() => action("cancel-booking")}
-                />
-              </div>
-            </>
-          )}
-          {["checked-in", "overstaying"].includes(b.status) && (
-            <>
-              <Alert tone={b.status === "overstaying" ? "error" : "info"}>
-                {b.status === "overstaying"
-                  ? "Your booking is overdue. Your vehicle still occupies its space."
-                  : "Your private vehicle is checked in."}
-              </Alert>
-              <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
-                <Confirm
-                  title="Check out this vehicle?"
-                  description="One parking space will be released and active charging stopped. Confirm only when ready to leave."
-                  trigger={
-                    <Button disabled={command.busy || !b.sessionId}>
-                      Check out
-                    </Button>
-                  }
-                  onConfirm={() => action("checkout")}
-                />
-              </div>
-            </>
-          )}
-          {["completed", "cancelled", "expired"].includes(b.status) && (
-            <>
-              <Alert>
-                {b.status === "expired"
-                  ? "No-show: this booking expired without check-in. No parked vehicle was removed."
-                  : `This booking is ${b.status}.`}
-              </Alert>
-              <Link
-                to="/student/parking/new"
-                data-slot="button"
-                className="active:translate-y-px inline-flex items-center justify-center gap-2 min-h-11 rounded-lg text-sm font-medium leading-[24px] whitespace-normal text-on-dark bg-primary [&:hover:not(:disabled)]:bg-brand-hover [&:hover:not(:disabled)]:text-on-dark py-2 px-5"
-              >
-                Book parking again
-              </Link>
-            </>
-          )}
-        </Panel>
       </div>
-    </>
+    </StudentJourney>
   );
 }

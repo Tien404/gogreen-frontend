@@ -33,7 +33,7 @@ export function ScenarioRecommendations({
                       to={url}
                       className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary hover:underline"
                     >
-                      Review suggested dispatch <Icon name="arrow" size={16} />
+                      Review dispatch <Icon name="arrow" size={16} />
                     </Link>
                   )}
                 </div>

@@ -18,7 +18,10 @@ export function DashboardWelcomeBanner({ go }: DashboardWelcomeBannerProps) {
           <br />
           All in one place.
         </p>
-        <Button onClick={() => go("/student/find-ride")}>
+        <Button
+          className="max-[600px]:w-full"
+          onClick={() => go("/student/find-ride")}
+        >
           Find a ride <Icon name="arrow" />
         </Button>
       </div>

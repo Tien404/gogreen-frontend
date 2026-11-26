@@ -70,7 +70,7 @@ test("API deep link waits for session, shows a retry if unavailable and only the
   );
   assert.match(
     render(destination, { status: "error", user: null, error: "Offline" }),
-    /Retry connection/,
+    />Retry</,
   );
   assert.doesNotMatch(
     render(destination, { status: "ready", user: null }),
@@ -174,12 +174,12 @@ test("shared hold and charging screens display server schedule and gate buttons 
     const expired = render("/student/holds/hold", auth);
     assert.match(expired, /09:15/);
     assert.match(expired, /Your hold expired/);
-    assert.doesNotMatch(expired, /Confirm pickup/);
+    assert.doesNotMatch(expired, />Pick up(?: |<)/);
     assert.doesNotMatch(
       expired,
       /minutes remaining|Pick up your vehicle before/,
     );
-    assert.match(expired, /Hold status/);
+    assert.doesNotMatch(expired, /Hold status|This hold has ended/);
     useData({
       charges: [
         studentCharge(
@@ -204,9 +204,10 @@ test("shared hold and charging screens display server schedule and gate buttons 
     assert.match(scheduled, /metro-c1/);
     assert.match(scheduled, /10:00/);
     assert.match(scheduled, /10:20/);
-    assert.match(scheduled, /Server schedule/);
-    assert.match(scheduled, /Cancel request/);
-    assert.doesNotMatch(scheduled, /Stop charging|Advance charging state/);
+    assert.match(scheduled, />Schedule</);
+    assert.doesNotMatch(scheduled, /Server schedule|Session timeline/);
+    assert.match(scheduled, />Cancel<\/button>/);
+    assert.doesNotMatch(scheduled, />Stop<\/button>|Advance charging state/);
   } finally {
     query.useApiQuery = original;
   }
@@ -255,7 +256,7 @@ test("a rejected return keeps the ride active and displays only the alternatives
       user: student,
     });
     assert.match(html, /Your ride is still active/);
-    assert.match(html, /Confirm return/);
+    assert.match(html, />Return(?: |<)/);
     assert.match(html, /Library(?:<!-- -->)? · 2 available/);
     assert.doesNotMatch(html, /Metro · \d+ available<\/button>/);
     actions.useApiAction = () => ({
@@ -381,7 +382,7 @@ test("What-if result renders named units, snapshot revision and a review-only di
     assert.match(html, /requests/);
     assert.match(html, /Operational revision/);
     assert.match(html, /changed since this snapshot/);
-    assert.match(html, /Review suggested dispatch/);
+    assert.match(html, /Review dispatch/);
     assert.match(
       html,
       /vehicle_id=ev1&amp;from_hub_id=north&amp;to_hub_id=metro/,

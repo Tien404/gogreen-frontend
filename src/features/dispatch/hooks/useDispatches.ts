@@ -32,8 +32,9 @@ export function useDispatches({ id }: { id?: string }) {
   const valid =
     vehicles.length > 0 &&
     source !== destination &&
-    vehicles.length === 1 &&
-    candidates.some((candidate) => candidate.id === vehicles[0]) &&
+    vehicles.every((vehicleId) =>
+      candidates.some((candidate) => candidate.id === vehicleId),
+    ) &&
     [source, destination].every((hub) => hubs.some((item) => item.id === hub));
   const action = async (type: string) => {
     if (d) {
@@ -65,19 +66,48 @@ export function useDispatches({ id }: { id?: string }) {
       setReview(true);
       return;
     }
-    const result = await command.run(() =>
-      api.request("POST /redistribution-tasks", {
-        body: {
-          from_hub_id: source,
-          to_hub_id: destination,
-          vehicle_id: vehicles[0],
-        },
-      }),
-    );
+    const selectedVehicles = [...vehicles];
+    const created: Array<{ task_id: string; vehicle_id: string }> = [];
+    const result = await command.run(async () => {
+      for (const vehicleId of selectedVehicles) {
+        try {
+          const task = await api.request("POST /redistribution-tasks", {
+            body: {
+              from_hub_id: source,
+              to_hub_id: destination,
+              vehicle_id: vehicleId,
+            },
+          });
+          created.push({ task_id: task.task_id, vehicle_id: vehicleId });
+        } catch (err) {
+          if (created.length > 0) {
+            const createdIds = new Set(created.map((item) => item.vehicle_id));
+            setVehicles((prev) => prev.filter((item) => !createdIds.has(item)));
+            refreshOperations?.();
+            notify(
+              `${created.length} dispatch(es) created before an error occurred.`,
+              "info",
+            );
+          }
+          throw err;
+        }
+      }
+      return created;
+    });
     if (result.ok) {
-      notify("Vehicle redistribution dispatch created.", "success");
       refreshOperations?.();
-      go(dispatchUrl(result.data.task_id));
+      if (result.data.length === 1) {
+        notify("Vehicle redistribution dispatch created.", "success");
+        go(dispatchUrl(result.data[0].task_id));
+      } else {
+        notify(
+          `${result.data.length} vehicle redistribution dispatches created.`,
+          "success",
+        );
+        setVehicles([]);
+        setReview(false);
+        setOpen(false);
+      }
     }
     return;
   };

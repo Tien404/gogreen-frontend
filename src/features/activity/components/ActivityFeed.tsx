@@ -4,6 +4,35 @@ import { Icon } from "@/shared/components/Icon";
 import { time } from "@/shared/lib/time";
 
 import { useActivity } from "../hooks/useActivity";
+
+function activityIcon(a: { action: string; link?: string }): string {
+  const link = a.link ?? "";
+  const action = a.action;
+  if (link.includes("/charging/") || /charg/i.test(action)) return "bolt";
+  if (
+    link.includes("/parking/") ||
+    /park|check[- ]?in|check[- ]?out|no[- ]?show/i.test(action)
+  )
+    return "parking";
+  if (link.includes("/holds/") || /hold|reserv/i.test(action)) return "clock";
+  if (
+    link.includes("/rides/") ||
+    link.includes("/vehicles") ||
+    /ride|rental|pickup|return|vehicle/i.test(action)
+  )
+    return "bike";
+  if (link.includes("/dispatch/") || /dispatch|redistribut/i.test(action))
+    return "dispatch";
+  if (link.includes("/incidents") || /incident|fault|alert/i.test(action))
+    return "alert";
+  if (
+    link.includes("/what-if/") ||
+    /simulat|what[- ]?if|scenario/i.test(action)
+  )
+    return "flask";
+  return "activity";
+}
+
 type ActivityFeedProps = {
   compact?: boolean;
 };
@@ -13,25 +42,20 @@ export function ActivityFeed({ compact = false }: ActivityFeedProps) {
     <>
       {!compact && (
         <div className="filter-bar">
-          <div
-            data-slot="search-input"
-            className="flex items-center bg-panel rounded-lg min-w-40 flex-1 gap-2 max-w-105 text-content-muted focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
-          >
+          <div data-slot="search-input" className="filter-search">
             <Icon name="search" />
             <Input
               aria-label="Search activity"
               placeholder="Search activity or resource…"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="max-w-full w-full min-w-0 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+              className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
             />
           </div>
           <Select
-            className="border-0 shadow-none"
             aria-label="Filter activity outcome"
             value={outcome}
             onValueChange={(value) => setOutcome(value)}
-            wrapperClassName="max-w-full cursor-pointer max-[600px]:max-w-full max-[600px]:flex-1 max-[600px]:min-w-0"
           >
             <option value="all">All outcomes</option>
             {["Success", "Failed", "Expired", "Ignored", "Attention"].map(
@@ -53,24 +77,18 @@ export function ActivityFeed({ compact = false }: ActivityFeedProps) {
               data-error={a.result === "Failed"}
               className="h-9 w-9 grid place-items-center bg-green-muted rounded-lg text-green-ink shrink-0 data-[error=true]:text-danger data-[error=true]:bg-danger-surface"
             >
-              <Icon
-                name={
-                  a.action.includes("harg")
-                    ? "bolt"
-                    : a.action.includes("ncident")
-                      ? "alert"
-                      : "activity"
-                }
-              />
+              <Icon name={activityIcon(a)} />
             </div>
             <div className="flex-1 min-w-0">
-              <strong className="text-sm capitalize">
+              <strong className="block text-base font-semibold leading-snug capitalize wrap-anywhere">
                 {a.action.replaceAll("-", " ")}
               </strong>
-              <p className="leading-[1.65] text-sm max-[600px]:max-w-full wrap-anywhere">
-                {a.reason}
-              </p>
-              <small className="leading-[1.6] block wrap-anywhere">
+              {a.reason && (
+                <p className="mt-1 text-sm leading-relaxed wrap-anywhere">
+                  {a.reason}
+                </p>
+              )}
+              <small className="mt-1 block text-sm leading-snug wrap-anywhere">
                 {a.actor} ·{" "}
                 {a.link ? (
                   <Link
@@ -89,7 +107,7 @@ export function ActivityFeed({ compact = false }: ActivityFeedProps) {
             </div>
             <div className="activity-meta flex items-end flex-col gap-1 shrink-0 max-[600px]:**:data-[slot~=badge]:text-sm max-[600px]:gap-2 max-[600px]:**:data-[slot~=badge]:py-px max-[600px]:**:data-[slot~=badge]:px-2">
               <Badge>{a.result}</Badge>
-              <small className="leading-[1.6]">{time(a.at)}</small>
+              <small className="text-sm tabular-nums">{time(a.at)}</small>
             </div>
           </div>
         ))}

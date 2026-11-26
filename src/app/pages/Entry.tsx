@@ -26,38 +26,28 @@ export function Entry() {
           </Link>
         </nav>
       </div>
-      <div className="relative grid grid-cols-[1.1fr_1fr] items-center gap-6 max-w-290 w-full my-12 mx-auto max-[900px]:grid-cols-1 max-[900px]:gap-5 max-[600px]:my-5">
+      <div className="mx-auto my-auto grid w-full max-w-6xl justify-items-center gap-8 py-8 text-center sm:gap-10 sm:py-12">
         <div className="min-w-0">
-          <h1 className="text-5xl leading-[1.1] tracking-tight mb-5 max-[600px]:text-4xl">
+          <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">
             Your campus,
             <br />
             <span className="text-primary">in motion.</span>
           </h1>
-          <p className="text-md leading-[1.8] mb-5 max-[600px]:text-sm">
-            Shared electric rides. A space to park. A place to recharge.
-            <br className="max-[600px]:hidden" />
-            Meet your everyday campus companion.
+          <p className="mx-auto mt-4 max-w-[42ch] text-balance text-base leading-relaxed sm:text-lg">
+            Shared electric rides, parking and charging across campus.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link to="/login">
-                Log in <Icon name="arrow" />
-              </Link>
-            </Button>
-          </div>
-
-          <p className="mt-5 text-sm text-content-muted">
-            One account for your everyday campus journey.
-          </p>
+          <Button asChild size="lg" className="mt-6">
+            <Link to="/login">
+              Log in <Icon name="arrow" />
+            </Link>
+          </Button>
         </div>
-        <figure className="m-0 min-w-0 max-[900px]:hidden">
-          <MobilityArtwork name="campus-hub" className="w-full" />
-          <figcaption className="text-center text-sm text-content-muted mt-4">
-            Ride. Park. Recharge. All connected.
-          </figcaption>
-        </figure>
+        <MobilityArtwork
+          name="campus-hub"
+          className="h-auto max-h-[min(38svh,24rem)] w-full max-w-2xl"
+        />
       </div>
-      <div className="flex justify-between items-center relative mt-auto text-sm text-content-muted max-[600px]:items-start max-[600px]:flex-col max-[600px]:gap-1">
+      <div className="relative mt-auto flex justify-between items-center text-sm text-content-muted max-[600px]:flex-col max-[600px]:gap-1">
         <span>{config.tagline}</span>
         <span>{config.campus}</span>
       </div>

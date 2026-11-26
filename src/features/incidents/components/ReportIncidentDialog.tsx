@@ -121,8 +121,8 @@ export function ReportIncidentDialog({
           />
         </Field>
         {error && <Alert tone="error">{error}</Alert>}
-        <Button type="submit" disabled={busy}>
-          Record incident
+        <Button type="submit" className="max-[600px]:w-full" disabled={busy}>
+          Record
         </Button>
       </form>
     </Modal>

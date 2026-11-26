@@ -5,10 +5,7 @@ import { ActivityFeed } from "../components/ActivityFeed";
 export function Activity() {
   return (
     <>
-      <PageTitle
-        title="Activity"
-        description="Your actions, outcomes and resource history."
-      />
+      <PageTitle title="Activity" />
       <StudentData screen="activity">
         <OperatorScreenData activity>
           <ActivityFeed />

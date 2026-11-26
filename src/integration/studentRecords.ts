@@ -7,6 +7,11 @@ const formatter = new Intl.DateTimeFormat("en-GB", {
   timeStyle: "short",
   timeZone: config.timezone,
 });
+const formatterWithSeconds = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "medium",
+  timeStyle: "medium",
+  timeZone: config.timezone,
+});
 export function campusTime(instant: string) {
   return formatter.format(apiTime(instant));
 }
@@ -96,9 +101,12 @@ export function hubAlternatives(error: unknown) {
   });
 }
 export function chargeSchedule(charge: Schemas["ChargingSessionOut"]) {
-  return charge.scheduled_start_at && charge.scheduled_end_at
-    ? `${campusTime(charge.scheduled_start_at)} – ${campusTime(charge.scheduled_end_at)}`
-    : "No assigned schedule";
+  if (!charge.scheduled_start_at || !charge.scheduled_end_at)
+    return "No assigned schedule";
+  const start = apiTime(charge.scheduled_start_at);
+  const end = apiTime(charge.scheduled_end_at);
+  const format = end - start < 60_000 ? formatterWithSeconds : formatter;
+  return `${format.format(start)} – ${format.format(end)}`;
 }
 export function vehicleTypeCode(label: string) {
   return label === "Electric motorcycle"

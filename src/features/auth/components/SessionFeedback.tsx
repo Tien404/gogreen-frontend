@@ -20,7 +20,7 @@ export function SessionFeedback({ auth }: { auth: AuthSession }) {
           <Alert tone="error">
             {auth.error ?? "Could not check your session."}
           </Alert>
-          <Button onClick={auth.retry}>Retry connection</Button>
+          <Button onClick={auth.retry}>Retry</Button>
         </div>
       )}
     </main>

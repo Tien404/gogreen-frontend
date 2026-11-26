@@ -1,5 +1,4 @@
 import { parkingLabel, vehicleLabel } from "@/integration/recordLabels";
-import { RecordReference } from "@/shared/ui/RecordReference";
 import { Panel, Alert, Button, Confirm, Link, SectionHead } from "@/shared/ui";
 import { useApp } from "@/app/providers/AppContext";
 import { useRefreshStudentData } from "@/integration/studentRefresh";
@@ -41,6 +40,7 @@ export function ChargingSessionDetails({
     refresh?.();
     refreshOperations?.();
   }
+  const student = s.role === "student";
   return (
     <div
       data-slot="two-col"
@@ -48,7 +48,52 @@ export function ChargingSessionDetails({
     >
       <Panel data-slot="panel" className="min-w-0">
         <SectionHead title="Battery progress" />
-        <div className="text-4xl leading-[1.3] tracking-tight text-primary max-[600px]:text-4xl my-5 mx-0">
+        {!student && (
+          <ol
+            aria-label="Charging progress"
+            className="mb-4 grid grid-cols-3 gap-2"
+          >
+            {[
+              {
+                label: "1. Requested",
+                done: ["scheduled", "active", "completed"].includes(c.status),
+                current: c.status === "pending",
+              },
+              {
+                label: "2. Scheduled",
+                done: ["active", "completed"].includes(c.status),
+                current: c.status === "scheduled",
+              },
+              {
+                label: "3. Charging",
+                done: c.status === "completed",
+                current: c.status === "active",
+              },
+            ].map((step) => (
+              <li key={step.label} className="min-w-0">
+                <div
+                  className={
+                    step.done
+                      ? "h-1.5 rounded-full bg-primary"
+                      : step.current
+                        ? "h-1.5 rounded-full bg-primary/70"
+                        : "h-1.5 rounded-full bg-surface-inset"
+                  }
+                />
+                <span
+                  className={
+                    step.done || step.current
+                      ? "mt-1.5 block truncate text-xs font-semibold text-primary"
+                      : "mt-1.5 block truncate text-xs text-content-muted"
+                  }
+                >
+                  {step.label}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+        <div className="my-3 text-4xl leading-none font-semibold tracking-tight text-primary tabular-nums">
           {c.battery ?? "—"}
           {c.battery !== null && <span className="text-4xl">%</span>}
         </div>
@@ -68,28 +113,43 @@ export function ChargingSessionDetails({
               : `${Math.max(0, c.target - c.battery)}% remaining`}
           </span>
         </div>
-        <Alert
-          tone={
-            ["interrupted", "stopped"].includes(c.status) ? "error" : "info"
-          }
-        >
-          <span className="min-w-0 wrap-anywhere">
-            {c.reason || "No allocation note."}
-          </span>
-        </Alert>
+        {(!student ||
+          (c.reason &&
+            ["pending", "interrupted", "stopped"].includes(c.status))) && (
+          <Alert
+            tone={
+              ["interrupted", "stopped"].includes(c.status) ? "error" : "info"
+            }
+          >
+            <span className="min-w-0 wrap-anywhere">
+              {c.reason || "No allocation note."}
+            </span>
+          </Alert>
+        )}
         <dl className="record-details">
+          <dt>Vehicle</dt>
+          <dd>{vehicleLabel(s, c.vehicle)}</dd>
+          <dt>Hub</dt>
+          <dd>
+            {s.hubs.find((hub) => hub.id === c.hub)?.name ?? "Unknown hub"}
+          </dd>
           <dt className="text-content-muted">Charging point</dt>
           <dd className="wrap-anywhere m-0">{c.point ?? "Not assigned"}</dd>
-          <dt className="text-content-muted">Queue</dt>
-          <dd className="wrap-anywhere m-0">
-            {c.status === "pending" ? "Awaiting allocation" : "Not waiting"}
-          </dd>
-          {
+          {!student && (
+            <>
+              <dt className="text-content-muted">Queue</dt>
+              <dd className="wrap-anywhere m-0">
+                {c.status === "pending" ? "Awaiting allocation" : "Not waiting"}
+              </dd>
+            </>
+          )}
+          {(!student ||
+            (c.schedule && c.schedule !== "No assigned schedule")) && (
             <>
               <dt className="text-content-muted">Schedule</dt>
               <dd className="wrap-anywhere m-0">{c.schedule}</dd>
             </>
-          }
+          )}
           <dt className="text-content-muted">Parking context</dt>
           <dd className="wrap-anywhere m-0">
             {c.booking && s.role === "operator" ? (
@@ -108,19 +168,16 @@ export function ChargingSessionDetails({
             )}
           </dd>
         </dl>
-        <RecordReference value={c.id} label="Charging reference" />
         {command.error != null && (
           <Alert tone="error">{apiErrorMessage(command.error)}</Alert>
         )}
         {canAct && (
-          <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
+          <div className="flex items-center flex-wrap gap-3 mt-5 max-[600px]:flex-nowrap max-[600px]:*:data-[slot~=button]:flex-1 max-[600px]:*:data-[slot~=button]:min-w-0">
             {s.role === "operator" && c.status === "scheduled" && (
               <Confirm
                 title="Start charging this vehicle?"
                 description="The server checks the charging window, parking and point before starting."
-                trigger={
-                  <Button disabled={command.busy}>Start charging</Button>
-                }
+                trigger={<Button disabled={command.busy}>Start</Button>}
                 onConfirm={() => update("start")}
               />
             )}
@@ -130,7 +187,7 @@ export function ChargingSessionDetails({
                 description="This cancels charging only. The parking booking remains unchanged."
                 trigger={
                   <Button variant="secondary" disabled={command.busy}>
-                    Cancel request
+                    Cancel
                   </Button>
                 }
                 onConfirm={() => update("cancel")}
@@ -146,7 +203,7 @@ export function ChargingSessionDetails({
                 }
                 trigger={
                   <Button variant="danger" disabled={command.busy}>
-                    Stop charging
+                    Stop
                   </Button>
                 }
                 onConfirm={() => update("stop")}
@@ -155,27 +212,26 @@ export function ChargingSessionDetails({
           </div>
         )}
       </Panel>
-      <Panel data-slot="panel" className="min-w-0">
-        <SectionHead title="Session timeline" />
-        <ol className="list-none [&_li:before]:content-[''] [&_li:before]:absolute [&_li:before]:-left-1.25 [&_li:before]:top-1.75 [&_li:before]:w-2.25 [&_li:before]:h-2.25 [&_li:before]:bg-primary [&_li:before]:rounded-full data-[compact=true]:mt-5 [&[data-compact=true]_li]:pb-3 m-0 p-0">
-          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
-            Request received{" "}
-            <small className="leading-[1.6] block mt-1">
-              {vehicleLabel(s, c.vehicle)}
-            </small>
-          </li>
-          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
-            Allocation {c.point ? "confirmed" : "pending"}
-            <small className="leading-[1.6] block mt-1">
-              {c.schedule ?? c.point ?? "No confirmed time slot"}
-            </small>
-          </li>
-          <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
-            Current state: {c.status}
-            <small className="leading-[1.6] block mt-1"></small>
-          </li>
-        </ol>
-      </Panel>
+      {!student && (
+        <Panel data-slot="panel" className="min-w-0">
+          <SectionHead title="Session timeline" />
+          <ol className="list-none [&_li:before]:content-[''] [&_li:before]:absolute [&_li:before]:-left-1.25 [&_li:before]:top-1.75 [&_li:before]:w-2.25 [&_li:before]:h-2.25 [&_li:before]:bg-primary [&_li:before]:rounded-full data-[compact=true]:mt-5 [&[data-compact=true]_li]:pb-3 m-0 p-0">
+            <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
+              Request received
+            </li>
+            <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
+              Allocation {c.point ? "confirmed" : "pending"}
+              <small className="leading-[1.6] block mt-1">
+                {c.schedule ?? c.point ?? "No confirmed time slot"}
+              </small>
+            </li>
+            <li className="relative ml-2 pt-0 pr-0 pb-5 pl-5 text-sm">
+              Current state: {c.status}
+              <small className="leading-[1.6] block mt-1"></small>
+            </li>
+          </ol>
+        </Panel>
+      )}
     </div>
   );
 }

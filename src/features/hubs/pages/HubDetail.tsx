@@ -23,6 +23,7 @@ export function HubDetail({ id }: HubDetailProps) {
   const { s, go } = useApp();
   const { result, retry, refreshError, retryOperations } = useLiveHub(id);
   const student = s.role === "student";
+  const VehicleSection = student ? Panel : "section";
   const back = (
     <Link
       className="inline-flex items-center gap-2 text-sm text-content-muted mb-5"
@@ -124,17 +125,10 @@ export function HubDetail({ id }: HubDetailProps) {
         </Panel>
       </div>
 
-      <Panel data-slot="panel" className="mt-5 min-w-0 max-[600px]:mt-5">
-        <SectionHead
-          title={student ? "Shared vehicles" : "Parking spaces"}
-          subtitle={
-            student
-              ? "Immediate holds only. Your intended destination does not reserve a return space."
-              : "Illustrated using the hub’s total capacity and occupancy."
-          }
-        />
-        {!student && (
-          <div className="grid grid-cols-6 gap-3 mb-5 max-[600px]:grid-cols-3 max-[600px]:gap-2">
+      {!student && (
+        <Panel data-slot="panel" className="mt-5 min-w-0">
+          <SectionHead title="Parking spaces" />
+          <div className="grid grid-cols-6 gap-3 max-[600px]:grid-cols-3 max-[600px]:gap-2">
             {Array.from({ length: h.capacity }, (_, i) => (
               <div
                 key={i}
@@ -152,12 +146,25 @@ export function HubDetail({ id }: HubDetailProps) {
               </div>
             ))}
           </div>
-        )}
+        </Panel>
+      )}
+      <VehicleSection
+        data-slot={student ? "panel" : undefined}
+        className="mt-5 min-w-0"
+      >
+        <SectionHead
+          title="Shared vehicles"
+          subtitle={
+            student
+              ? "Immediate holds only. Your intended destination does not reserve a return space."
+              : undefined
+          }
+        />
         <VehicleTable
           hub={id}
           live={data ? { hubName: h.name, vehicles: data.vehicles } : undefined}
         />
-      </Panel>
+      </VehicleSection>
       <div
         data-slot="two-col"
         className="mt-5 grid grid-cols-2 gap-5 **:data-[slot~=two-col]:gap-4 max-[900px]:gap-4 max-[600px]:mt-5 max-[900px]:grid-cols-1 max-[600px]:**:data-[slot~=two-col]:grid-cols-1"
@@ -196,6 +203,7 @@ export function HubDetail({ id }: HubDetailProps) {
               </p>
               <Button
                 variant="secondary"
+                className="max-[600px]:w-full"
                 onClick={() => go("/student/parking/new")}
               >
                 Book parking

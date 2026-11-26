@@ -11,13 +11,20 @@ import {
 
 type ModalProps = {
   title: string;
-  description: string;
+  description?: string;
   trigger?: ReactNode;
   children: ReactNode;
   open?: boolean;
   onOpenChange?: (v: boolean) => void;
   drawer?: boolean;
   onCloseAutoFocus?: (event: Event) => void;
+  size?: "sm" | "md" | "lg";
+};
+
+const modalSizeClasses: Record<NonNullable<ModalProps["size"]>, string> = {
+  sm: "sm:max-w-md",
+  md: "sm:max-w-xl",
+  lg: "sm:max-w-3xl",
 };
 
 export function Modal({
@@ -29,6 +36,7 @@ export function Modal({
   onOpenChange,
   drawer = false,
   onCloseAutoFocus,
+  size = "md",
 }: ModalProps) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
@@ -40,11 +48,12 @@ export function Modal({
         </DialogTrigger>
       )}
       <DialogContent
+        {...(!description && { "aria-describedby": undefined })}
         data-drawer={drawer}
         className={
           drawer
             ? "inset-y-4 right-4 left-auto top-4 w-[calc(100%-2rem)] max-w-xl translate-x-0 translate-y-0 max-h-[calc(100dvh-2rem)]"
-            : undefined
+            : modalSizeClasses[size]
         }
         onOpenAutoFocus={() => {
           openerRef.current = document.activeElement as HTMLElement;
@@ -68,7 +77,7 @@ export function Modal({
       >
         <DialogHeader className="mb-5">
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         {children}
       </DialogContent>
@@ -100,9 +109,9 @@ export function Confirm({
       open={open}
       onOpenChange={setOpen}
     >
-      <div className="flex gap-3 justify-end mt-5 flex-wrap max-[600px]:*:data-[slot~=button]:flex-1">
+      <div className="flex gap-3 justify-end mt-5 flex-wrap max-[600px]:grid max-[600px]:grid-cols-2 max-[600px]:*:data-[slot~=button]:w-full">
         <Button variant="secondary" onClick={() => setOpen(false)}>
-          Keep current state
+          Quit
         </Button>
         <Button
           variant={danger ? "danger" : "primary"}

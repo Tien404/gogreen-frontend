@@ -42,10 +42,7 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
   return (
     <>
       <div className="filter-bar">
-        <div
-          data-slot="search-input"
-          className="flex items-center bg-panel border border-divider rounded-lg min-w-40 flex-1 gap-2 max-w-105 text-content-muted transition-colors in-data-[slot=panel]:bg-surface-inset in-data-[slot=panel]:focus-within:bg-panel focus-within:outline-2 focus-within:outline-primary focus-within:outline-offset-2 [&_input:focus-visible]:outline-none max-[600px]:max-w-none max-[600px]:basis-full py-0 px-3"
-        >
+        <div data-slot="search-input" className="filter-search">
           <Icon name="search" />
           <Input
             aria-label="Search shared vehicles"
@@ -55,11 +52,10 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="max-w-full w-full min-w-0 border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
           />
         </div>
         <Select
-          className="border border-divider bg-panel shadow-none in-data-[slot=panel]:bg-surface-inset in-data-[slot=panel]:hover:bg-surface-muted"
           aria-label="Vehicle status"
           value={status}
           onValueChange={(value) => {
@@ -82,7 +78,6 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
           ))}
         </Select>
         <Select
-          className="border border-divider bg-panel shadow-none in-data-[slot=panel]:bg-surface-inset in-data-[slot=panel]:hover:bg-surface-muted"
           aria-label="Sort vehicles"
           value={sort}
           onValueChange={(value) => setSort(value)}
@@ -118,25 +113,34 @@ export function VehicleTable({ hub, live }: VehicleTableProps) {
           }
         />
       )}
-      <div className="flex justify-end items-center gap-2 pt-5 **:data-[slot~=button]:text-sm **:data-[slot~=button]:min-h-9 max-[600px]:flex-wrap max-[600px]:*:data-[slot~=button]:flex-1 **:data-[slot~=button]:py-1 **:data-[slot~=button]:px-3">
-        <small className="leading-[1.6] mr-auto max-[600px]:w-full">
+      <nav
+        aria-label="Shared fleet pagination"
+        className="flex flex-wrap items-center justify-end gap-2 pt-5"
+      >
+        <small className="mr-auto leading-[1.6]">
           {list.length} shared vehicles · Page {current} of {pages}
         </small>
         <Button
+          type="button"
           variant="secondary"
+          size="icon"
+          aria-label="Previous page"
           disabled={current <= 1}
           onClick={() => setPage(current - 1)}
         >
-          Previous
+          <Icon name="chevron-left" />
         </Button>
         <Button
+          type="button"
           variant="secondary"
+          size="icon"
+          aria-label="Next page"
           disabled={current >= pages}
           onClick={() => setPage(current + 1)}
         >
-          Next
+          <Icon name="chevron" />
         </Button>
-      </div>
+      </nav>
       <Modal
         title={v ? vehicleLabel(s, v.id) : "Vehicle"}
         description="Shared fleet vehicle details"

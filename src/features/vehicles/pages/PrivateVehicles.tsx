@@ -10,11 +10,14 @@ import {
   Link,
   Modal,
   PageTitle,
+  SectionHead,
 } from "@/shared/ui";
+import { useApp } from "@/app/providers/AppContext";
 import { StudentData } from "@/integration/StudentScreenData";
 import { config } from "@/config/app";
 import { VehicleArtwork } from "@/shared/components/MobilityArtwork";
 import { Icon } from "@/shared/components/Icon";
+import { useState } from "react";
 
 import { usePrivateVehicles } from "../hooks/usePrivateVehicles";
 export function PrivateVehicles() {
@@ -25,6 +28,8 @@ export function PrivateVehicles() {
   );
 }
 function PrivateVehiclesView() {
+  const { auth, go, notify } = useApp();
+  const [signingOut, setSigningOut] = useState(false);
   const {
     s,
     open,
@@ -35,11 +40,55 @@ function PrivateVehiclesView() {
     openCharging,
     chargingVehicle,
   } = usePrivateVehicles();
+
+  const displayName = auth.user?.name || "Student";
+  const initials = displayName
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  async function signOut() {
+    setSigningOut(true);
+    const result = await auth.signOut();
+    if (result.error) {
+      notify(result.error, "error");
+      setSigningOut(false);
+    } else {
+      go("/login");
+    }
+  }
+
   return (
     <>
-      <PageTitle
-        title="Your private vehicles"
-        description="Your own vehicles, ready for campus parking and charging."
+      <PageTitle title="Account" />
+      <div className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-2xl bg-surface-muted p-3 sm:gap-4 sm:p-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3.5">
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-green-muted text-sm font-semibold text-primary sm:size-12 sm:text-base">
+            {initials || "ST"}
+          </span>
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold wrap-anywhere">
+              {displayName}
+            </h2>
+            <p className="text-sm text-content-muted wrap-anywhere">
+              {auth.user?.email || `Student · ${s.persona}`}
+            </p>
+          </div>
+        </div>
+        <Button
+          variant="secondary"
+          className="justify-self-end whitespace-nowrap"
+          disabled={signingOut}
+          onClick={() => void signOut()}
+        >
+          <Icon name="logout" size={18} />
+          {signingOut ? "Logging out…" : "Log out"}
+        </Button>
+      </div>
+      <SectionHead
+        title="My vehicles"
         action={
           <Button onClick={() => setOpen(true)}>
             <Icon name="plus" />
@@ -71,7 +120,7 @@ function PrivateVehiclesView() {
               <p className="leading-[1.65] mt-1 mb-3 mx-0">
                 {v.type} · Your private vehicle
               </p>
-              <div className="mt-5 grid grid-cols-2 gap-2 max-[400px]:grid-cols-1">
+              <div className="mt-5 grid grid-cols-2 gap-2">
                 <Button variant="secondary" asChild>
                   <Link
                     to={`/student/parking/new?vehicle=${encodeURIComponent(v.id)}`}
@@ -132,8 +181,8 @@ function PrivateVehiclesView() {
             />
           </Field>
           {error && <Alert tone="error">{error}</Alert>}
-          <Button type="submit" disabled={busy}>
-            Add private vehicle
+          <Button type="submit" className="max-[600px]:w-full" disabled={busy}>
+            Add
           </Button>
         </form>
       </Modal>

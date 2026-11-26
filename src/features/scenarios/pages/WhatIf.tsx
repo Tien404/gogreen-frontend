@@ -1,7 +1,6 @@
 import { campusTime } from "@/integration/studentRecords";
 import {
   Panel,
-  Badge,
   Button,
   Empty,
   Link,
@@ -47,12 +46,7 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
   if (newScenario)
     return (
       <>
-        <PageTitle
-          title="Explore a What-if"
-          description={
-            "Choose inputs and compare outcomes from an operational snapshot."
-          }
-        />
+        <PageTitle title="Explore a What-if" />
         <ScenarioForm {...model} />
       </>
     );
@@ -60,7 +54,6 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
     <>
       <PageTitle
         title="What-if scenarios"
-        description="Forecast network outcomes before making changes to operations."
         action={
           <Button onClick={() => go("/operator/what-if/new")}>
             <Icon name="plus" />
@@ -72,31 +65,22 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
         {scenarioKinds.map((kind) => {
           const scenario = simulationTypes[kind];
           return (
-            <Panel
-              data-slot="panel"
-              className="min-w-0 **:data-[slot~=button]:text-sm"
+            <Link
+              to={`/operator/what-if/new?scenario=${scenario.query}`}
+              className="flex min-w-0 items-start gap-3 rounded-xl bg-panel p-4 hover:bg-surface-muted"
               key={kind}
             >
-              <span
-                data-slot="icon-box"
-                className="inline-flex items-center justify-center bg-green-muted text-green-ink w-11 h-11 rounded-lg shrink-0 mb-5"
-              >
-                <Icon name={scenario.icon} size={24} />
+              <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg bg-green-muted text-primary">
+                <Icon name={scenario.icon} size={22} />
               </span>
-              <h3>{scenario.label}</h3>
-              <p className="leading-[1.65] mt-2 mb-5 mx-0">
-                {scenario.description}
-              </p>
-              <Button
-                variant="secondary"
-                aria-label={`Configure ${scenario.label.toLowerCase()}`}
-                onClick={() =>
-                  go(`/operator/what-if/new?scenario=${scenario.query}`)
-                }
-              >
-                {"Configure scenario"} <Icon name="arrow" size={16} />
-              </Button>
-            </Panel>
+              <span className="min-w-0 flex-1">
+                <strong className="block text-base">{scenario.label}</strong>
+                <span className="mt-1 block text-sm text-content-muted">
+                  {scenario.description}
+                </span>
+              </span>
+              <Icon name="chevron" size={18} />
+            </Link>
           );
         })}
       </div>
@@ -118,7 +102,7 @@ function WhatIfView({ id, newScenario = false }: WhatIfProps) {
                     {campusTime(run.snapshot_at)}
                   </small>
                 </span>
-                <Badge>completed</Badge>
+                <Icon name="chevron" size={18} />
               </Link>
             ))}
             {query.result.status === "ready" && !liveRuns.length && (

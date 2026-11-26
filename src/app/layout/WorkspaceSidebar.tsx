@@ -54,7 +54,7 @@ export function WorkspaceSidebar({
         <Brand />
         <button
           data-slot="icon-button"
-          className="hidden items-center justify-center w-9 h-9 bg-transparent border-0 border-solid rounded-lg text-content-muted hover:bg-surface-inset hover:text-primary max-[900px]:inline-flex"
+          className="hidden items-center justify-center w-9 h-9 bg-action-muted rounded-lg text-content-muted hover:bg-action-muted-hover hover:text-primary max-[900px]:inline-flex"
           onClick={closeMenu}
           aria-label="Close navigation"
         >
@@ -93,7 +93,7 @@ export function WorkspaceSidebar({
         <button
           disabled={signingOut}
           onClick={signOut}
-          className="flex w-full items-center gap-3 rounded-lg py-3 px-4 text-sm text-content-muted hover:bg-soft hover:text-primary"
+          className="flex w-full items-center gap-3 rounded-lg bg-action-muted py-3 px-4 text-sm font-medium text-content hover:bg-action-muted-hover"
         >
           <Icon name="logout" /> {signingOut ? "Logging out…" : "Log out"}
         </button>

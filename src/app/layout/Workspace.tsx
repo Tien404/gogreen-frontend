@@ -6,6 +6,7 @@ import { Navigate, useLocation } from "react-router";
 import { SessionFeedback } from "@/features/auth/components/SessionFeedback";
 import { useApp } from "../providers/AppContext";
 import { OperatorFeedProvider } from "../providers/OperatorFeedProvider";
+import { StudentLayout } from "./StudentLayout";
 import { useWorkspace } from "./useWorkspace";
 import { WorkspaceContent } from "./WorkspaceContent";
 import { WorkspaceDialogs } from "./WorkspaceDialogs";
@@ -39,18 +40,18 @@ function WorkspaceGuard({ role }: WorkspaceGuardProps) {
           You’re logged in as {auth.user.name}. Continue to your workspace.
         </p>
         <Button onClick={() => go(`/${auth.user!.role}`)}>
-          Open my workspace <Icon name="arrow" />
+          Open workspace <Icon name="arrow" />
         </Button>
         <Link to="/">Return to entry</Link>
       </main>
     );
   // Reset transient menus and dialogs on every navigation, including Back/Forward.
 
-  const layout = <WorkspaceLayout key={location.key} role={role} />;
-  return role === "operator" ? (
-    <OperatorFeedProvider>{layout}</OperatorFeedProvider>
-  ) : (
-    layout
+  if (role === "student") return <StudentLayout key={location.key} />;
+  return (
+    <OperatorFeedProvider>
+      <WorkspaceLayout key={location.key} role={role} />
+    </OperatorFeedProvider>
   );
 }
 export function StudentWorkspace() {

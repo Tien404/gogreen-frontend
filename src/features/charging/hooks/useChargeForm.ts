@@ -21,6 +21,7 @@ export function useChargeForm({ onDone }: { onDone?: (id: string) => void }) {
       id: booking.vehicle,
       label: `${vehicleLabel(s, booking.vehicle)} · ${parkingLabel(s, booking)}`,
       booking: booking.id,
+      hub: booking.hub,
     }));
   const [choice, setChoice] = useState(
     eligible.find((row) => row.booking === params.get("parking"))?.booking ??
@@ -54,7 +55,8 @@ export function useChargeForm({ onDone }: { onDone?: (id: string) => void }) {
       }),
     );
     if (result.ok) {
-      notify("Charging request submitted successfully.", "success");
+      if (!student)
+        notify("Charging request submitted successfully.", "success");
       if (onDone) onDone(result.data.session_id);
       else go(recordUrl("charging", result.data.session_id));
     }
@@ -62,6 +64,7 @@ export function useChargeForm({ onDone }: { onDone?: (id: string) => void }) {
   };
   return {
     student,
+    hub: selected?.hub,
     selectedContext: selected
       ? {
           vehicle: vehicleLabel(s, selected.id),

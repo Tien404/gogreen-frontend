@@ -1,13 +1,11 @@
 import { vehicleLabel } from "@/integration/recordLabels";
 import {
-  Panel,
   Table,
   TableHeader,
   TableRow,
   TableHead,
   TableBody,
   TableCell,
-  Alert,
   Badge,
   Button,
   Empty,
@@ -65,7 +63,6 @@ function DispatchesView({ id }: DispatchesProps) {
         </Link>
         <PageTitle
           title="Vehicle dispatch"
-          description={`${d.vehicles.map((id) => vehicleLabel(s, id)).join(", ")} · ${s.hubs.find((h) => h.id === d.source)?.name} → ${s.hubs.find((h) => h.id === d.destination)?.name}`}
           action={<Badge>{d.status}</Badge>}
         />
         <DispatchDetails
@@ -81,88 +78,66 @@ function DispatchesView({ id }: DispatchesProps) {
     <>
       <PageTitle
         title="Vehicle dispatch"
-        description="Balance the shared fleet between hubs, one reviewed movement at a time."
         action={
           <Button onClick={() => setOpen(true)}>
             <Icon name="plus" />
-            Create dispatch
+            New dispatch
           </Button>
         }
       />
-      <Alert>
-        Only shared vehicles can be dispatched. Planned vehicles remain at the
-        source until departure.
-      </Alert>
-      <Panel data-slot="panel" className="min-w-0">
-        <div className="min-w-0 max-w-full">
-          <Table
-            aria-label="Vehicle dispatches"
-            className="w-full border-collapse text-left text-sm max-[600px]:min-w-190"
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                  Dispatch
-                </TableHead>
-                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                  Source → destination
-                </TableHead>
-                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                  Vehicles
-                </TableHead>
-                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                  Status
-                </TableHead>
-                <TableHead className="[&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                  Details
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {s.dispatches.map((d) => (
+      {s.dispatches.length ? (
+        <Table
+          aria-label="Vehicle dispatches"
+          className="w-full border-collapse text-left text-sm min-w-112"
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead>Vehicles</TableHead>
+              <TableHead>Source → destination</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-px">
+                <span className="sr-only">Details</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {s.dispatches.map((d) => {
+              const vehicleNames = d.vehicles
+                .map((id) => vehicleLabel(s, id))
+                .join(", ");
+              return (
                 <TableRow key={d.id}>
-                  <TableHead
-                    scope="row"
-                    className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75"
-                  >
-                    {d.vehicles.map((id) => vehicleLabel(s, id)).join(", ")}
+                  <TableHead scope="row" className="border-b border-divider">
+                    {vehicleNames}
                   </TableHead>
-                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
+                  <TableCell className="border-b border-divider">
                     {s.hubs.find((h) => h.id === d.source)?.name} →{" "}
                     {s.hubs.find((h) => h.id === d.destination)?.name}
                   </TableCell>
-                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                    {d.vehicles.map((id) => vehicleLabel(s, id)).join(", ")}
-                  </TableCell>
-                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
+                  <TableCell className="border-b border-divider">
                     <Badge>{d.status}</Badge>
                   </TableCell>
-                  <TableCell className="border-b border-solid border-b-divider  [&_small]:block [&_small]:font-normal [&_small]:max-w-75">
-                    <Link
-                      data-slot="text-link"
-                      className="leading-[16px] text-primary inline-flex items-center gap-2 text-sm font-semibold hover:underline"
-                      to={`/operator/dispatch/${encodeURIComponent(d.id)}`}
-                    >
-                      View dispatch <Icon name="arrow" size={16} />
-                    </Link>
+                  <TableCell className="border-b border-divider">
+                    <Button asChild variant="ghost" size="icon">
+                      <Link
+                        aria-label={`View dispatch for ${vehicleNames}`}
+                        to={`/operator/dispatch/${encodeURIComponent(d.id)}`}
+                      >
+                        <Icon name="chevron" />
+                      </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        {!s.dispatches.length && (
-          <Empty
-            title="No dispatches planned"
-            text="Select a source, destination and eligible vehicles to create a movement."
-            action={
-              <Button onClick={() => setOpen(true)}>
-                Create your first dispatch
-              </Button>
-            }
-          />
-        )}
-      </Panel>
+              );
+            })}
+          </TableBody>
+        </Table>
+      ) : (
+        <Empty
+          title="No dispatches planned"
+          text="New dispatches will appear here."
+        />
+      )}
       <CreateDispatchDialog
         s={s}
         open={open}

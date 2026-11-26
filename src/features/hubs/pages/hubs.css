@@ -12,7 +12,6 @@
   margin-bottom: 24px;
 }
 .hub-directory-heading h1 {
-  font-size: 28px;
   line-height: 1.2;
   letter-spacing: -0.025em;
 }
@@ -41,6 +40,10 @@
   border-radius: 8px;
   background: var(--background);
   color: var(--hub-muted);
+}
+.student-layout .hub-directory-search,
+.student-layout .hub-directory-filter [data-slot="select-trigger"] {
+  background: var(--color-surface-muted);
 }
 .hub-directory-search:focus-within {
   outline: 2px solid var(--primary);
@@ -156,9 +159,6 @@
     flex-direction: column;
     gap: 4px;
     margin-bottom: 20px;
-  }
-  .hub-directory-heading h1 {
-    font-size: 26px;
   }
   .hub-directory-heading .hub-directory-updated {
     margin-top: 0;

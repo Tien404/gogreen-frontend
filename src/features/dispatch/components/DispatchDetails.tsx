@@ -1,5 +1,4 @@
 import { vehicleLabel } from "@/integration/recordLabels";
-import { RecordReference } from "@/shared/ui/RecordReference";
 import { Panel, Alert, Button, Confirm, SectionHead } from "@/shared/ui";
 import { studentDate } from "@/integration/studentData";
 
@@ -55,7 +54,6 @@ export function DispatchDetails({
                   : "In transit · belongs to neither hub"}
           </dd>
         </dl>
-        <RecordReference value={d.id} label="Dispatch reference" />
         {d.reason && (
           <Alert tone={d.status === "failed" ? "error" : "info"}>
             <span className="wrap-anywhere">{d.reason}</span>
@@ -95,13 +93,13 @@ export function DispatchDetails({
           )}
         </ol>
         {error && <Alert tone="error">{error}</Alert>}
-        <div className="flex items-center flex-wrap gap-3 mt-5 *:data-[slot~=button]:shrink-0">
+        <div className="flex items-center flex-wrap gap-3 mt-5 max-[600px]:*:data-[slot~=button]:w-full">
           {d.status === "planned" && (
             <>
               <Confirm
                 title="Start this dispatch?"
                 description={`${d.vehicles.length} vehicle(s) leave the source and become in transit.`}
-                trigger={<Button disabled={busy}>Start dispatch</Button>}
+                trigger={<Button disabled={busy}>Start</Button>}
                 onConfirm={() => action("start-dispatch")}
               />
             </>
@@ -111,7 +109,7 @@ export function DispatchDetails({
             <Confirm
               title="Confirm arrival?"
               description="Destination capacity is checked before these vehicles are placed."
-              trigger={<Button disabled={busy}>Complete dispatch</Button>}
+              trigger={<Button disabled={busy}>Complete</Button>}
               onConfirm={() => action("complete-dispatch")}
             />
           )}

@@ -134,7 +134,7 @@ export function Select({
                   disabled={
                     option.disabled || (required && option.value === "")
                   }
-                  className="relative flex min-h-11 cursor-pointer items-center rounded-md py-2 pr-9 pl-3 text-sm leading-5 outline-none data-[highlighted]:bg-surface-muted data-[state=checked]:bg-soft data-[state=checked]:text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                  className="relative flex min-h-11 cursor-pointer items-center rounded-md py-2 pr-9 pl-3 text-sm leading-snug outline-none data-[highlighted]:bg-surface-muted data-[state=checked]:bg-soft data-[state=checked]:text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                 >
                   <SelectPrimitive.ItemText>
                     {option.label}

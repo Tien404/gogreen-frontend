@@ -1,17 +1,10 @@
-import {
-  Panel,
-  Alert,
-  Badge,
-  Link,
-  PageTitle,
-  RecordReference,
-} from "@/shared/ui";
+import { Badge, Link, PageTitle } from "@/shared/ui";
 import type { State } from "@/domain/types";
-import { metricLabel, simulationLabel } from "@/integration/operatorRecords";
-import { campusTime } from "@/integration/studentRecords";
+import { simulationLabel } from "@/integration/operatorRecords";
 import type { Schemas } from "@/shared/api/contract.generated";
 import { Icon } from "@/shared/components/Icon";
 
+import { ScenarioMap } from "./ScenarioMap";
 import { ScenarioComparison } from "./ScenarioComparison";
 import { ScenarioRecommendations } from "./ScenarioRecommendation";
 type ScenarioResultProps = {
@@ -30,26 +23,9 @@ export function ScenarioResult({ s, run, revision }: ScenarioResultProps) {
       </Link>
       <PageTitle
         title={simulationLabel(run.scenario_type)}
-        description={`${run.horizon_minutes}-minute horizon · Snapshot at ${campusTime(run.snapshot_at)}`}
         action={<Badge>completed</Badge>}
       />
-      <RecordReference value={run.run_id} label="Simulation reference" />
-      <Alert>
-        Baseline and scenario values are calculated from the same snapshot.
-      </Alert>
-      <div className="grid grid-cols-4 gap-4 max-[1200px]:grid-cols-2 max-[600px]:gap-2">
-        {run.metrics.map((metric) => (
-          <Panel key={metric.name} data-slot="panel" className="min-w-0">
-            <span className="text-sm text-content-muted">
-              {metricLabel(metric.name)}
-            </span>
-            <strong className="metric-value">{metric.scenario}</strong>
-            <small className="leading-[1.6] block max-[600px]:text-sm">
-              Baseline: {metric.baseline} · {metric.unit}
-            </small>
-          </Panel>
-        ))}
-      </div>
+      <ScenarioMap key={run.run_id} run={run} s={s} />
       <ScenarioComparison run={run} s={s} revision={revision} />
       <ScenarioRecommendations recommendations={run.recommendations} />
     </>

@@ -58,7 +58,8 @@ export function useAuthForm() {
         return;
       }
       formRef.current?.reset();
-      notify(`Welcome back, ${result.user.name}.`, "success");
+      if (result.user.role === "operator")
+        notify(`Welcome back, ${result.user.name}.`, "success");
       navigate(loginDestination(params.get("returnTo"), result.user.role), {
         replace: true,
       });

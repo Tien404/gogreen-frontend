@@ -34,61 +34,48 @@ export function ScenarioComparison({ run, s, revision }: LiveProps) {
       data-slot="two-col"
       className="mt-5 grid grid-cols-2 gap-5 max-[900px]:gap-4 max-[900px]:grid-cols-1"
     >
-      <Panel data-slot="panel" className="min-w-0">
-        <SectionHead
-          title="KPI comparison"
-          subtitle="Baseline vs scenario over the selected horizon"
-        />
+      <section className="min-w-0">
+        <SectionHead title="KPI comparison" />
         {run.metrics.length ? (
-          <div className="min-w-0">
-            <Table
-              aria-label="Baseline and scenario KPI comparison"
-              className="w-full min-w-130 border-collapse text-left text-sm"
-            >
-              <TableCaption className="sr-only">
-                Baseline and scenario KPI values
-              </TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead scope="col">Metric</TableHead>
-                  <TableHead scope="col">Unit</TableHead>
-                  <TableHead scope="col">Baseline</TableHead>
-                  <TableHead scope="col">Scenario</TableHead>
+          <Table
+            aria-label="Baseline and scenario KPI comparison"
+            className="w-full min-w-130 border-collapse text-left text-sm"
+          >
+            <TableCaption className="sr-only">
+              Baseline and scenario KPI values
+            </TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col">Metric</TableHead>
+                <TableHead scope="col">Unit</TableHead>
+                <TableHead scope="col">Baseline</TableHead>
+                <TableHead scope="col">Scenario</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {run.metrics.map((metric) => (
+                <TableRow key={metric.name} className="border-b border-divider">
+                  <TableHead scope="row">{metricLabel(metric.name)}</TableHead>
+                  <TableCell className="whitespace-nowrap">
+                    {metric.unit}
+                  </TableCell>
+                  <TableCell className="tabular-nums">
+                    {metric.baseline}
+                  </TableCell>
+                  <TableCell className="tabular-nums">
+                    {metric.scenario}
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {run.metrics.map((metric) => (
-                  <TableRow
-                    key={metric.name}
-                    className="border-b border-divider"
-                  >
-                    <TableHead scope="row">
-                      {metricLabel(metric.name)}
-                    </TableHead>
-                    <TableCell className="whitespace-nowrap">
-                      {metric.unit}
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {metric.baseline}
-                    </TableCell>
-                    <TableCell className="tabular-nums">
-                      {metric.scenario}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <p className="mt-2 text-sm sm:hidden">
-              Scroll to compare baseline and scenario.
-            </p>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         ) : (
           <Empty
             title="No KPIs reported"
             text="This run has no comparison metrics."
           />
         )}
-      </Panel>
+      </section>
       <Panel data-slot="panel" className="min-w-0">
         <SectionHead title="Snapshot" />
         <dl className="record-details">

@@ -1,0 +1,467 @@
+body:has(.student-layout) {
+  --student-nav-height: 64px;
+}
+.student-layout {
+  min-height: 100dvh;
+  background: var(--background);
+}
+.student-header {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px;
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--background);
+}
+.student-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.student-main {
+  min-width: 0;
+  width: min(100%, 92rem);
+  margin-inline: auto;
+  padding: 18px 16px
+    calc(var(--student-nav-height) + 24px + env(safe-area-inset-bottom));
+}
+.student-main:focus-visible,
+.student-layout a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.student-main:focus-visible {
+  outline-offset: -2px;
+}
+.student-skip {
+  position: fixed;
+  z-index: 100;
+  top: -100px;
+  left: 12px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.student-skip:focus {
+  top: 8px;
+}
+.student-tabs {
+  position: fixed;
+  z-index: 20;
+  inset: auto 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  min-height: calc(var(--student-nav-height) + env(safe-area-inset-bottom));
+  padding: 5px 8px calc(5px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-divider);
+  background: var(--background);
+}
+.student-tabs > :is(a, button) {
+  display: flex;
+  min-height: 48px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 10px;
+  color: var(--color-content-muted);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-weight: 600;
+}
+.student-tabs > :is(a, button):hover {
+  background: var(--color-surface-muted);
+}
+.student-tabs > [data-active="true"],
+.student-header:has(.student-account:popover-open) .student-account-trigger {
+  background: var(--color-green-muted);
+  color: var(--primary);
+}
+.student-account-trigger {
+  anchor-name: --student-account-trigger;
+  cursor: pointer;
+}
+.student-account-trigger:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.student-account {
+  inset: auto 12px
+    calc(var(--student-nav-height) + env(safe-area-inset-bottom) + 8px) auto;
+  width: min(calc(100% - 24px), 250px);
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--color-divider);
+  border-radius: 12px;
+  background: var(--background);
+  color: var(--color-content);
+}
+.student-account > p {
+  padding: 8px 12px;
+}
+.student-account > a,
+.student-account > button {
+  display: flex;
+  min-height: 44px;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+.student-account > a:hover {
+  background: var(--color-surface-muted);
+}
+
+.student-journey {
+  min-width: 0;
+}
+.student-journey-map {
+  min-width: 0;
+  margin: -18px -16px 0;
+}
+.student-journey .campus-map-canvas {
+  height: clamp(190px, 32svh, 330px);
+}
+.student-journey[data-home="true"][data-active="false"] .campus-map-canvas {
+  height: clamp(250px, 43svh, 440px);
+}
+.student-journey-sheet {
+  position: relative;
+  z-index: 10;
+  min-width: 0;
+  margin: -16px -16px 0;
+  padding: 6px 16px 16px;
+  border-radius: 20px 20px 0 0;
+  background: var(--background);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  transition: height 200ms ease;
+}
+.student-journey-sheet[data-dragging="true"] {
+  transition: none;
+}
+.student-sheet-handle {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  min-height: 40px;
+  flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
+  background: transparent;
+}
+.student-sheet-handle:active {
+  cursor: grabbing;
+}
+.student-sheet-handle > span {
+  display: block;
+  width: 40px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-divider);
+}
+.student-journey-sheet [data-slot="two-col"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.student-journey-sheet [data-slot="page-title"] + [data-slot="two-col"] {
+  row-gap: 16px;
+}
+.student-journey-sheet
+  [data-slot="page-title"]
+  + [data-slot="two-col"]
+  > [data-slot="panel"] {
+  padding-block: 12px;
+}
+.student-home-heading {
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.student-home-services {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.student-home-services > a {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(62px, 1fr) auto;
+  gap: 10px;
+  min-width: 0;
+  min-height: 120px;
+  overflow: hidden;
+  padding: 16px 12px 12px;
+  border-radius: 16px;
+  background: var(--color-surface-muted);
+  color: var(--color-content);
+}
+.student-home-services > a:hover {
+  background: var(--color-green-muted);
+  color: var(--primary);
+}
+.student-service-icon {
+  z-index: 1;
+  display: grid;
+  width: 33px;
+  height: 33px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--background);
+  color: var(--primary);
+}
+.student-service-art {
+  position: absolute;
+  inset: 12px 8px auto auto;
+  width: 61%;
+  height: 66px;
+  pointer-events: none;
+}
+.student-service-label {
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+.student-service-label svg {
+  flex: none;
+}
+.student-home-other {
+  display: grid;
+  gap: 10px;
+}
+.student-home-other > a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--color-surface-muted);
+  color: var(--color-content);
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+.student-home-other > a:hover {
+  background: var(--color-green-muted);
+  color: var(--primary);
+}
+.student-home-other > a > svg:last-child {
+  margin-inline-start: auto;
+  flex: none;
+}
+
+@media (min-width: 850px) {
+  .student-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    padding-inline: 24px;
+  }
+  .student-brand {
+    justify-self: start;
+  }
+  .student-account {
+    inset: 62px max(12px, calc(50% - 245px)) auto auto;
+  }
+  @supports (top: anchor(bottom)) {
+    .student-account {
+      position-anchor: --student-account-trigger;
+      inset: anchor(bottom) anchor(right) auto auto;
+      margin-top: 8px;
+    }
+  }
+  .student-main {
+    width: min(100%, 104rem);
+    padding: 20px 24px;
+  }
+  .student-tabs {
+    position: static;
+    display: flex;
+    gap: 4px;
+    border: 0;
+    padding: 0;
+    min-height: 0;
+  }
+  .student-tabs > :is(a, button) {
+    flex-direction: row;
+    gap: 8px;
+    padding-inline: 14px;
+    font-size: 0.875rem;
+    min-height: 44px;
+  }
+  .student-journey {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 430px);
+    align-items: stretch;
+    min-height: calc(100dvh - 104px);
+    gap: 24px;
+  }
+  .student-journey-map {
+    position: sticky;
+    top: 20px;
+    margin: 0;
+    height: calc(100dvh - 104px);
+  }
+  .student-journey-map .campus-map {
+    height: 100%;
+  }
+  .student-journey-sheet {
+    position: static;
+    margin: 0;
+    height: auto !important;
+    min-height: 100%;
+    border-radius: 16px;
+    background: var(--color-surface-muted);
+    box-shadow: none;
+    overflow: visible;
+    padding: 20px;
+  }
+  .student-sheet-handle {
+    display: none;
+  }
+  .student-home-services > a {
+    background: var(--background);
+  }
+  .student-service-icon {
+    background: var(--color-green-muted);
+  }
+  .student-journey .campus-map-canvas,
+  .student-journey[data-home="true"][data-active="false"] .campus-map-canvas {
+    height: 100%;
+    min-height: calc(100dvh - 104px);
+  }
+}
+
+.student-journey-sheet .page-actions {
+  flex-shrink: 0;
+}
+.student-ride-results {
+  margin-block: 16px;
+}
+@media (min-width: 620px) and (max-width: 849px) {
+  .student-ride-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 849px) {
+  .student-main:has(> .student-journey) {
+    padding-block: 0;
+  }
+  .student-journey {
+    --student-map-min-height: 58px;
+    --student-sheet-radius: 24px;
+    --student-journey-height: calc(
+      100dvh - 58px - var(--student-nav-height) - env(safe-area-inset-bottom)
+    );
+    display: grid;
+    grid-template-rows: minmax(var(--student-map-min-height), 1fr) auto;
+    height: var(--student-journey-height);
+  }
+  .student-journey-map {
+    margin: 0 -16px calc(-1 * var(--student-sheet-radius));
+    overflow: hidden;
+  }
+  .student-journey-map .campus-map {
+    height: 100%;
+    border-radius: 0;
+  }
+  .student-journey-map .leaflet-bottom {
+    bottom: var(--student-sheet-radius);
+  }
+  .student-journey .campus-map-canvas,
+  .student-journey[data-home="true"][data-active="false"] .campus-map-canvas {
+    height: 100%;
+  }
+  .student-journey-sheet {
+    --student-sheet-viewport-max: calc(
+      var(--student-journey-height) - var(--student-map-min-height)
+    );
+    display: flex;
+    flex-direction: column;
+    height: max(
+      144px,
+      var(
+        --student-sheet-height,
+        var(
+          --student-sheet-content-height,
+          calc(var(--student-journey-height) * 0.55)
+        )
+      )
+    );
+    max-height: min(
+      var(--student-sheet-content-height, var(--student-sheet-viewport-max)),
+      var(--student-sheet-viewport-max)
+    );
+    margin: 0 -16px;
+    padding: 0;
+    border-radius: var(--student-sheet-radius) var(--student-sheet-radius) 0 0;
+    overflow: hidden;
+  }
+  .student-journey-sheet[data-stepped] {
+    /* Use a consistent resting height as forms and their results change. */
+    height: max(
+      144px,
+      var(--student-sheet-height, calc(var(--student-journey-height) * 0.55))
+    );
+  }
+  .student-journey-sheet[data-stepped] .student-sheet-content {
+    overflow-anchor: none;
+  }
+  .student-sheet-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .student-journey-sheet
+    [data-slot="page-title"]
+    + [data-slot="two-col"]
+    > [data-slot="panel"] {
+    padding: 0;
+  }
+  .student-sheet-body {
+    display: flow-root;
+    padding: 0 16px 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .student-journey-sheet {
+    transition: none;
+  }
+}
+
+.student-date-calendar {
+  display: grid;
+  justify-content: center;
+  margin-block: 0 16px;
+}
+.student-date-calendar .rdp-root {
+  --rdp-accent-color: var(--primary);
+  --rdp-day-width: clamp(31px, 10vw, 44px);
+  --rdp-day-height: var(--rdp-day-width);
+  --rdp-day_button-width: var(--rdp-day-width);
+  --rdp-day_button-height: var(--rdp-day-height);
+}
+.student-date-calendar .rdp-selected .rdp-day_button {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.student-date-calendar .rdp-month_caption {
+  font-size: 1rem;
+  font-weight: 650;
+}
+.student-picker-clock {
+  font-size: 1.125rem;
+  font-variant-numeric: tabular-nums;
+}

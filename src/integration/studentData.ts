@@ -44,18 +44,18 @@ export const studentScreens = {
     "rides",
     "bookings",
     "charges",
-    "activity",
+    "privateVehicles",
   ],
-  findRide: ["hubs", "holds", "rides"],
+  findRide: ["hubs", "availability", "holds", "rides"],
   hold: ["hubs", "hold"],
   ride: ["hubs", "ride"],
   privateVehicles: ["privateVehicles"],
   parkingList: ["hubs", "bookings", "privateVehicles", "charges"],
-  newParking: ["hubs", "privateVehicles"],
-  parking: ["hubs", "privateVehicles", "booking", "charges"],
-  charging: ["hubs", "charges", "privateVehicles"],
-  newCharging: ["bookings", "privateVehicles"],
-  charge: ["hubs", "charge", "privateVehicles"],
+  newParking: ["hubs", "availability", "privateVehicles"],
+  parking: ["hubs", "availability", "privateVehicles", "booking", "charges"],
+  charging: ["hubs", "availability", "charges", "privateVehicles"],
+  newCharging: ["hubs", "availability", "bookings", "privateVehicles"],
+  charge: ["hubs", "availability", "charge", "privateVehicles"],
   activity: ["activity"],
 } as const satisfies Record<string, readonly Resource[]>;
 export type StudentScreen = keyof typeof studentScreens;
@@ -304,7 +304,14 @@ export async function loadStudentData(
     privateVehicles,
     holds: holdRows.map((row) => studentHold(row, owner)),
     rides: rideRows.map((row) =>
-      studentRide(row, owner, linkedHold?.intended_hub_id),
+      studentRide(
+        row,
+        owner,
+        (
+          linkedHold ??
+          holdRows.find((hold) => hold.reservation_id === row.reservation_id)
+        )?.intended_hub_id,
+      ),
     ),
     bookings: bookingRows.map((row) => studentBooking(row, owner)),
     charges: chargeRows.map((row) =>

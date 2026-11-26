@@ -50,10 +50,7 @@ export function UnknownRoutePage() {
   const { s } = useApp();
   return (
     <>
-      <PageTitle
-        title="Page not found"
-        description="This address does not match a page in the campus workspace."
-      />
+      <PageTitle title="Page not found" />
       <Empty
         title="Let’s get you back on track"
         text="Check the address or return to your overview."
